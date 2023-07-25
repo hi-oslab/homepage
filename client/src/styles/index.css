@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 폰트 임포트 */
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+  }
+
+  html,
+  body,
+  #__next {
+    width: 100%;
+    background: black;
+    color: white;
+  }
+}

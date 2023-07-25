@@ -1,0 +1,61 @@
+{
+  "name": "next_ts_styled_tailwind",
+  "version": "2.0.0",
+  "authors": [
+    "SEJIN OH <https://sejinoh.live>"
+  ],
+  "homepage": "https://designerSejinOH.github.io/nextStarter/",
+  "private": true,
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "babel-plugin-macros": "^3.1.0",
+    "babel-plugin-styled-components": "^2.0.7",
+    "framer": "^2.2.0",
+    "framer-motion": "^7.6.5",
+    "next": "^13.0.1",
+    "next-pwa": "^5.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "react-merge-refs": "^2.0.1",
+    "react-spinners": "^0.13.8",
+    "react-spring": "^9.5.5",
+    "sass": "^1.59.3",
+    "styled-components": "^5.3.8",
+    "twin.macro": "^3.1.0"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^12.3.1",
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.26",
+    "autoprefixer": "^10.4.12",
+    "eslint": "^8.24.0",
+    "eslint-config-next": "^13.0.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-tailwind": "^0.2.1",
+    "file-loader": "^6.2.0",
+    "postcss": "^8.4.18",
+    "prettier": "^2.7.1",
+    "raw-loader": "^4.0.2",
+    "tailwindcss": "^3.2.1",
+    "typescript": "^4.9.4",
+    "url-loader": "^4.1.1"
+  },
+  "scripts": {
+    "lint": "yarn prettier && yarn eslint",
+    "eslint": "next lint --fix --dir src",
+    "prettier": "prettier --list-different \"./src/**/*.{ts,tsx,md}\"",
+    "dev": "next dev",
+    "build": "next build",
+    "export": "EXPORT=true next build && EXPORT=true next export",
+    "analyze": "ANALYZE=true next build",
+    "start": "next start"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
+  }
+}
