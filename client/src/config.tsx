@@ -1,10 +1,10 @@
 import Head from 'next/head'
 
-const titleDefault = 'NO-TITLE'
-const url = 'NO-URL'
-const description = 'NO-DESCRIPTION'
-const author = 'NO-AUTHOR'
-const keywords = 'NO-KEYWORDS'
+const titleDefault = 'Opn Source Lab'
+const url = 'https://hi-oslab.github.io/'
+const description = 'Hongik Univ. Interactive Media Art Crew'
+const author = '@opensource_lab'
+const keywords = 'MEDIA ART, INTERACTIVE, CREATIVE CODING, OPEN SOURCE, HONGIK, HONGDAE, SEOUL, KOREA'
 
 export default function Header({ title = titleDefault }) {
   return (
@@ -47,13 +47,6 @@ export default function Header({ title = titleDefault }) {
       <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1.0' />
       <meta name='theme-color' content='#000' />
       <link rel='shortcut icon' href='/icons/favicon.ico' />
-
-      {/* 
-      Twitter Summary card
-        documentation: https://dev.twitter.com/cards/getting-started
-        Be sure validate your Twitter card markup on the documentation site. */}
-      <meta name='twitter:card' content='summary' />
-      <meta name='twitter:site' content='@onirenaud' />
     </Head>
   )
 }
