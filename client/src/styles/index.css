@@ -3,20 +3,27 @@
 @tailwind utilities;
 
 /* 폰트 임포트 */
-
+@font-face {
+  font-family: 'NeoDunggeunmoPro-Regular';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/NeoDunggeunmoPro-Regular.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
 @layer base {
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     transition: all 0.2s ease-in-out;
+    font-family: 'NeoDunggeunmoPro-Regular';
   }
 
   html,
   body,
   #__next {
     width: 100%;
-    background: black;
-    color: white;
+    background: white;
+    color: black;
   }
 }
