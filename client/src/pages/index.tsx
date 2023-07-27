@@ -14,7 +14,8 @@ export default function Page(props) {
               <button
                 className=' p-2 text-3xl hover:text-gray-400'
                 onClick={() => {
-                  setPage('home')
+                  window.open('https://hi-oslab.github.io/')
+                  // setPage('home')
                 }}>
                 <p className='text-xs'>Hongik univ. Interactive media art crew</p>
                 {props.title}
@@ -37,57 +38,23 @@ export default function Page(props) {
               </div>
             </div>
             <div className=' w-64 md:w-0 h-0 md:h-64 border-[0.5px]'></div>
-            <div className='w-80  h-60 flex flex-col justify-center items-center border'>
+            <div className='w-80  h-60 flex flex-col justify-center items-center '>
               <iframe
+                className='w-full h-full border '
                 src='https://hi-oslab.github.io/'
-                width='100%'
-                height='100%'
                 frameBorder='0'
                 allowTransparency={true}
                 allow='encrypted-media'></iframe>
+              <a className='text-xxs text-black opacity-70 underline px-2' href='https://hi-oslab.github.io/'>
+                hi-oslab.github.io
+              </a>
             </div>
           </div>
         </>
       ) : (
         <>
           <Header title={props.title} height={80} />
-          <div className='mt-20 text-white flex flex-col justify-start w-screen h-full gap-10 py-20'>
-            <div className='w-full h-[300px] bg-white'></div>
-            <div className=''>
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-              standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it
-              to make a type specimen book. It has survived not only five centuries, but also the leap into electronic
-              typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
-              sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
-              PageMaker including versions of Lorem Ipsum.
-            </div>
-            <div className='w-full h-[300px] bg-white'></div>
-            <div className=''>
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-              standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it
-              to make a type specimen book. It has survived not only five centuries, but also the leap into electronic
-              typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
-              sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
-              PageMaker including versions of Lorem Ipsum.
-            </div>
-            <div className='w-full h-[300px] bg-white'></div>
-            <div className=''>
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-              standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it
-              to make a type specimen book. It has survived not only five centuries, but also the leap into electronic
-              typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
-              sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
-              PageMaker including versions of Lorem Ipsum.
-            </div>
-            <div className=''>
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-              standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it
-              to make a type specimen book. It has survived not only five centuries, but also the leap into electronic
-              typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
-              sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
-              PageMaker including versions of Lorem Ipsum.
-            </div>
-          </div>
+          <div className='mt-20 text-white flex flex-col justify-start w-screen h-full gap-10 py-20'></div>
         </>
       )}
     </>
