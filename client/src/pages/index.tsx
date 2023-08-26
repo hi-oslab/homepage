@@ -1,9 +1,10 @@
 import Header from '@/components/dom/layout/Header'
+import New from '@/components/new'
 import { useState } from 'react'
 import { AiOutlineInstagram, AiOutlineMail } from 'react-icons/ai'
 
 export default function Page(props) {
-  const [page, setPage] = useState<string>('index')
+  const [page, setPage] = useState<string>('new')
 
   return (
     <>
@@ -52,6 +53,10 @@ export default function Page(props) {
               </a>
             </div>
           </div>
+        </>
+      ) : page === 'new' ? (
+        <>
+          <New />
         </>
       ) : (
         <>
