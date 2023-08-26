@@ -9,8 +9,8 @@ export default function Page(props) {
     <>
       {page === 'index' ? (
         <>
-          <div className=' w-full h-screen flex justify-center items-center gap-10 flex-col md:flex-row '>
-            <div className='flex flex-col justify-center items-center '>
+          <div className=' w-full h-screen flex justify-center items-center flex-col md:flex-row '>
+            <div className='w-full md:w-1/2 p-10  flex flex-col justify-center items-center '>
               <button
                 className=' p-2 text-3xl hover:text-gray-400'
                 onClick={() => {
@@ -37,16 +37,18 @@ export default function Page(props) {
                 </button>
               </div>
             </div>
-            <div className=' w-64 md:w-0 h-0 md:h-64 border-[0.5px]'></div>
-            <div className='w-80  h-60 flex flex-col justify-center items-center '>
+            <div className=' w-80 md:w-0 h-0 md:h-80 border-[0.5px]'></div>
+            <div className='w-full  h-full p-10 gap-4 flex flex-col justify-center items-center '>
               <iframe
                 className='w-full h-full border '
                 src='https://hi-oslab.github.io/'
                 frameBorder='0'
                 allowTransparency={true}
                 allow='encrypted-media'></iframe>
-              <a className='text-xxs text-black opacity-70 underline px-2' href='https://hi-oslab.github.io/'>
-                hi-oslab.github.io
+              <a
+                className='text-md rounded-full border border-black text-white bg-black px-3 py-1 md:hover:text-black md:hover:bg-white active:text-black active:bg-white'
+                href='https://hi-oslab.github.io/'>
+                기존 홈페이지로 가기
               </a>
             </div>
           </div>
