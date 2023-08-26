@@ -54,8 +54,10 @@ export default function Page(props) {
                 frameBorder='0'
                 allowTransparency={true}
                 allow='encrypted-media'></iframe>
-              <a className='text-xxs text-black opacity-70 underline px-2' href='https://hi-oslab.github.io/'>
-                hi-oslab.github.io
+              <a
+                className='text-md rounded-full border border-black text-white bg-black px-3 py-1 md:hover:text-black md:hover:bg-white active:text-black active:bg-white'
+                href='https://hi-oslab.github.io/'>
+                기존 홈페이지로 가기
               </a>
             </div>
           </div>
