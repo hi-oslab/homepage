@@ -1,10 +1,9 @@
 import Head from 'next/head'
 
-const titleDefault = 'Opn Source Lab'
-const url = 'https://hi-oslab.github.io/'
-const description = 'Hongik Univ. Interactive Media Art Crew'
-const author = '@opensource_lab'
-const keywords = 'MEDIA ART, INTERACTIVE, CREATIVE CODING, OPEN SOURCE, HONGIK, HONGDAE, SEOUL, KOREA'
+const titleDefault = 'SEJIN OH'
+const url = 'https://sejinoh.live'
+const description = 'React Three Fiber Starter Kit with Twin'
+const author = 'Author'
 
 export default function Header({ title = titleDefault }) {
   return (
@@ -20,7 +19,10 @@ export default function Header({ title = titleDefault }) {
       {/* Search Engine Optimization Meta Tags */}
       <title>{title}</title>
       <meta name='description' content={description} />
-      <meta name='keywords' content={keywords} />
+      <meta
+        name='keywords'
+        content='Designer, Graphic Designer, Interaction, Interactive Designer, UI, UX, User Interface, User Experience, Web, Web Designer, Web Development, Web Developer, Front End, Front End Developer, Front End Development, Frontend, Frontend Developer, Frontend Development, React, ReactJS, React.js, React.js Developer, React.js Development, NextJS, Next.js, Next.js Developer, Next.js Development, NextJS Developer, NextJS Development, ThreeJS, Three.js, Three.js Developer, Three.js Development, ThreeJS Developer, ThreeJS Development, ThreeJS Starter, Three.js Starter, Three.js Starter Kit, ThreeJS Starter Kit, React Three Fiber, React Three Fiber Starter, React Three Fiber Starter Kit'
+      />
       <meta name='robots' content='index,follow' />
       <meta name='distribution' content='web' />
       {/* 
@@ -47,6 +49,13 @@ export default function Header({ title = titleDefault }) {
       <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1.0' />
       <meta name='theme-color' content='#000' />
       <link rel='shortcut icon' href='/icons/favicon.ico' />
+
+      {/* 
+      Twitter Summary card
+        documentation: https://dev.twitter.com/cards/getting-started
+        Be sure validate your Twitter card markup on the documentation site. */}
+      <meta name='twitter:card' content='summary' />
+      <meta name='twitter:site' content='@onirenaud' />
     </Head>
   )
 }
