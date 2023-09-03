@@ -81,6 +81,13 @@ export function Model(props: JSX.IntrinsicElements['group']) {
     'https://hi-oslab.s3.ap-northeast-2.amazonaws.com/poster.gltf',
   ) as GLTFResult
   const { actions } = useAnimations<GLTFActions>(animations, group)
+
+  const Material = new THREE.MeshStandardMaterial({
+    color: '#EEEEFF',
+    roughness: 0.1,
+    metalness: 0.9,
+  })
+
   return (
     <group ref={group} {...props} dispose={null}>
       <group>
@@ -89,13 +96,13 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             <group name='Text'>
               <group name='1' position={[-30.796, 0, 0]}>
                 <group name='OPEN'>
-                  <mesh name='O' castShadow receiveShadow geometry={nodes.O.geometry} material={nodes.O.material} />
+                  <mesh name='O' castShadow receiveShadow geometry={nodes.O.geometry} material={Material} />
                   <mesh
                     name='P'
                     castShadow
                     receiveShadow
                     geometry={nodes.P.geometry}
-                    material={nodes.P.material}
+                    material={Material}
                     position={[5.327, 0, 0]}
                   />
                   <mesh
@@ -103,7 +110,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E.geometry}
-                    material={nodes.E.material}
+                    material={Material}
                     position={[9.55, 0, 0]}
                   />
                   <mesh
@@ -111,18 +118,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.N.geometry}
-                    material={nodes.N.material}
+                    material={Material}
                     position={[13.521, 0, 0]}
                   />
                 </group>
                 <group name='SOURCE' position={[19.941, 0, 0]}>
-                  <mesh name='S' castShadow receiveShadow geometry={nodes.S.geometry} material={nodes.S.material} />
+                  <mesh name='S' castShadow receiveShadow geometry={nodes.S.geometry} material={Material} />
                   <mesh
                     name='O_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_1.geometry}
-                    material={nodes.O_1.material}
+                    material={Material}
                     position={[4.071, 0, 0]}
                   />
                   <mesh
@@ -130,7 +137,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.U.geometry}
-                    material={nodes.U.material}
+                    material={Material}
                     position={[9.398, 0, 0]}
                   />
                   <mesh
@@ -138,7 +145,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.R.geometry}
-                    material={nodes.R.material}
+                    material={Material}
                     position={[14.065, 0, 0]}
                   />
                   <mesh
@@ -146,7 +153,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.C.geometry}
-                    material={nodes.C.material}
+                    material={Material}
                     position={[18.585, 0, 0]}
                   />
                   <mesh
@@ -154,18 +161,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E_1.geometry}
-                    material={nodes.E_1.material}
+                    material={Material}
                     position={[22.984, 0, 0]}
                   />
                 </group>
                 <group name='LAB' position={[48.473, 0, 0]}>
-                  <mesh name='L' castShadow receiveShadow geometry={nodes.L.geometry} material={nodes.L.material} />
+                  <mesh name='L' castShadow receiveShadow geometry={nodes.L.geometry} material={Material} />
                   <mesh
                     name='A'
                     castShadow
                     receiveShadow
                     geometry={nodes.A.geometry}
-                    material={nodes.A.material}
+                    material={Material}
                     position={[3.732, 0, 0]}
                   />
                   <mesh
@@ -173,7 +180,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.B.geometry}
-                    material={nodes.B.material}
+                    material={Material}
                     position={[9.065, 0, 0]}
                   />
                 </group>
@@ -185,7 +192,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.plastic_band.geometry}
-            material={nodes.plastic_band.material}
+            material={Material}
             position={[0, 68.594, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -195,7 +202,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_plastic.geometry}
-            material={nodes.Ear_piece_plastic.material}
+            material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
             scale={100}
           />
@@ -204,7 +211,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_rubber.geometry}
-            material={nodes.Ear_piece_rubber.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -213,7 +220,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Plastic_holder.geometry}
-            material={nodes.Plastic_holder.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -222,7 +229,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube001.geometry}
-            material={nodes.Cube001.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={37.292}
           />
@@ -231,7 +238,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube002.geometry}
-            material={nodes.Cube002.material}
+            material={Material}
             position={[0, 68.594, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -241,7 +248,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Sphere.geometry}
-            material={nodes.Sphere.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={[9.424, 9.424, 5.969]}
           />
@@ -250,7 +257,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cylinder002.geometry}
-            material={nodes.Cylinder002.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -260,19 +267,13 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             <group name='Text_1'>
               <group name='1_1' position={[-58.589, 0, 0]}>
                 <group name='OPEN_1'>
-                  <mesh
-                    name='O_2'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.O_2.geometry}
-                    material={nodes.O_2.material}
-                  />
+                  <mesh name='O_2' castShadow receiveShadow geometry={nodes.O_2.geometry} material={Material} />
                   <mesh
                     name='P_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.P_1.geometry}
-                    material={nodes.P_1.material}
+                    material={Material}
                     position={[10.134, 0, 0]}
                   />
                   <mesh
@@ -280,7 +281,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E_2.geometry}
-                    material={nodes.E_2.material}
+                    material={Material}
                     position={[18.169, 0, 0]}
                   />
                   <mesh
@@ -288,24 +289,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.N_1.geometry}
-                    material={nodes.N_1.material}
+                    material={Material}
                     position={[25.725, 0, 0]}
                   />
                 </group>
                 <group name='SOURCE_1' position={[37.937, 0, 0]}>
-                  <mesh
-                    name='S_1'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.S_1.geometry}
-                    material={nodes.S_1.material}
-                  />
+                  <mesh name='S_1' castShadow receiveShadow geometry={nodes.S_1.geometry} material={Material} />
                   <mesh
                     name='O_3'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_3.geometry}
-                    material={nodes.O_3.material}
+                    material={Material}
                     position={[7.745, 0, 0]}
                   />
                   <mesh
@@ -313,7 +308,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.U_1.geometry}
-                    material={nodes.U_1.material}
+                    material={Material}
                     position={[17.88, 0, 0]}
                   />
                   <mesh
@@ -321,7 +316,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.R_1.geometry}
-                    material={nodes.R_1.material}
+                    material={Material}
                     position={[26.758, 0, 0]}
                   />
                   <mesh
@@ -329,7 +324,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.C_1.geometry}
-                    material={nodes.C_1.material}
+                    material={Material}
                     position={[35.359, 0, 0]}
                   />
                   <mesh
@@ -337,24 +332,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E_3.geometry}
-                    material={nodes.E_3.material}
+                    material={Material}
                     position={[43.727, 0, 0]}
                   />
                 </group>
                 <group name='LAB_1' position={[92.221, 0, 0]}>
-                  <mesh
-                    name='L_1'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.L_1.geometry}
-                    material={nodes.L_1.material}
-                  />
+                  <mesh name='L_1' castShadow receiveShadow geometry={nodes.L_1.geometry} material={Material} />
                   <mesh
                     name='A_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.A_1.geometry}
-                    material={nodes.A_1.material}
+                    material={Material}
                     position={[7.101, 0, 0]}
                   />
                   <mesh
@@ -362,7 +351,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.B_1.geometry}
-                    material={nodes.B_1.material}
+                    material={Material}
                     position={[17.246, 0, 0]}
                   />
                 </group>
@@ -374,7 +363,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.plastic_band_1.geometry}
-            material={nodes.plastic_band_1.material}
+            material={Material}
             position={[0, 130.502, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -384,7 +373,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_plastic_1.geometry}
-            material={nodes.Ear_piece_plastic_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
             scale={100}
           />
@@ -393,7 +382,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_rubber_1.geometry}
-            material={nodes.Ear_piece_rubber_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -402,7 +391,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Plastic_holder_1.geometry}
-            material={nodes.Plastic_holder_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -411,7 +400,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube001_1.geometry}
-            material={nodes.Cube001_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={37.292}
           />
@@ -420,7 +409,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube002_1.geometry}
-            material={nodes.Cube002_1.material}
+            material={Material}
             position={[0, 130.502, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -430,7 +419,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Sphere_1.geometry}
-            material={nodes.Sphere_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={[9.424, 9.424, 5.969]}
           />
@@ -439,7 +428,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cylinder002_1.geometry}
-            material={nodes.Cylinder002_1.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -449,19 +438,13 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             <group name='Text_2'>
               <group name='1_2' position={[-47.851, 0, 0]}>
                 <group name='OPEN_2'>
-                  <mesh
-                    name='O_4'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.O_4.geometry}
-                    material={nodes.O_4.material}
-                  />
+                  <mesh name='O_4' castShadow receiveShadow geometry={nodes.O_4.geometry} material={Material} />
                   <mesh
                     name='P_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.P_2.geometry}
-                    material={nodes.P_2.material}
+                    material={Material}
                     position={[8.277, 0, 0]}
                   />
                   <mesh
@@ -469,7 +452,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E_4.geometry}
-                    material={nodes.E_4.material}
+                    material={Material}
                     position={[14.839, 0, 0]}
                   />
                   <mesh
@@ -477,24 +460,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.N_2.geometry}
-                    material={nodes.N_2.material}
+                    material={Material}
                     position={[21.01, 0, 0]}
                   />
                 </group>
                 <group name='SOURCE_2' position={[30.984, 0, 0]}>
-                  <mesh
-                    name='S_2'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.S_2.geometry}
-                    material={nodes.S_2.material}
-                  />
+                  <mesh name='S_2' castShadow receiveShadow geometry={nodes.S_2.geometry} material={Material} />
                   <mesh
                     name='O_5'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_5.geometry}
-                    material={nodes.O_5.material}
+                    material={Material}
                     position={[6.326, 0, 0]}
                   />
                   <mesh
@@ -502,7 +479,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.U_2.geometry}
-                    material={nodes.U_2.material}
+                    material={Material}
                     position={[14.603, 0, 0]}
                   />
                   <mesh
@@ -510,7 +487,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.R_2.geometry}
-                    material={nodes.R_2.material}
+                    material={Material}
                     position={[21.854, 0, 0]}
                   />
                   <mesh
@@ -518,7 +495,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.C_2.geometry}
-                    material={nodes.C_2.material}
+                    material={Material}
                     position={[28.879, 0, 0]}
                   />
                   <mesh
@@ -526,24 +503,18 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.E_5.geometry}
-                    material={nodes.E_5.material}
+                    material={Material}
                     position={[35.713, 0, 0]}
                   />
                 </group>
                 <group name='LAB_2' position={[75.319, 0, 0]}>
-                  <mesh
-                    name='L_2'
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.L_2.geometry}
-                    material={nodes.L_2.material}
-                  />
+                  <mesh name='L_2' castShadow receiveShadow geometry={nodes.L_2.geometry} material={Material} />
                   <mesh
                     name='A_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.A_2.geometry}
-                    material={nodes.A_2.material}
+                    material={Material}
                     position={[5.799, 0, 0]}
                   />
                   <mesh
@@ -551,7 +522,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
                     castShadow
                     receiveShadow
                     geometry={nodes.B_2.geometry}
-                    material={nodes.B_2.material}
+                    material={Material}
                     position={[14.085, 0, 0]}
                   />
                 </group>
@@ -563,7 +534,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.plastic_band_2.geometry}
-            material={nodes.plastic_band_2.material}
+            material={Material}
             position={[0, 106.584, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -573,7 +544,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_plastic_2.geometry}
-            material={nodes.Ear_piece_plastic_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
             scale={100}
           />
@@ -582,7 +553,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Ear_piece_rubber_2.geometry}
-            material={nodes.Ear_piece_rubber_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -591,7 +562,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Plastic_holder_2.geometry}
-            material={nodes.Plastic_holder_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />
@@ -600,7 +571,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube001_2.geometry}
-            material={nodes.Cube001_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={37.292}
           />
@@ -609,7 +580,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cube002_2.geometry}
-            material={nodes.Cube002_2.material}
+            material={Material}
             position={[0, 106.584, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={35.228}
@@ -619,7 +590,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Sphere_2.geometry}
-            material={nodes.Sphere_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={[9.424, 9.424, 5.969]}
           />
@@ -628,7 +599,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             castShadow
             receiveShadow
             geometry={nodes.Cylinder002_2.geometry}
-            material={nodes.Cylinder002_2.material}
+            material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
             scale={100}
           />

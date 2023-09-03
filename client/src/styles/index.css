@@ -17,5 +17,6 @@
   body,
   #__next {
     width: 100%;
+    position: relative;
   }
 }

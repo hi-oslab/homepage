@@ -16,6 +16,13 @@ export const Loader = () => {
   )
 }
 
+export const Common = ({ color }) => (
+  <>
+    {/* @ts-ignore */}
+    {color && <color attach='background' args={[color]} />}
+  </>
+)
+
 const Scene = ({ children, ...props }) => {
   const canvasRef = useRef()
   return (

@@ -1,5 +1,5 @@
 import { Model } from '@/components/canvas/Model'
-import Scene from '@/components/canvas/Scene'
+import Scene, { Common } from '@/components/canvas/Scene'
 import { Sky, OrbitControls, Stage, Environment } from '@react-three/drei'
 import { useRouter } from 'next/router'
 import { useRef, useState } from 'react'
@@ -13,27 +13,37 @@ export default function Page(props) {
 
   const [isHovered, setIsHovered] = useState(false)
   const [active, setActive] = useState(false)
-  const [banner, setBanner] = useState(true)
+  const [banner, setBanner] = useState(false)
 
   return (
     <>
       <button
         onClick={() => {
-          router.push('/')
+          window.open(
+            'https://docs.google.com/forms/d/e/1FAIpQLScJM7D5iMDB58d_rtXuZ6JG5-bVmuPCIU2PcRQ4MRbwfCmcNA/viewform?usp=sf_link',
+          )
         }}
-        className='fixed left-0 z-10 text-black bg-white text-left px-2 w-fit md:hover:opacity-50 active:opacity-50'>
-        RECRUIT <br /> : Open Source Lab
+        className='fixed bottom-0 right-0 z-20 text-[#0000FF] bg-white text-center text-xl px-4 py-2 w-fit font-semibold md:hover:opacity-50 active:opacity-50'>
+        <span className='animate-pulse'>지원하기</span>
       </button>
-      <div className='fixed bottom-0 right-0 z-10 px-2 text-black bg-white w-fit md:hover:opacity-50 active:opacity-50'>
-        All rights reserved © 2023 by <a href='https://www.instagram.com/opensource_lab/'>Open Source Lab</a>
+      <div key='top/4' className='fixed top-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
+      <div key='left/16' className='fixed top-0 left-0 z-10 w-16 h-full px-2 text-black bg-[#0000FF]'>
+        <div className='fixed z-20 origin-left -rotate-90 bottom-0 left-8 flex flex-col w-[900px] h-10 text-[#FFFF00] text-md font-semibold'>
+          <div className=''> OPEN SOURCE LAB 2023-2 RECRUITING PERFORMANCE</div>
+          <div className=''> CO-DING-A-DING-A-LING</div>
+        </div>
+        <div className='fixed z-20 origin-left -rotate-90 top-40 left-8 w-40 h-10 text-[#FFFF00] text-md text-right font-semibold'>
+          23.09.05 TUE
+        </div>
       </div>
-      <div className='fixed z-0 w-full h-screen'>
+      <div key='right/4' className='fixed top-0 right-0 z-10 w-4 h-full text-left text-black bg-[#0000FF]'></div>
+      <div key='bottom/4' className='fixed bottom-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
+      <div className='fixed z-0 w-full h-screen pointer-events-none'>
         <Scene>
+          <Common color={'#000000'} />
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
           <pointLight position={[-10, -10, -10]} />
-
-          <Sky sunPosition={[100, 20, 100]} />
           {/* 
           //@ts-ignore */}
           <Stage controls={ref} environment={null}>
@@ -42,6 +52,7 @@ export default function Page(props) {
           </Stage>
           <OrbitControls
             ref={ref}
+            autoRotate={true}
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
