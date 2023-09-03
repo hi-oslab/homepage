@@ -1,10 +1,13 @@
+import { Model } from '@/components/canvas/Model'
 import Scene from '@/components/canvas/Scene'
-import { Sky, OrbitControls, Sphere, Plane } from '@react-three/drei'
+import { Sky, OrbitControls, Stage, Plane } from '@react-three/drei'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 export default function Page(props) {
   const router = useRouter()
+
+  const ref = useRef()
 
   const [isHovered, setIsHovered] = useState(false)
   const [active, setActive] = useState(false)
@@ -30,18 +33,17 @@ export default function Page(props) {
           <Sky sunPosition={[100, 20, 100]} />
           {/* 
           //@ts-ignore */}
-          <Sphere
-            onPointerOver={() => setIsHovered(true)}
-            onPointerOut={() => setIsHovered(false)}
-            onClick={() => setActive(!active)}
-            args={[1, 32, 32]}
-            position={[0, 0, 0]}>
-            {
-              //@ts-ignore
-              <meshStandardMaterial color={isHovered ? 'hotpink' : 'orange'} />
-            }
-          </Sphere>
-          <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={0} maxDistance={100} />
+          <Stage controls={ref} environment={null}>
+            <Model />
+          </Stage>
+          <OrbitControls
+            ref={ref}
+            enablePan={true}
+            enableZoom={true}
+            enableRotate={true}
+            minDistance={0}
+            maxDistance={100}
+          />
         </Scene>
       </div>
     </>
@@ -49,5 +51,5 @@ export default function Page(props) {
 }
 
 export async function getStaticProps() {
-  return { props: { title: 'Home' } }
+  return { props: { title: 'RECRUIT' } }
 }

@@ -8,7 +8,7 @@ const Scene = ({ children, ...props }) => {
   const canvasRef = useRef()
   return (
     <>
-      <Canvas {...props} ref={canvasRef} {...props} shadows>
+      <Canvas {...props} ref={canvasRef} {...props} shadows dpr={[1, 2]} camera={{ fov: 50 }}>
         <Suspense
           fallback={
             <mesh position={[0, 0, 0]}>
