@@ -27,6 +27,7 @@
     "react-icons": "^4.8.0",
     "react-merge-refs": "^2.0.1",
     "react-spring": "^9.5.5",
+    "react-type-animation": "^3.1.0",
     "sass": "^1.59.3",
     "styled-components": "^5.3.8",
     "three": "^0.146.0",
