@@ -22,7 +22,7 @@ export default function Page(props) {
         RECRUIT <br /> : Open Source Lab
       </button>
       <div className='fixed bottom-0 right-0 z-10 px-2 text-black bg-white w-fit md:hover:opacity-50 active:opacity-50'>
-        All rights reserved © 2023 by SEJIN
+        All rights reserved © 2023 by <a href='https://www.instagram.com/opensource_lab/'>Open Source Lab</a>
       </div>
       <div className='fixed z-0 w-full h-screen'>
         <Scene>
