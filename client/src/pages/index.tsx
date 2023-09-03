@@ -18,10 +18,10 @@ export default function Page(props) {
         onClick={() => {
           router.push('/')
         }}
-        className='fixed left-0 z-10 text-black bg-white w-fit md:hover:opacity-50 active:opacity-50'>
-        LOGO
+        className='fixed left-0 z-10 text-black bg-white text-left px-2 w-fit md:hover:opacity-50 active:opacity-50'>
+        RECRUIT <br /> : Open Source Lab
       </button>
-      <div className='fixed right-0 z-10 text-black bg-white w-fit md:hover:opacity-50 active:opacity-50'>
+      <div className='fixed bottom-0 right-0 z-10 px-2 text-black bg-white w-fit md:hover:opacity-50 active:opacity-50'>
         All rights reserved © 2023 by SEJIN
       </div>
       <div className='fixed z-0 w-full h-screen'>
@@ -34,7 +34,7 @@ export default function Page(props) {
           {/* 
           //@ts-ignore */}
           <Stage controls={ref} environment={null}>
-            <Model />
+            <Model scale={0.15} />
           </Stage>
           <OrbitControls
             ref={ref}
