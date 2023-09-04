@@ -16,6 +16,24 @@ export default function Page(props) {
 
   return (
     <>
+      <div
+        className='ml-80 text-white pointer-events-none flex flex-col fixed top-2 drop-shadow w-[1920px] h-fit font-thin text-8xl z-10'
+        style={{
+          textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+        }}>
+        <span className='-ml-60'> CO-DING-A-DING-A-LING </span>
+        <span className='-ml-40'> CO-DING-A-DING-A-LING </span>
+        <span className='-ml-20'> CO-DING-A-DING-A-LING </span>
+      </div>
+      <div
+        className='text-white pointer-events-none flex flex-col fixed bottom-2 drop-shadow w-[1920px] h-fit font-thin text-8xl z-10'
+        style={{
+          textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+        }}>
+        <span className='-ml-60'> CO-DING-A-DING-A-LING </span>
+        <span className='-ml-40'> CO-DING-A-DING-A-LING </span>
+        <span className='-ml-20'> CO-DING-A-DING-A-LING </span>
+      </div>
       <button
         onClick={() => {
           window.open('https://hioslab.com')
@@ -46,6 +64,7 @@ export default function Page(props) {
           23.09.05 TUE
         </div>
       </div>
+
       <div key='right/4' className='fixed top-0 right-0 z-10 w-4 h-full text-left text-black bg-[#0000FF]'></div>
       <div key='bottom/4' className='fixed bottom-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
       <div className='fixed z-0 w-full h-screen pointer-events-none'>
@@ -55,7 +74,7 @@ export default function Page(props) {
           <spotLight position={[50, 50, -30]} castShadow />
           <pointLight position={[-10, -10, -10]} color='red' intensity={10} />
           <pointLight position={[0, -5, 5]} intensity={0.5} />
-          <directionalLight position={[0, -5, 0]} color='blue' intensity={10} />
+          <pointLight position={[0, -5, 0]} color='green' intensity={10} />
 
           {/* 
           //@ts-ignore */}
