@@ -86,6 +86,7 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   const texture = useLoader(THREE.TextureLoader, '/data/texture.png')
   const Material = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color('blue').convertSRGBToLinear(),
+    specular: 1,
     roughness: 0,
     materials: 1,
     clearcoat: 1,

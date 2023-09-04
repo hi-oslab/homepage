@@ -17,7 +17,7 @@ export default function Page(props) {
   return (
     <>
       <div
-        className='ml-80 text-white pointer-events-none flex flex-col fixed top-2 drop-shadow w-[1920px] h-fit font-thin text-8xl z-10'
+        className='ml-80 text-white pointer-events-none flex flex-col fixed top-4 drop-shadow w-[1920px] h-fit font-thin text-6xl z-10'
         style={{
           textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
         }}>
@@ -26,7 +26,7 @@ export default function Page(props) {
         <span className='-ml-20'> CO-DING-A-DING-A-LING </span>
       </div>
       <div
-        className='text-white pointer-events-none flex flex-col fixed bottom-2 drop-shadow w-[1920px] h-fit font-thin text-8xl z-10'
+        className='text-white pointer-events-none flex flex-col fixed bottom-4 drop-shadow w-[1920px] h-fit font-thin text-6xl z-10'
         style={{
           textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
         }}>
@@ -79,20 +79,9 @@ export default function Page(props) {
           {/* 
           //@ts-ignore */}
           <Stage controls={ref} environment={null}>
-            <Environment
-              background
-              files={[
-                './data/texture.png',
-                './data/texture.png',
-                './data/texture.png',
-                './data/texture.png',
-                './data/texture.png',
-                './data/texture.png',
-              ]}
-            />
+            <Environment path='/data/' files='satara_night_2k.hdr'></Environment>
             <Model scale={0.3} />
           </Stage>
-
           <OrbitControls
             ref={ref}
             autoRotate={true}
