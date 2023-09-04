@@ -85,12 +85,15 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   const { actions } = useAnimations<GLTFActions>(animations, group)
   const texture = useLoader(THREE.TextureLoader, '/data/texture.png')
   const Material = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#000').convertSRGBToLinear(),
+    color: 0x000,
     specular: 1,
     roughness: 0,
     materials: 1,
-    clearcoat: 1,
+    clearcoat: 2,
     clearcoatRoughness: 0,
+    reflectivity: 1,
+    envMapIntensity: 1,
+    map: texture,
   })
 
   return (

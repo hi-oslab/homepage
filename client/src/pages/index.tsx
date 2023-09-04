@@ -26,13 +26,13 @@ export default function Page(props) {
         <span className='-ml-20'> CO-DING-A-DING-A-LING </span>
       </div>
       <div
-        className='text-white pointer-events-none flex flex-col fixed bottom-4 drop-shadow w-[1920px] h-fit font-thin text-6xl z-10'
+        className='text-white pointer-events-none flex flex-col fixed bottom-4 right-0 drop-shadow w-[1920px] text-right h-fit font-thin text-6xl z-10'
         style={{
           textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
         }}>
-        <span className='-ml-60'> CO-DING-A-DING-A-LING </span>
-        <span className='-ml-40'> CO-DING-A-DING-A-LING </span>
-        <span className='-ml-20'> CO-DING-A-DING-A-LING </span>
+        <span className='mr-60'> CO-DING-A-DING-A-LING </span>
+        <span className='mr-40'> CO-DING-A-DING-A-LING </span>
+        <span className='mr-20'> CO-DING-A-DING-A-LING </span>
       </div>
       <button
         onClick={() => {
@@ -50,7 +50,10 @@ export default function Page(props) {
           )
         }}
         className='fixed bottom-0 right-0 z-20 bg-[#0000FF] text-[#FFFF00] text-center text-xl p-4  w-fit font-semibold'>
-        <span className='active:bg-[#0000FF] animate-pulse active:border-2 active:border-[#FFFF00] active:text-[#FFFF00] md:hover:bg-[#0000FF] md:hover:text-[#FFFF00] md:hover:border-2 md:hover:border-[#FFFF00] px-2 py-1 bg-[#FFFF00] text-[#0000FF]'>
+        <span className='fixed bottom-14 py-2 animate-bounce right-10 flex justify-center items-center'>
+          👇👇👇👇👇
+        </span>
+        <span className='active:bg-[#0000FF] active:border-2 active:border-[#FFFF00] active:text-[#FFFF00] md:hover:bg-[#0000FF] md:hover:text-[#FFFF00] md:hover:border-2 md:hover:border-[#FFFF00] px-2 py-1 bg-[#FFFF00] text-[#0000FF]'>
           오픈소스랩 지원하기
         </span>
       </button>
@@ -69,15 +72,14 @@ export default function Page(props) {
       <div key='bottom/4' className='fixed bottom-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
       <div className='fixed z-0 w-full h-screen pointer-events-none bg-black'>
         <Scene>
-          <Common color={'#000033'} />
+          <Common color={'#000000'} />
           <ambientLight intensity={1} />
           <spotLight position={[50, 50, -30]} castShadow />
           <pointLight position={[-10, -10, -10]} intensity={10} />
-
           {/* 
           //@ts-ignore */}
-          <Stage controls={ref} environment={null}>
-            <Environment path='/data/' files='texture.hdr'></Environment>
+          <Stage controls={ref} environment={null} intensity={1}>
+            <Environment path='/data/' files='texture.hdr' />
             <Model scale={0.3} />
           </Stage>
           <OrbitControls
