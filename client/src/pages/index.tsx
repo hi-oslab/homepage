@@ -67,19 +67,17 @@ export default function Page(props) {
 
       <div key='right/4' className='fixed top-0 right-0 z-10 w-4 h-full text-left text-black bg-[#0000FF]'></div>
       <div key='bottom/4' className='fixed bottom-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
-      <div className='fixed z-0 w-full h-screen pointer-events-none'>
+      <div className='fixed z-0 w-full h-screen pointer-events-none bg-black'>
         <Scene>
           <Common color={'#000033'} />
-          <ambientLight intensity={0.5} />
+          <ambientLight intensity={1} />
           <spotLight position={[50, 50, -30]} castShadow />
-          <pointLight position={[-10, -10, -10]} color='red' intensity={10} />
-          <pointLight position={[0, -5, 5]} intensity={0.5} />
-          <pointLight position={[0, -5, 0]} color='green' intensity={10} />
+          <pointLight position={[-10, -10, -10]} intensity={10} />
 
           {/* 
           //@ts-ignore */}
           <Stage controls={ref} environment={null}>
-            <Environment path='/data/' files='satara_night_2k.hdr'></Environment>
+            <Environment path='/data/' files='texture.hdr'></Environment>
             <Model scale={0.3} />
           </Stage>
           <OrbitControls
