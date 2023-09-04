@@ -17,7 +17,7 @@ export default function Page(props) {
   return (
     <>
       <div
-        className='ml-80 text-white pointer-events-none flex flex-col fixed top-4 drop-shadow w-[1920px] h-fit font-thin text-6xl z-10'
+        className='ml-80 text-white pointer-events-none flex flex-col fixed top-4 drop-shadow w-[1920px] h-fit font-extralight text-6xl z-10'
         style={{
           textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
         }}>
