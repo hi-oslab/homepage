@@ -1,9 +1,9 @@
 import Head from 'next/head'
 
-const titleDefault = 'SEJIN OH'
-const url = 'https://sejinoh.live'
-const description = 'React Three Fiber Starter Kit with Twin'
-const author = 'Author'
+const titleDefault = 'Recruit 2023-2'
+const url = 'https://hioslab.com'
+const description = 'Recruit 2023-2 by Open Source Lab'
+const author = 'SEJIN OH'
 
 export default function Header({ title = titleDefault }) {
   return (
@@ -54,8 +54,8 @@ export default function Header({ title = titleDefault }) {
       Twitter Summary card
         documentation: https://dev.twitter.com/cards/getting-started
         Be sure validate your Twitter card markup on the documentation site. */}
-      <meta name='twitter:card' content='summary' />
-      <meta name='twitter:site' content='@onirenaud' />
+      {/* <meta name='twitter:card' content='summary' />
+      <meta name='twitter:site' content='@onirenaud' /> */}
     </Head>
   )
 }

@@ -23,8 +23,10 @@ export default function Page(props) {
             'https://docs.google.com/forms/d/e/1FAIpQLScJM7D5iMDB58d_rtXuZ6JG5-bVmuPCIU2PcRQ4MRbwfCmcNA/viewform?usp=sf_link',
           )
         }}
-        className='fixed bottom-0 right-0 z-20 text-[#0000FF] bg-white text-center text-xl px-4 py-2 w-fit font-semibold md:hover:opacity-50 active:opacity-50'>
-        <span className='animate-pulse'>지원하기</span>
+        className='fixed bottom-0 right-0 z-20 bg-[#0000FF] text-[#FFFF00] text-center text-xl p-4  w-fit font-semibold'>
+        <span className='animate-pulse border-2 px-2 py-1 md:hover:bg-white md:hover:text-[#0000FF] active:bg-white active:text-[#0000FF]'>
+          리크루트 지원하기
+        </span>
       </button>
       <div key='top/4' className='fixed top-0 left-0 z-10 w-full h-4 text-left text-black bg-[#0000FF]'></div>
       <div key='left/16' className='fixed top-0 left-0 z-10 w-16 h-full px-2 text-black bg-[#0000FF]'>
@@ -41,7 +43,7 @@ export default function Page(props) {
       <div className='fixed z-0 w-full h-screen pointer-events-none'>
         <Scene>
           <Common color={'#000000'} />
-          <ambientLight intensity={0.5} />
+          <ambientLight intensity={1} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
           <pointLight position={[-10, -10, -10]} />
           {/* 
@@ -53,6 +55,7 @@ export default function Page(props) {
           <OrbitControls
             ref={ref}
             autoRotate={true}
+            autoRotateSpeed={5}
             enablePan={true}
             enableZoom={true}
             enableRotate={true}

@@ -83,9 +83,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   const { actions } = useAnimations<GLTFActions>(animations, group)
 
   const Material = new THREE.MeshStandardMaterial({
-    color: '#EEEEFF',
+    color: '#0000FF',
     roughness: 0.1,
     metalness: 0.9,
+    envMapIntensity: 1,
   })
 
   return (
