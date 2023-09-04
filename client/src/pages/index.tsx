@@ -22,7 +22,7 @@ export default function Page(props) {
         }}
         className='fixed top-0 right-0 z-20 bg-[#0000FF] text-[#FFFF00] text-center text-md p-2  w-fit'>
         <span className='px-1 flex flex-row justify-center items-center gap-1 md:hover:bg-[#FFFF00] md:hover:text-[#0000FF] active:bg-[#FFFF00] active:text-[#0000FF]'>
-          <AiOutlineHome /> hisoslab.com
+          hisoslab.com
         </span>
       </button>
       <button
@@ -32,7 +32,7 @@ export default function Page(props) {
           )
         }}
         className='fixed bottom-0 right-0 z-20 bg-[#0000FF] text-[#FFFF00] text-center text-xl p-4  w-fit font-semibold'>
-        <span className='active:bg-[#0000FF] animate-pulse active:border-2 active:border-[#FFFF00] active:text-[#FFFF00] md:hover:bg-[#0000FF] md:hover:border-2 md:hover:border-[#FFFF00] px-2 py-1 bg-[#FFFF00] text-[#0000FF]'>
+        <span className='active:bg-[#0000FF] animate-pulse active:border-2 active:border-[#FFFF00] active:text-[#FFFF00] md:hover:bg-[#0000FF] md:hover:text-[#FFFF00] md:hover:border-2 md:hover:border-[#FFFF00] px-2 py-1 bg-[#FFFF00] text-[#0000FF]'>
           오픈소스랩 지원하기
         </span>
       </button>
@@ -51,9 +51,12 @@ export default function Page(props) {
       <div className='fixed z-0 w-full h-screen pointer-events-none'>
         <Scene>
           <Common color={'#000033'} />
-          <ambientLight intensity={1} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-          <pointLight position={[-10, -10, -10]} />
+          <ambientLight intensity={0.5} />
+          <spotLight position={[50, 50, -30]} castShadow />
+          <pointLight position={[-10, -10, -10]} color='red' intensity={10} />
+          <pointLight position={[0, -5, 5]} intensity={0.5} />
+          <directionalLight position={[0, -5, 0]} color='blue' intensity={10} />
+
           {/* 
           //@ts-ignore */}
           <Stage controls={ref} environment={null}>
