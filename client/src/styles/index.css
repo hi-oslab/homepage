@@ -4,7 +4,6 @@
 
 /* 폰트 임포트 */
 
-
 @layer base {
   * {
     margin: 0;
@@ -18,5 +17,6 @@
   #__next {
     width: 100%;
     position: relative;
+    background-image: url('/data/texture.png');
   }
 }

@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import React, { useRef } from 'react'
 import { useGLTF, PerspectiveCamera, useAnimations } from '@react-three/drei'
 import { GLTF } from 'three-stdlib'
+import { useLoader } from '@react-three/fiber'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -81,12 +82,14 @@ export function Model(props: JSX.IntrinsicElements['group']) {
     'https://hi-oslab.s3.ap-northeast-2.amazonaws.com/poster.gltf',
   ) as GLTFResult
   const { actions } = useAnimations<GLTFActions>(animations, group)
-
+  const texture = useLoader(THREE.TextureLoader, '/data/texture.png')
   const Material = new THREE.MeshStandardMaterial({
-    color: '#0000FF',
-    roughness: 0.1,
-    metalness: 0.9,
-    envMapIntensity: 1,
+    color: '#FFF',
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    roughness: 0,
+    metalness: 0.7,
+    texture: texture,
   })
 
   return (
@@ -97,93 +100,119 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             <group name='Text'>
               <group name='1' position={[-30.796, 0, 0]}>
                 <group name='OPEN'>
-                  <mesh name='O' castShadow receiveShadow geometry={nodes.O.geometry} material={Material} />
+                  <mesh name='O' castShadow receiveShadow geometry={nodes.O.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='P'
                     castShadow
                     receiveShadow
                     geometry={nodes.P.geometry}
                     material={Material}
-                    position={[5.327, 0, 0]}
-                  />
+                    position={[5.327, 0, 0]}>
+                    <meshNormalMaterial attach='material' />
+                  </mesh>
                   <mesh
                     name='E'
                     castShadow
                     receiveShadow
                     geometry={nodes.E.geometry}
                     material={Material}
-                    position={[9.55, 0, 0]}
-                  />
+                    position={[9.55, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='N'
                     castShadow
                     receiveShadow
                     geometry={nodes.N.geometry}
                     material={Material}
-                    position={[13.521, 0, 0]}
-                  />
+                    position={[13.521, 0, 0]}>
+                    <meshNormalMaterial attach='material' />
+                  </mesh>
                 </group>
                 <group name='SOURCE' position={[19.941, 0, 0]}>
-                  <mesh name='S' castShadow receiveShadow geometry={nodes.S.geometry} material={Material} />
+                  <mesh name='S' castShadow receiveShadow geometry={nodes.S.geometry} material={Material}>
+                    <meshNormalMaterial attach='material' />
+                  </mesh>
                   <mesh
                     name='O_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_1.geometry}
                     material={Material}
-                    position={[4.071, 0, 0]}
-                  />
+                    position={[4.071, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='U'
                     castShadow
                     receiveShadow
                     geometry={nodes.U.geometry}
                     material={Material}
-                    position={[9.398, 0, 0]}
-                  />
+                    position={[9.398, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='R'
                     castShadow
                     receiveShadow
                     geometry={nodes.R.geometry}
                     material={Material}
-                    position={[14.065, 0, 0]}
-                  />
+                    position={[14.065, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='C'
                     castShadow
                     receiveShadow
                     geometry={nodes.C.geometry}
                     material={Material}
-                    position={[18.585, 0, 0]}
-                  />
+                    position={[18.585, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='E_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.E_1.geometry}
                     material={Material}
-                    position={[22.984, 0, 0]}
-                  />
+                    position={[22.984, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
                 <group name='LAB' position={[48.473, 0, 0]}>
-                  <mesh name='L' castShadow receiveShadow geometry={nodes.L.geometry} material={Material} />
+                  <mesh name='L' castShadow receiveShadow geometry={nodes.L.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='A'
                     castShadow
                     receiveShadow
                     geometry={nodes.A.geometry}
                     material={Material}
-                    position={[3.732, 0, 0]}
-                  />
+                    position={[3.732, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='B'
                     castShadow
                     receiveShadow
                     geometry={nodes.B.geometry}
                     material={Material}
-                    position={[9.065, 0, 0]}
-                  />
+                    position={[9.065, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
               </group>
             </group>
@@ -196,8 +225,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 68.594, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_plastic'
             castShadow
@@ -205,8 +236,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_plastic.geometry}
             material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_rubber'
             castShadow
@@ -214,8 +247,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_rubber.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Plastic_holder'
             castShadow
@@ -223,8 +258,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Plastic_holder.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube001'
             castShadow
@@ -232,8 +269,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cube001.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={37.292}
-          />
+            scale={37.292}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube002'
             castShadow
@@ -242,8 +281,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 68.594, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Sphere'
             castShadow
@@ -251,8 +292,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Sphere.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={[9.424, 9.424, 5.969]}
-          />
+            scale={[9.424, 9.424, 5.969]}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cylinder002'
             castShadow
@@ -260,101 +303,132 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cylinder002.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
         </group>
         <group name='headphone2' position={[37.831, -65.4, -241.386]} rotation={[-1.534, -1.165, -1.891]}>
           <group name='MoText_1' position={[1.711, 126.78, 17.968]}>
             <group name='Text_1'>
               <group name='1_1' position={[-58.589, 0, 0]}>
                 <group name='OPEN_1'>
-                  <mesh name='O_2' castShadow receiveShadow geometry={nodes.O_2.geometry} material={Material} />
+                  <mesh name='O_2' castShadow receiveShadow geometry={nodes.O_2.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='P_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.P_1.geometry}
                     material={Material}
-                    position={[10.134, 0, 0]}
-                  />
+                    position={[10.134, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='E_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.E_2.geometry}
                     material={Material}
-                    position={[18.169, 0, 0]}
-                  />
+                    position={[18.169, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='N_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.N_1.geometry}
                     material={Material}
-                    position={[25.725, 0, 0]}
-                  />
+                    position={[25.725, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
                 <group name='SOURCE_1' position={[37.937, 0, 0]}>
-                  <mesh name='S_1' castShadow receiveShadow geometry={nodes.S_1.geometry} material={Material} />
+                  <mesh name='S_1' castShadow receiveShadow geometry={nodes.S_1.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='O_3'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_3.geometry}
                     material={Material}
-                    position={[7.745, 0, 0]}
-                  />
+                    position={[7.745, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='U_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.U_1.geometry}
                     material={Material}
-                    position={[17.88, 0, 0]}
-                  />
+                    position={[17.88, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='R_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.R_1.geometry}
                     material={Material}
-                    position={[26.758, 0, 0]}
-                  />
+                    position={[26.758, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='C_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.C_1.geometry}
                     material={Material}
-                    position={[35.359, 0, 0]}
-                  />
+                    position={[35.359, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='E_3'
                     castShadow
                     receiveShadow
                     geometry={nodes.E_3.geometry}
                     material={Material}
-                    position={[43.727, 0, 0]}
-                  />
+                    position={[43.727, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
                 <group name='LAB_1' position={[92.221, 0, 0]}>
-                  <mesh name='L_1' castShadow receiveShadow geometry={nodes.L_1.geometry} material={Material} />
+                  <mesh name='L_1' castShadow receiveShadow geometry={nodes.L_1.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='A_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.A_1.geometry}
                     material={Material}
-                    position={[7.101, 0, 0]}
-                  />
+                    position={[7.101, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='B_1'
                     castShadow
                     receiveShadow
                     geometry={nodes.B_1.geometry}
                     material={Material}
-                    position={[17.246, 0, 0]}
-                  />
+                    position={[17.246, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
               </group>
             </group>
@@ -367,8 +441,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 130.502, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_plastic_1'
             castShadow
@@ -376,8 +452,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_plastic_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_rubber_1'
             castShadow
@@ -385,8 +463,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_rubber_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Plastic_holder_1'
             castShadow
@@ -394,8 +474,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Plastic_holder_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube001_1'
             castShadow
@@ -403,8 +485,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cube001_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={37.292}
-          />
+            scale={37.292}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube002_1'
             castShadow
@@ -413,8 +497,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 130.502, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Sphere_1'
             castShadow
@@ -422,8 +508,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Sphere_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={[9.424, 9.424, 5.969]}
-          />
+            scale={[9.424, 9.424, 5.969]}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cylinder002_1'
             castShadow
@@ -431,101 +519,132 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cylinder002_1.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
         </group>
         <group name='headphone1' position={[-36.81, 39.488, -279.6]} rotation={[0, -0.715, 0]}>
           <group name='MoText_2' position={[1.397, 103.545, 14.675]}>
             <group name='Text_2'>
               <group name='1_2' position={[-47.851, 0, 0]}>
                 <group name='OPEN_2'>
-                  <mesh name='O_4' castShadow receiveShadow geometry={nodes.O_4.geometry} material={Material} />
+                  <mesh name='O_4' castShadow receiveShadow geometry={nodes.O_4.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='P_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.P_2.geometry}
                     material={Material}
-                    position={[8.277, 0, 0]}
-                  />
+                    position={[8.277, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='E_4'
                     castShadow
                     receiveShadow
                     geometry={nodes.E_4.geometry}
                     material={Material}
-                    position={[14.839, 0, 0]}
-                  />
+                    position={[14.839, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='N_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.N_2.geometry}
                     material={Material}
-                    position={[21.01, 0, 0]}
-                  />
+                    position={[21.01, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
                 <group name='SOURCE_2' position={[30.984, 0, 0]}>
-                  <mesh name='S_2' castShadow receiveShadow geometry={nodes.S_2.geometry} material={Material} />
+                  <mesh name='S_2' castShadow receiveShadow geometry={nodes.S_2.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='O_5'
                     castShadow
                     receiveShadow
                     geometry={nodes.O_5.geometry}
                     material={Material}
-                    position={[6.326, 0, 0]}
-                  />
+                    position={[6.326, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='U_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.U_2.geometry}
                     material={Material}
-                    position={[14.603, 0, 0]}
-                  />
+                    position={[14.603, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='R_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.R_2.geometry}
                     material={Material}
-                    position={[21.854, 0, 0]}
-                  />
+                    position={[21.854, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='C_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.C_2.geometry}
                     material={Material}
-                    position={[28.879, 0, 0]}
-                  />
+                    position={[28.879, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='E_5'
                     castShadow
                     receiveShadow
                     geometry={nodes.E_5.geometry}
                     material={Material}
-                    position={[35.713, 0, 0]}
-                  />
+                    position={[35.713, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
                 <group name='LAB_2' position={[75.319, 0, 0]}>
-                  <mesh name='L_2' castShadow receiveShadow geometry={nodes.L_2.geometry} material={Material} />
+                  <mesh name='L_2' castShadow receiveShadow geometry={nodes.L_2.geometry} material={Material}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='A_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.A_2.geometry}
                     material={Material}
-                    position={[5.799, 0, 0]}
-                  />
+                    position={[5.799, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                   <mesh
                     name='B_2'
                     castShadow
                     receiveShadow
                     geometry={nodes.B_2.geometry}
                     material={Material}
-                    position={[14.085, 0, 0]}
-                  />
+                    position={[14.085, 0, 0]}>
+                    {' '}
+                    <meshNormalMaterial attach='material' />{' '}
+                  </mesh>
                 </group>
               </group>
             </group>
@@ -538,8 +657,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 106.584, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_plastic_2'
             castShadow
@@ -547,8 +668,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_plastic_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, Math.PI / 2, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Ear_piece_rubber_2'
             castShadow
@@ -556,8 +679,9 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Ear_piece_rubber_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            <meshNormalMaterial attach='material' />
+          </mesh>
           <mesh
             name='Plastic_holder_2'
             castShadow
@@ -565,8 +689,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Plastic_holder_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube001_2'
             castShadow
@@ -574,8 +700,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cube001_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={37.292}
-          />
+            scale={37.292}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cube002_2'
             castShadow
@@ -584,8 +712,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             material={Material}
             position={[0, 106.584, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={35.228}
-          />
+            scale={35.228}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Sphere_2'
             castShadow
@@ -593,8 +723,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Sphere_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={[9.424, 9.424, 5.969]}
-          />
+            scale={[9.424, 9.424, 5.969]}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
           <mesh
             name='Cylinder002_2'
             castShadow
@@ -602,8 +734,10 @@ export function Model(props: JSX.IntrinsicElements['group']) {
             geometry={nodes.Cylinder002_2.geometry}
             material={Material}
             rotation={[-Math.PI / 2, 0, 0]}
-            scale={100}
-          />
+            scale={100}>
+            {' '}
+            <meshNormalMaterial attach='material' />{' '}
+          </mesh>
         </group>
       </group>
     </group>

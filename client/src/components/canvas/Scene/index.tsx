@@ -27,7 +27,7 @@ const Scene = ({ children, ...props }) => {
   const canvasRef = useRef()
   return (
     <>
-      <Canvas {...props} ref={canvasRef} {...props} shadows dpr={[1, 2]} camera={{ fov: 50 }}>
+      <Canvas {...props} ref={canvasRef} {...props} shadows dpr={[1, 2]} camera={{ fov: 70 }}>
         <Suspense fallback={<Loader />}>
           {children}
           <Preload all />
