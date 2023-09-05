@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 const titleDefault = 'Opn Source Lab'
-const url = 'https://hi-oslab.github.io/'
+const url = 'https://hioslab.com'
 const description = 'Hongik Univ. Interactive Media Art Crew'
 const author = '@opensource_lab'
 const keywords = 'MEDIA ART, INTERACTIVE, CREATIVE CODING, OPEN SOURCE, HONGIK, HONGDAE, SEOUL, KOREA'

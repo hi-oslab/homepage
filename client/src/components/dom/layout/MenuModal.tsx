@@ -8,6 +8,38 @@ interface MenuModalProps {
 
 export default function MenuModal({ onHandleMenu }: MenuModalProps) {
   const router = useRouter()
+
+  const pages = [
+    {
+      title: 'Home',
+      path: '/',
+    },
+    {
+      title: 'Intro',
+      path: '/intro',
+    },
+    {
+      title: 'Yes or No, Really?',
+      path: '/yes-or-no-really',
+    },
+    {
+      title: 'Rainbow Reflection',
+      path: '/rainbow-reflection',
+    },
+    {
+      title: 'Momo',
+      path: '/momo',
+    },
+    {
+      title: 'Happy Box',
+      path: '/happy-box',
+    },
+    {
+      title: 'Paranormal Sapiens',
+      path: '/paranormal-sapiens',
+    },
+  ]
+
   const onClickEvent = (path: string) => () => {
     router.push(`/${path}`)
     onHandleMenu(false)
@@ -16,18 +48,11 @@ export default function MenuModal({ onHandleMenu }: MenuModalProps) {
   return (
     <S.MenuModal>
       <S.MenuModalContent>
-        <S.MenuModalItem onClick={onClickEvent('#')}>
-          <span>First</span>
-          <S.MenuModalItemHidden> | SubTitle</S.MenuModalItemHidden>
-        </S.MenuModalItem>
-        <S.MenuModalItem onClick={onClickEvent('#')}>
-          <span>Second</span>
-          <S.MenuModalItemHidden> | SubTitle </S.MenuModalItemHidden>
-        </S.MenuModalItem>
-        <S.MenuModalItem onClick={onClickEvent('#')}>
-          <span>Third</span>
-          <S.MenuModalItemHidden> | SubTitle</S.MenuModalItemHidden>
-        </S.MenuModalItem>
+        {pages.map((page, index) => (
+          <S.MenuModalItem key={index} onClick={onClickEvent(page.path)}>
+            <span>{page.title}</span>
+          </S.MenuModalItem>
+        ))}
       </S.MenuModalContent>
     </S.MenuModal>
   )

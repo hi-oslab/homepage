@@ -3,14 +3,14 @@ import tw from 'twin.macro'
 import { MotionModal } from '@/styles/common.styles'
 
 export const Header = styled.div<{
-  height: number
+  isMenuOpen: boolean
   scrollPosition: number
 }>`
   ${tw`
   fixed
   top-0
     w-full
-    h-20
+    h-12
     bg-white
     flex
     flex-row
@@ -21,10 +21,9 @@ export const Header = styled.div<{
     font-bold
     text-center 
     z-40
-    border-b
-    border-black
     `}
-  ${({ scrollPosition }) => (scrollPosition < 20 ? tw`mix-blend-normal` : tw` mix-blend-difference`)}
+  ${({ isMenuOpen }) => (isMenuOpen ? tw`border-b-0` : tw`border-b-4 border-black`)}
+  ${({ scrollPosition }) => (scrollPosition < 12 ? tw`mix-blend-normal` : tw` mix-blend-difference`)}
 `
 
 export const HeaderLogo = styled.div`
@@ -64,6 +63,7 @@ fixed
   items-center
   bg-white 
   text-black
+  text-center
   py-20
   px-10
   `}
@@ -78,15 +78,16 @@ export const MenuModalContent = styled.div`
   gap-4
   justify-center
   items-center
-  md:items-start
+  text-center
   `}
 `
 export const MenuModalItem = styled.div`
   ${tw`
   flex
   flex-row
-  justify-start
+  justify-center
   items-center
+  text-center
   w-full
   px-8
   pt-2
@@ -95,8 +96,8 @@ export const MenuModalItem = styled.div`
   font-[hel-bd]
   cursor-pointer
   rounded-full
-  active:opacity-50
-  md:hover:opacity-50
+  active:line-through
+  md:hover:line-through
   `}
 `
 export const MenuModalItemHidden = styled.p`
