@@ -14,10 +14,10 @@ export default function Page(props) {
       <AnimatePresence>
         {isModal ? (
           <MotionModal>
-            <div className='fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-30 backdrop-blur-sm w-full h-full flex flex-col justify-center items-center gap-4'>
+            <div className='fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-30 backdrop-blur-sm w-full h-full flex flex-col justify-start md:justify-center items-center p-10'>
               <div className='border-2 rounded-xl flex flex-col gap-8 justify-center items-center relative bg-black border-black p-10 '>
                 <p className='text-xl gap-2 flex flex-row text-white'>
-                  <span className='text-lg '>👋</span> 2023-2 오픈소스랩 리크루트
+                  <span className='text-lg '>🪞</span> 거울에서 도망치기
                 </p>
                 <button
                   className='absolute top-0 right-0 p-2 text-white text-3xl hover:text-gray-400 '
@@ -33,13 +33,14 @@ export default function Page(props) {
                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
                   </svg>
                 </button>
-                <Image src='/popup/poster.png' width={350.8} height={496.1} alt='poster' />
+                <Image src='/popup/poster.png' width={500} height={500} alt='poster' />
                 <button
                   className='bg-white text-black rounded-xl py-2 px-4 md:hover:bg-black md:hover:text-white border-white border-2 active:bg-black active:text-white'
-                  onClick={() => {
-                    window.open('https://recruit.hioslab.com')
-                  }}>
-                  🫵 지원하러 가기
+                  // onClick={() => {
+                  //   window.open('https://recruit.hioslab.com')
+                  // }}
+                >
+                  전시링크가 곧 오픈됩니다.
                 </button>
               </div>
             </div>
