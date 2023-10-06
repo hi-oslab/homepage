@@ -47,6 +47,8 @@ export default function Header({ title = titleDefault }) {
       <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1.0' />
       <meta name='theme-color' content='#000' />
       <link rel='shortcut icon' href='/icons/favicon.ico' />
+
+      <link rel='stylesheet' href='https://indestructibletype.com/fonts/Jost.css' type='text/css' charSet='utf-8' />
     </Head>
   )
 }

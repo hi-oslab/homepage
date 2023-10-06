@@ -30,7 +30,6 @@ export const MotionBtn = styled(motion.button)`
 `
 
 export const MotionModal = styled(motion.div).attrs({
-  layout: true,
   initial: { x: 0, opacity: 1 },
   animate: { x: 0, opacity: 1 },
   exit: { x: 0, opacity: 0 },
