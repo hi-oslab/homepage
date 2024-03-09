@@ -28,8 +28,8 @@ export default function Banner(
     <>
       <AnimatePresence>
         {isModal && (
-          <MotionModal className='fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-30 backdrop-blur-xs w-full h-full flex flex-col justify-start md:justify-center items-center p-10'>
-            <div className='border-t-2 flex flex-col gap-8 justify-center items-center relative bg-white border-black p-10 '>
+          <MotionModal className='fixed z-20 top-0 left-0 w-screen h-screen bg-black bg-opacity-30 backdrop-blur-xs w-full h-full flex flex-col justify-start md:justify-center items-center p-10'>
+            <div className='border-2 flex flex-col gap-8 justify-center items-center relative bg-white border-black  px-4 md:px-10 pt-2 pb-8 '>
               <p className='text-xl gap-2 flex flex-row '>{title}</p>
               <button
                 className='absolute top-0 right-0 p-2 text-black text-3xl hover:text-gray-400 '
@@ -45,19 +45,23 @@ export default function Banner(
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
                 </svg>
               </button>
-              {image_src && <Image src={image_src} width={500} height={500} alt='banner_image' />}
+              {image_src && <Image className='w-full' src={image_src} width={500} height={500} alt='banner_image' />}
               {children}
             </div>
           </MotionModal>
         )}
       </AnimatePresence>
-      <div className=' m-2 w-fit h-fit flex flex-col justify-center items-center bg-black'>
+      <div className='m-2 md:m-4 w-fit h-fit relative flex flex-col justify-center items-center bg-black'>
+        {noti && (
+          <div className='absolute -top-1 -right-3 rounded-full leading-tight z-10 w-fit h-4 px-1 text-xs bg-red-500 text-white'>
+            new
+          </div>
+        )}
         <button
           onClick={() => {
             setIsModal(true)
           }}
           className=' w-fit h-fit p-2 text-xl bg-white border-b-2 border-black hover:-translate-x-[4px] hover:-translate-y-[2px] '>
-          {noti && <div className='fixed top-0 right-0 rounded-full z-10 w-fit h-4 px-1 text-xs bg-red-500'>new</div>}
           Notice
         </button>
       </div>

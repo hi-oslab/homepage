@@ -15,7 +15,7 @@ const Frame = forwardRef(
     useImperativeHandle(ref, () => localRef.current)
 
     return (
-      <div {...props} ref={localRef} className='flex flex-col w-screen h-full'>
+      <div {...props} ref={localRef} className='fixed flex flex-col w-screen h-full'>
         {children}
       </div>
     )
