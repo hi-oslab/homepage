@@ -54,7 +54,11 @@ export default function Page(props) {
               </button>
 
               <Banner title='2024년도 1학기 모집!' noti={true} image_src='/img/recruitposter20241.png'>
-                <button className='w-fit h-fit bg-white border-2 border-black px-4 rounded-full text-xl md:text-2xl md:hover:translate-y-2 active:translate-y-2 shadow-[0_2px_0_0_#000] md:hover:shadow-[0_0_0_0_#000] active:shadow-[0_0_0_0_#000] '>
+                <button
+                  onClick={() => {
+                    window.open('https://recruit.hioslab.com')
+                  }}
+                  className='w-fit h-fit bg-white border-2 border-black px-4 rounded-full text-xl md:text-2xl md:hover:translate-y-2 active:translate-y-2 shadow-[0_2px_0_0_#000] md:hover:shadow-[0_0_0_0_#000] active:shadow-[0_0_0_0_#000] '>
                   recruit.hioslab.com
                 </button>
               </Banner>
