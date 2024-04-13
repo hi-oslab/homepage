@@ -6,9 +6,16 @@ const description = 'Hongik Univ. Interactive Media Art Crew'
 const author = '@opensource_lab'
 const keywords = 'MEDIA ART, INTERACTIVE, CREATIVE CODING, OPEN SOURCE, HONGIK, HONGDAE, SEOUL, KOREA'
 
-export default function Header({ title = titleDefault }) {
+interface HeaderProps {
+  title?: string
+  children?: React.ReactNode
+}
+
+export default function Header(props: HeaderProps) {
+  const { title = titleDefault, children } = props
   return (
     <Head>
+      {children}
       {/* Recommended Meta Tags */}
       <meta charSet='utf-8' />
       <meta name='language' content='english' />
