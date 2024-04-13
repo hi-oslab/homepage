@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 const titleDefault = 'Opn Source Lab'
-const url = 'https://hi-oslab.github.io/'
+const url = 'https://hioslab.com'
 const description = 'Hongik Univ. Interactive Media Art Crew'
 const author = '@opensource_lab'
 const keywords = 'MEDIA ART, INTERACTIVE, CREATIVE CODING, OPEN SOURCE, HONGIK, HONGDAE, SEOUL, KOREA'
@@ -54,8 +54,6 @@ export default function Header(props: HeaderProps) {
       <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1.0' />
       <meta name='theme-color' content='#000' />
       <link rel='shortcut icon' href='/icons/favicon.ico' />
-
-      <link rel='stylesheet' href='https://indestructibletype.com/fonts/Jost.css' type='text/css' charSet='utf-8' />
     </Head>
   )
 }
