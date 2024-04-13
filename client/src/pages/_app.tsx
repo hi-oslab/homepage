@@ -6,7 +6,12 @@ import Frame from '@/components/dom/Frame'
 import '@/styles/index.css'
 import * as gtag from '@/lib/gtag'
 
-export default function App({ Component, pageProps = { title: 'NONE' } }) {
+export default function App({
+  Component,
+  pageProps = {
+    title: 'Open Source Lab',
+  },
+}) {
   const router = useRouter()
   const ref = useRef()
 
