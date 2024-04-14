@@ -13,7 +13,7 @@
 | :------| :-------| :----- |
 | Maintainer | 오세진  |   [@designerSejinOH](https://github.com/designerSejinOH)    |
 | Maintainer | 박성훈  |   [@Orwiss](https://github.com/Orwiss)    |
-||
+||
 | Designer | 강예은  |   [@ye-eunKang](https://github.com/ye-eunKang)    |
 | Designer | 권경림  |   [@33e33e](https://github.com/33e33e)    |
 | Designer | 이은진  |   [@katherineunjin](https://github.com/katherineunjin)    |
