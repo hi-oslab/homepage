@@ -29,7 +29,6 @@
 | Developer | 이신영  |  [@Somsomi2](https://github.com/Somsomi2)    |
 | Developer | 하연지  |  [@hayeonji](https://github.com/hayeonji)    |
 | Developer | 홍누리  |   [@honggnuri](https://github.com/honggnuri)    |
-
-
+| Developer | 조성빈  |       |
 
 ...
