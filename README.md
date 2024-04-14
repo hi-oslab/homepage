@@ -21,6 +21,7 @@
 | Designer | 이은진  |   [@katherineunjin](https://github.com/katherineunjin)    |
 | Designer | 한혜지  |   [@hyeji0-0](https://github.com/hyeji0-0)    |
 | Designer | 홍채영  |   [@heebanee](https://github.com/heebanee)    |
+| Designer | 강연우  |       |
 | |
 | Developer | 김지혜  |   [@Maziyo](https://github.com/Maziyo)    |
 | Developer | 김효진  |   [@hyojin222](https://github.com/hyojin222)    |
@@ -29,6 +30,6 @@
 | Developer | 이신영  |  [@Somsomi2](https://github.com/Somsomi2)    |
 | Developer | 하연지  |  [@hayeonji](https://github.com/hayeonji)    |
 | Developer | 홍누리  |   [@honggnuri](https://github.com/honggnuri)    |
-| Developer | 조성빈  |       |
+| Developer | 조성빈  |   [@jjosb-art](https://github.com/jjosb-art)    |
 
 ...
