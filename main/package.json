@@ -1,0 +1,49 @@
+{
+  "name": "",
+  "version": "0.1.0",
+  "authors": [
+    ""
+  ],
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prettier": "npx prettier --list-different \"./src/**/*.{ts,tsx,md}\" \"./app/**/*.{ts,tsx,md}\"\"",
+    "postbuild": "next-sitemap"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.0.0",
+    "@next/third-parties": "^15.1.2",
+    "@svgr/webpack": "^8.1.0",
+    "classnames": "^2.5.1",
+    "framer-motion": "^11.15.0",
+    "next": "^15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "styled-components": "^6.1.16"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^15.1.7",
+    "@types/classnames": "^2.3.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/parser": "^8.24.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^9.20.1",
+    "eslint-config-next": "^14.0.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-tailwindcss": "^3.13.0",
+    "file-loader": "^6.2.0",
+    "postcss": "^8",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.91.0"
+  }
+}

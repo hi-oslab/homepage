@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  * {
+    box-sizing: border-box;
+  }
+
+  div {
+    white-space: pre-wrap;
+  }
+
+  :root {
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+  }
+
+  input,
+  textarea {
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0;
+  }
+
+  input:focus,
+  textarea:focus {
+    outline: none;
+    caret-color: #000000;
+  }
+
+  input:-internal-autofill-selected {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  select::-ms-expand {
+    /* 화살표 없애기 for IE10, 11*/
+    display: none;
+  }
+
+  #__next,
+  html,
+  body {
+    @apply font-korean;
+
+    margin: 0;
+    padding: 0;
+    /* 16px */
+    background: #fff;
+    font-size: 100%;
+
+  }
+
+  /* ( 크롬, 사파리, 오페라, 엣지 ) 동작 */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scroll-bar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scroll-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .checking {
+    /*  border border-red-500 border-dashed */
+    border: 1px solid red;
+    border-style: dashed;
+  }
+
+  .transition {
+    /* transition-all duration-500 ease-in-out */
+    transition: all 0.5s ease-in-out;
+  }
+
+  .snap-none {
+    scroll-snap-type: none !important;
+  }
+
+  .show-scrollbar {
+    /* 파이어폭스 */
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+
+    /* IE */
+    -ms-overflow-style: scrollbar;
+  }
+
+  /* 웹킷 기반 브라우저 (크롬, 사파리, 오페라, 엣지) */
+  .show-scrollbar::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+    /* 스크롤바 너비 */
+  }
+
+  .show-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* 스크롤바 트랙 색상 */
+  }
+
+  .show-scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+    /* 스크롤바 색상 */
+    border-radius: 4px;
+    /* 스크롤바 모서리 둥글게 */
+  }
+
+  .show-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* 스크롤바 호버 색상 */
+  }
+
+
+}
