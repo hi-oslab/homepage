@@ -1,9 +1,21 @@
 import classNames from 'classnames'
 
-export const Section = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+export const Section = ({
+  children,
+  className,
+  fixed = false,
+}: {
+  children: React.ReactNode
+  className?: string
+  fixed?: boolean
+}) => {
   return (
     <section
-      className={classNames('w-full relative h-screen flex flex-col items-center justify-center snap-start', className)}
+      className={classNames(
+        'w-full relative snap-start',
+        className,
+        fixed ? 'h-screen' : 'min-h-screen h-fit overflow-y-scroll',
+      )}
     >
       {children}
     </section>
