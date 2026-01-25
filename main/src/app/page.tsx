@@ -1,7 +1,7 @@
 import { getParsedDataByTableType } from '@/app/api/notion'
 import { InView, Section } from '@/components'
 
-export const revalidate = 60 // 60초마다 데이터 갱신 (자동 업데이트)
+export const revalidate = 30 // 60초마다 데이터 갱신 (자동 업데이트)
 
 export default async function Page() {
   return (

@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 
 type PageParams = Promise<{ slug: string }>
 
-export const revalidate = 60 // 60초마다 데이터 갱신 (자동 업데이트)
+export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
 
 export default async function Page({ params }: { params: PageParams }) {
   const workItem = await getPageBySlug('works', (await params).slug)

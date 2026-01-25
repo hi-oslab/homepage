@@ -2,7 +2,7 @@ import { getParsedDataByTableType } from '@/app/api/notion'
 import { InView } from '@/components'
 import { MemberCard } from './components'
 
-export const revalidate = 60 // 30초마다 데이터 갱신 (자동 업데이트)
+export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
 
 export default async function Page() {
   const parsedMembers = await getParsedDataByTableType('members')
