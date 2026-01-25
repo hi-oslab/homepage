@@ -9,7 +9,8 @@ export interface ParsedType {
       slug: string
       thumbnail: string
       title: string
-      projectDate: string
+      year: number
+      projectDate: { start: string; end?: string }
       subtitle: string
       description: string
       businessType: string
@@ -26,7 +27,7 @@ export interface ParsedType {
       name: string
       subName: string
       description: string
-      role: string[]
+      role: string
       field: string[]
       email: string
       website: string

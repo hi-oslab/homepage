@@ -52,13 +52,12 @@
   html,
   body {
     @apply font-korean;
-
+    background: #000;
+    color: #fff;
     margin: 0;
     padding: 0;
     /* 16px */
-    background: #fff;
     font-size: 100%;
-
   }
 
   /* ( 크롬, 사파리, 오페라, 엣지 ) 동작 */

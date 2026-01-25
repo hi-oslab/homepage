@@ -6,7 +6,8 @@ export interface WORKS_TYPE {
     slug?: { rich_text: { plain_text: string }[] }
     thumbnail?: { files: { file: { url: string } }[] }
     title?: { title: { plain_text: string }[] }
-    projectDate?: { created_time: string }
+    year?: { number: number }
+    projectDate?: { date: { start: string; end?: string } }
     subtitle?: { rich_text: { plain_text: string }[] }
     description?: { rich_text: { plain_text: string }[] }
     businessType?: { select: { name: string } }
@@ -28,8 +29,7 @@ export interface MEMBERS_TYPE {
     name?: { title: { plain_text: string }[] }
     subName?: { rich_text: { plain_text: string }[] }
     description?: { rich_text: { plain_text: string }[] }
-    role?: { multi_select: { name: string }[] }
-
+    role?: { select: { name: string } }
     field?: { multi_select: { name: string }[] }
     email?: { rich_text: { plain_text: string }[] }
     website?: { url: string }

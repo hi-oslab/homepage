@@ -13,7 +13,7 @@ export const Section = ({
     <section
       className={classNames(
         'w-full relative snap-start',
-        className,
+        className ? className : 'px-4 py-4 md:px-8 md:py-8',
         fixed ? 'h-screen' : 'min-h-screen h-fit overflow-y-scroll',
       )}
     >
