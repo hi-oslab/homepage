@@ -1,3 +1,4 @@
+import { sawarabiMincho } from '@/theme/font'
 import type { Config } from 'tailwindcss'
 
 export default {
@@ -30,8 +31,8 @@ export default {
         primary: '#1A49F1',
       },
       fontFamily: {
-        // 한글용 폰트
-        korean: ['var(--font-pretendard)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        d2Coding: ['var(--font-d2coding)', 'sans-serif'],
+        sawarabiMincho: ['var(--font-sawarabi-mincho)', 'serif'],
       },
       aspectRatio: {},
     },

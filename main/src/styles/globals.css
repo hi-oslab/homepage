@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* base: D2Coding (전체 문자) */
+@font-face {
+  font-family: "LogoBaseD2";
+  src: url("/fonts/D2Coding.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LogoBaseD2";
+  src: url("/fonts/D2CodingBold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* icons: SawarabiMincho (특정 유니코드만) */
+@font-face {
+  font-family: "LogoIconsSawarabi";
+  src: url("/fonts/SawarabiMincho.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+
+  /* ● ▲ ☰ 만 이 폰트로 렌더 */
+  unicode-range: U+25CF, U+25B2, U+2630;
+}
+
+
+
 @layer base {
 
   * {
@@ -51,13 +83,21 @@
   #__next,
   html,
   body {
-    @apply font-korean;
     background: #000;
     color: #fff;
     margin: 0;
     padding: 0;
     /* 16px */
     font-size: 100%;
+    font-family: "LogoIconsSawarabi",
+      "LogoBaseD2",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-variant-ligatures: none;
   }
 
   /* ( 크롬, 사파리, 오페라, 엣지 ) 동작 */
