@@ -1,7 +1,11 @@
 import { ParsedType } from '@/types'
 import { MdAlternateEmail, MdLink } from 'react-icons/md'
 
-export const MemberCard = (member: ParsedType['members']) => {
+type MemberCardProps = {
+  member: ParsedType['members']
+}
+
+export const MemberCard = ({ member }: MemberCardProps) => {
   const linkShortener = (url: string) => {
     // url에 http:// 또는 https:// 가 포함되어 있으면 제거
     if (url.startsWith('http://')) {
