@@ -42,7 +42,7 @@ export const Header = () => {
               <li key={item.name}>
                 <a
                   href={item.path}
-                  className={`hover:text-gray-500 transition-all duration-300 ease-in-out ${pathname === item.path ? 'underline underline-offset-4' : ''}`}
+                  className={`hover:text-gray-500 transition-all duration-300 ease-in-out ${pathname === item.path ? '' : ''}`}
                 >
                   {item.name}
                 </a>
@@ -50,14 +50,16 @@ export const Header = () => {
             ))}
           </ul>
         </nav>
-        {/* <div className='hidden md:flex w-fit h-fit flex-row gap-6 items-center justify-end'>
-          <a
+        {/* 
+        <div className='hidden md:flex w-fit h-fit flex-row gap-6 items-center justify-end'>
+        <a
             href='https://www.instagram.com/opensource_lab/'
             className='text-lg uppercase hover:text-gray-500 transition-all duration-300 ease-in-out'
           >
             Instagram
           </a>
-        </div> */}
+        </div> 
+        */}
         <motion.button
           className='block md:hidden'
           whileTap={{ scale: 0.95 }}

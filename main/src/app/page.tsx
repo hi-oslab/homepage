@@ -8,7 +8,7 @@ export default async function Page() {
     <>
       <InView className=' px-4 md:px-8 h-[calc(100dvh-64px)] flex items-center justify-center'>
         {/* <img src='/img/main.png' className='max-w-full max-h-full' /> */}
-        <span className='text-4xl'>●▲☰</span>
+        <span className='text-4xl'>●▲☰ abc node</span>
       </InView>
     </>
   )

@@ -1,12 +1,17 @@
 // src/app/work/[slug]/page.tsx
 
-import { getPageContent, getPageBySlug } from '@/app/api/notion'
+import { getPageContent, getPageBySlug, getParsedDataByTableType } from '@/app/api/notion'
 import { Breadcrumbs, NotionRenderer } from '@/components'
 import { notFound } from 'next/navigation'
 
 type PageParams = Promise<{ slug: string }>
 
 export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
+
+export async function generateStaticParams() {
+  const works = await getParsedDataByTableType('works')
+  return works.map((work) => ({ slug: work.properties.slug }))
+}
 
 export default async function Page({ params }: { params: PageParams }) {
   const workItem = await getPageBySlug('works', (await params).slug)
