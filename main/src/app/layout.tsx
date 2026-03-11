@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { METADATA } from './metadata'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
-import { d2Coding, sawarabiMincho } from '@/theme/font'
 import '@/styles/globals.css'
 import { Layout } from '@/components'
 
@@ -87,6 +86,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        <link rel="preload" href="/fonts/D2Coding.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/D2CodingBold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/SawarabiMincho.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body className={`antialiased`}>
         <Layout>{children}</Layout>
       </body>

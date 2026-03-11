@@ -43,7 +43,7 @@ print("오소랩 방향: 창의력 무한 확장!")`}
       </div>
       <div className='w-full h-fit  flex flex-col-reverse lg:flex-row justify-between items-start gap-4 lg:gap-0 lg:items-end'>
         <p className='text-sm lg:text-base'>© {new Date().getFullYear()} Open Source Lab. All rights reserved.</p>
-        <Logo className='h-8 md:h-14 w-auto' />
+        <span className='text-4xl leading-none'>●▲☰</span>
       </div>
     </footer>
   )

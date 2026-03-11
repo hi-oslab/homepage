@@ -1,4 +1,3 @@
-import { sawarabiMincho } from '@/theme/font'
 import type { Config } from 'tailwindcss'
 
 export default {

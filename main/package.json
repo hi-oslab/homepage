@@ -17,6 +17,8 @@
     "@next/third-parties": "^15.1.2",
     "@notion-render/client": "^0.0.2",
     "@notionhq/client": "^2.2.16",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@svgr/webpack": "^8.1.0",
     "classnames": "^2.5.1",
     "dotenv": "^16.4.7",
@@ -26,8 +28,11 @@
     "react-dom": "^19.0.0",
     "react-fast-marquee": "^1.6.5",
     "react-icons": "^5.5.0",
+    "react-player": "^3.4.0",
     "styled-components": "^6.1.16",
-    "swiper": "^11.2.6"
+    "swiper": "^11.2.6",
+    "three": "^0.182.0",
+    "three-stdlib": "^2.36.1"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.1.7",
@@ -35,9 +40,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.182.0",
     "@typescript-eslint/parser": "^8.24.0",
     "autoprefixer": "^10.4.16",
-   "eslint": "^8.57.1",
+    "eslint": "^8.57.1",
     "eslint-config-next": "14.2.24",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-tailwindcss": "^3.13.0",
