@@ -4,25 +4,19 @@ import { Client } from '@notionhq/client'
 import { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
 import { cache } from 'react'
 
-// ✅ 로컬 페이지 데이터 가져오기 및 파싱
-import { WORKS_TYPE, MEMBERS_TYPE } from './types'
-import { ParsedType } from '@/types'
+import { DATABASE_REGISTRY, TableType, ParsedItem, parseBySchema } from './schema'
 
 // ✅ Notion API 연결
 const TOKEN = process.env.NEXT_PUBLIC_NOTION_TOKEN as string
-
-const WORKS_ID = process.env.NEXT_PUBLIC_NOTION_WORKS_DATABASE_ID as string
-const MEMBERS_ID = process.env.NEXT_PUBLIC_NOTION_MEMBERS_DATABASE_ID as string
 
 export const notionClient = new Client({
   auth: TOKEN,
 })
 
-// ✅ 테이블 유형별 DATABASE_ID 매핑
-const DATABASE_ID_MAP: Record<string, string> = {
-  works: WORKS_ID,
-  members: MEMBERS_ID,
-}
+// ✅ registry에서 DATABASE_ID 자동 생성
+const DATABASE_ID_MAP = Object.fromEntries(
+  Object.entries(DATABASE_REGISTRY).map(([key, { envKey }]) => [key, process.env[envKey] as string]),
+) as Record<TableType, string>
 
 // ✅ 타입 가드 함수 - PageObjectResponse인지 확인
 function isFullPage(page: any): page is PageObjectResponse {
@@ -30,7 +24,7 @@ function isFullPage(page: any): page is PageObjectResponse {
 }
 
 // ✅ 특정 테이블에서 데이터 가져오기 (post, project 등) - 수정된 버전
-export const getPagesByTableType = async (tableType: 'works' | 'members'): Promise<PageObjectResponse[]> => {
+export const getPagesByTableType = async (tableType: TableType): Promise<PageObjectResponse[]> => {
   const databaseId = DATABASE_ID_MAP[tableType]
   if (!databaseId) throw new Error(`Invalid tableType: ${tableType}`)
 
@@ -48,7 +42,7 @@ export const getPagesByTableType = async (tableType: 'works' | 'members'): Promi
 
 // ✅ 특정 테이블에서 Slug로 페이지 가져오기
 export const getPageBySlug = async (
-  tableType: 'works' | 'members',
+  tableType: TableType,
   slug: string,
 ): Promise<PageObjectResponse | undefined> => {
   const databaseId = DATABASE_ID_MAP[tableType]
@@ -68,70 +62,33 @@ export const getPageBySlug = async (
   return firstResult && isFullPage(firstResult) ? firstResult : undefined
 }
 
-// ✅ 특정 페이지의 블록 콘텐츠 가져오기 (캐싱 적용)
-export const getPageContent = cache(async (pageId: string) => {
+// 자식 블록을 포함하는 확장 타입
+export type BlockWithChildren = BlockObjectResponse & { children?: BlockWithChildren[] }
+
+// ✅ 특정 페이지의 블록 콘텐츠 가져오기 - has_children 블록의 자식을 재귀적으로 fetch
+export const getPageContent = cache(async (pageId: string): Promise<BlockWithChildren[]> => {
   try {
     const response = await notionClient.blocks.children.list({ block_id: pageId })
-    return response.results as BlockObjectResponse[]
+    const blocks = response.results as BlockObjectResponse[]
+
+    return Promise.all(
+      blocks.map(async (block) => {
+        if (block.has_children) {
+          const children = await getPageContent(block.id)
+          return { ...block, children }
+        }
+        return block
+      }),
+    )
   } catch (error) {
     console.error(`Error fetching page content for pageId: ${pageId}`, error)
-    return [] // 에러 발생 시 빈 배열 반환 (페이지 깨짐 방지)
+    return []
   }
 })
 
-// 방법 2: 제네릭 타입을 사용하여 단일 함수로 처리
-export function getParsedDataByTableType(itemType: 'works'): Promise<ParsedType['works'][]>
-export function getParsedDataByTableType(itemType: 'members'): Promise<ParsedType['members'][]>
-export async function getParsedDataByTableType(
-  itemType: 'works' | 'members',
-): Promise<ParsedType['works'][] | ParsedType['members'][]> {
+// ✅ 파싱된 데이터 가져오기 - 스키마는 schema.ts에서 관리
+export async function getParsedDataByTableType<T extends TableType>(itemType: T): Promise<ParsedItem<T>[]> {
   const rawItems = await getPagesByTableType(itemType)
-
-  if (itemType === 'works') {
-    return rawItems.map((rawItem) => {
-      const item = rawItem as WORKS_TYPE
-      const thumbnail = `https://designersejinoh.notion.site/image/${encodeURIComponent(
-        item.properties.thumbnail?.files[0]?.file?.url || '',
-      )}?table=block&id=${item.id}&cache=v2`
-
-      return {
-        id: item.id,
-        properties: {
-          slug: item.properties.slug?.rich_text[0]?.plain_text || '',
-          thumbnail,
-          title: item.properties.title?.title[0]?.plain_text || '',
-          year: item.properties.year?.number || 0,
-          projectDate: item.properties.projectDate?.date || { start: '', end: '' },
-          subtitle: item.properties.subtitle?.rich_text[0]?.plain_text || '',
-          description: item.properties.description?.rich_text[0]?.plain_text || '',
-          businessType: item.properties.businessType?.select?.name || '',
-          category: item.properties.category?.select?.name || '',
-          tags: item.properties.tags?.multi_select || [],
-          createdTime: item.properties.createdTime?.created_time || '',
-          lastEditedTime: item.properties.lastEditedTime?.last_edited_time || '',
-        },
-      }
-    }) as ParsedType['works'][]
-  } else {
-    return rawItems.map((rawItem) => {
-      const item = rawItem as MEMBERS_TYPE
-      const coverImage = `https://designersejinoh.notion.site/image/${encodeURIComponent(
-        item.properties.coverImage?.files[0]?.file?.url || '',
-      )}?table=block&id=${item.id}&cache=v2`
-
-      return {
-        id: item.id,
-        properties: {
-          coverImage,
-          name: item.properties.name?.title[0]?.plain_text || '',
-          subName: item.properties.subName?.rich_text[0]?.plain_text || '',
-          description: item.properties.description?.rich_text[0]?.plain_text || '',
-          role: item.properties.role?.select?.name || '',
-          field: item.properties.field?.multi_select.map((field) => field.name) || [],
-          email: item.properties.email?.rich_text[0]?.plain_text || '',
-          website: item.properties.website?.url || '',
-        },
-      }
-    }) as ParsedType['members'][]
-  }
+  const { schema } = DATABASE_REGISTRY[itemType]
+  return rawItems.map((item) => parseBySchema(schema, item)) as ParsedItem<T>[]
 }

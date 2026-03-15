@@ -41,9 +41,7 @@ export default async function Page() {
                 <p className='w-full text-left text-base leading-relaxed break-keep'>{work.properties.description}</p>
                 <p className='w-full text-left text-sm text-neutral-500'>{work.properties.year}</p>
                 <p className='w-full text-left text-sm text-neutral-500'>Category: {work.properties.category}</p>
-                <p className='w-full text-left text-sm text-neutral-500'>
-                  Business Type: {work.properties.businessType}
-                </p>
+
                 <div className='w-full text-left mt-2'>
                   {work.properties.tags.map((tag) => (
                     <span
