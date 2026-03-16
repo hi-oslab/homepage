@@ -1,8 +1,22 @@
+import type { Metadata } from 'next'
 import { getParsedDataByTableType } from '@/app/api/notion'
 import { InView } from '@/components'
 import { MemberCard } from './components'
 
 export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
+
+export const metadata: Metadata = {
+  title: 'About',
+  description:
+    '2018년 홍익대학교에서 시작된 인터랙티브 미디어 아트 크루, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅을 연구하고 공유합니다.',
+  openGraph: {
+    title: 'About | Open Source Lab',
+    description:
+      '2018년 홍익대학교에서 시작된 인터랙티브 미디어 아트 크루, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅을 연구하고 공유합니다.',
+    url: 'https://hioslab.com/about',
+  },
+  alternates: { canonical: 'https://hioslab.com/about' },
+}
 
 const CONTENTS = {
   title: 'Open Source Lab',

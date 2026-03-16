@@ -1,15 +1,43 @@
 export const METADATA = {
-  name: "",
-  title: "",
-  titleTemplate: "%s - ",
-  description: `
-  `,
-  keywords: [],
+  name: 'Open Source Lab',
+  title: 'Open Source Lab',
+  titleTemplate: '%s | Open Source Lab',
+  description:
+    '홍익대학교 인터랙티브 미디어 아트 크루, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 작품을 만들고 공유합니다. Hongik University Interactive Media Art Crew.',
+  keywords: [
+    'Open Source Lab',
+    'OSL',
+    '오픈소스랩',
+    '미디어 아트',
+    'Media Art',
+    'Interactive Art',
+    '인터랙티브 아트',
+    'Creative Coding',
+    '크리에이티브 코딩',
+    'Physical Computing',
+    '피지컬 컴퓨팅',
+    '홍익대학교',
+    'Hongik University',
+    '홍대',
+    'Hongdae',
+    'Seoul',
+    'Korea',
+    'Digital Media Design',
+    '디지털미디어디자인',
+    'New Media',
+    '뉴미디어',
+  ],
   authors: [
     {
-      name: "",
-      email: "",
+      name: 'Open Source Lab',
+      email: 'hi.oslab@gmail.com',
+      url: 'https://hioslab.com',
     },
   ],
-  url: "",
-};
+  url: 'https://hioslab.com',
+  twitter: {
+    card: 'summary_large_image' as const,
+    site: '@opensource_lab',
+    creator: '@opensource_lab',
+  },
+}

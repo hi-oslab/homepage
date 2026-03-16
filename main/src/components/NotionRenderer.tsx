@@ -10,13 +10,25 @@ export const NotionRenderer = ({ blocks }: { blocks: BlockWithChildren[] }) => {
       {groups.length > 0 ? (
         groups.map((group, i) => {
           if (group.kind === 'bulleted')
-            return <ul key={i} className='list-disc pl-6 space-y-1'>{group.blocks.map((b) => <NotionBlock key={b.id} block={b} />)}</ul>
+            return (
+              <ul key={i} className='list-disc pl-6 space-y-1'>
+                {group.blocks.map((b) => (
+                  <NotionBlock key={b.id} block={b} />
+                ))}
+              </ul>
+            )
           if (group.kind === 'numbered')
-            return <ol key={i} className='list-decimal pl-6 space-y-1'>{group.blocks.map((b) => <NotionBlock key={b.id} block={b} />)}</ol>
+            return (
+              <ol key={i} className='list-decimal pl-6 space-y-1'>
+                {group.blocks.map((b) => (
+                  <NotionBlock key={b.id} block={b} />
+                ))}
+              </ol>
+            )
           return <NotionBlock key={group.block.id} block={group.block} />
         })
       ) : (
-        <p className='bg-black text-white px-3 py-2'>No content available.</p>
+        <p className='px-3 py-2'>No content available.</p>
       )}
     </div>
   )

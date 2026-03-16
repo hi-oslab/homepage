@@ -11,24 +11,24 @@ const notionImageUrl = (rawUrl: string, blockId: string) =>
 // bold, italic, underline, strikethrough, code, color, link 처리
 
 const COLOR_CLASS: Record<string, string> = {
-  gray: 'text-gray-500',
-  brown: 'text-amber-800',
-  orange: 'text-orange-500',
-  yellow: 'text-yellow-500',
-  green: 'text-green-600',
-  blue: 'text-blue-600',
-  purple: 'text-purple-600',
-  pink: 'text-pink-500',
-  red: 'text-red-500',
-  gray_background: 'bg-gray-200',
-  brown_background: 'bg-amber-100',
-  orange_background: 'bg-orange-100',
-  yellow_background: 'bg-yellow-100',
-  green_background: 'bg-green-100',
-  blue_background: 'bg-blue-100',
-  purple_background: 'bg-purple-100',
-  pink_background: 'bg-pink-100',
-  red_background: 'bg-red-100',
+  gray: 'text-gray-400',
+  brown: 'text-amber-400',
+  orange: 'text-orange-400',
+  yellow: 'text-yellow-400',
+  green: 'text-green-400',
+  blue: 'text-blue-400',
+  purple: 'text-purple-400',
+  pink: 'text-pink-400',
+  red: 'text-red-400',
+  gray_background: 'bg-gray-800',
+  brown_background: 'bg-amber-900',
+  orange_background: 'bg-orange-900',
+  yellow_background: 'bg-yellow-900',
+  green_background: 'bg-green-900',
+  blue_background: 'bg-blue-900',
+  purple_background: 'bg-purple-900',
+  pink_background: 'bg-pink-900',
+  red_background: 'bg-red-900',
 }
 
 function RichText({ texts }: { texts: RichTextItemResponse[] }) {
@@ -42,7 +42,7 @@ function RichText({ texts }: { texts: RichTextItemResponse[] }) {
           italic ? 'italic' : '',
           strikethrough ? 'line-through' : '',
           underline ? 'underline' : '',
-          code ? 'font-mono bg-black/10 px-1 py-0.5 rounded text-sm' : '',
+          code ? 'font-mono bg-white/10 px-1 py-0.5 rounded text-sm' : '',
           color !== 'default' ? (COLOR_CLASS[color] ?? '') : '',
         ]
           .filter(Boolean)
@@ -132,35 +132,35 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'paragraph':
       return (
-        <p className='text-base md:text-lg leading-8 text-gray-800 tracking-wide'>
+        <p className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
           <RichText texts={block.paragraph.rich_text} />
         </p>
       )
 
     case 'heading_1':
       return (
-        <h1 className='text-4xl md:text-5xl font-bold tracking-tight text-black mt-14 mb-4'>
+        <h1 className='text-4xl md:text-5xl font-bold tracking-tight text-white mt-14 mb-4'>
           <RichText texts={block.heading_1.rich_text} />
         </h1>
       )
 
     case 'heading_2':
       return (
-        <h2 className='text-2xl md:text-3xl font-bold tracking-tight text-black mt-12 mb-3 pb-2 border-b border-black/10'>
+        <h2 className='text-2xl md:text-3xl font-bold tracking-tight text-white mt-12 mb-3 pb-2 border-b border-white/10'>
           <RichText texts={block.heading_2.rich_text} />
         </h2>
       )
 
     case 'heading_3':
       return (
-        <h3 className='text-xl md:text-2xl font-semibold tracking-tight text-black mt-8 mb-2'>
+        <h3 className='text-xl md:text-2xl font-semibold tracking-tight text-white mt-8 mb-2'>
           <RichText texts={block.heading_3.rich_text} />
         </h3>
       )
 
     case 'heading_4' as any:
       return (
-        <h4 className='mt-6 mb-1 text-lg font-semibold tracking-tight text-black md:text-xl'>
+        <h4 className='mt-6 mb-1 text-lg font-semibold tracking-tight text-white md:text-xl'>
           <RichText texts={(block as any).heading_4.rich_text} />
         </h4>
       )
@@ -169,7 +169,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'bulleted_list_item':
       return (
-        <li className='text-base md:text-lg leading-8 text-gray-800 tracking-wide'>
+        <li className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
           <RichText texts={block.bulleted_list_item.rich_text} />
           <Children blocks={children} />
         </li>
@@ -177,7 +177,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'numbered_list_item':
       return (
-        <li className='text-base md:text-lg leading-8 text-gray-800 tracking-wide'>
+        <li className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
           <RichText texts={block.numbered_list_item.rich_text} />
           <Children blocks={children} />
         </li>
@@ -186,9 +186,9 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
     case 'to_do':
       return (
         <label className='flex items-start gap-3 cursor-pointer'>
-          <input type='checkbox' defaultChecked={block.to_do.checked} disabled className='mt-2 accent-black' />
+          <input type='checkbox' defaultChecked={block.to_do.checked} disabled className='mt-2 accent-white' />
           <span
-            className={`text-base md:text-lg leading-8 tracking-wide ${block.to_do.checked ? 'line-through text-gray-400' : 'text-gray-800'}`}
+            className={`text-base md:text-lg leading-8 tracking-wide ${block.to_do.checked ? 'line-through text-gray-600' : 'text-gray-300'}`}
           >
             <RichText texts={block.to_do.rich_text} />
           </span>
@@ -199,8 +199,8 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'quote':
       return (
-        <blockquote className='border-l-[3px] border-black pl-6 my-2'>
-          <p className='text-xl md:text-2xl italic leading-9 text-gray-700'>
+        <blockquote className='border-l-[3px] border-white/40 pl-6 my-2'>
+          <p className='text-xl md:text-2xl italic leading-9 text-gray-400'>
             <RichText texts={block.quote.rich_text} />
           </p>
           <Children blocks={children} />
@@ -209,11 +209,11 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'callout':
       return (
-        <div className='flex gap-4 px-6 py-5 bg-gray-50 border border-gray-200'>
+        <div className='flex gap-4 px-6 py-5 bg-white/5 border border-white/10'>
           {block.callout.icon?.type === 'emoji' && (
             <span className='text-xl shrink-0 mt-0.5'>{block.callout.icon.emoji}</span>
           )}
-          <div className='text-base leading-7 text-gray-800'>
+          <div className='text-base leading-7 text-gray-300'>
             <RichText texts={block.callout.rich_text} />
             <Children blocks={children} />
           </div>
@@ -224,12 +224,12 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'toggle':
       return (
-        <details className='border border-gray-200 rounded group'>
-          <summary className='px-5 py-3 font-semibold text-base cursor-pointer select-none list-none flex items-center justify-between gap-2 hover:bg-gray-50'>
+        <details className='border border-white/10 rounded group'>
+          <summary className='list-none flex items-center justify-between gap-2 px-5 py-3 cursor-pointer select-none text-base font-semibold text-white hover:bg-white/5'>
             <RichText texts={block.toggle.rich_text} />
-            <span className='text-gray-400 group-open:rotate-180 transition-transform shrink-0'>▾</span>
+            <span className='shrink-0 text-gray-500 transition-transform group-open:rotate-180'>▾</span>
           </summary>
-          <div className='px-5 pb-4 pt-2 border-t border-gray-100'>
+          <div className='border-t border-white/5 px-5 pt-2 pb-4'>
             <Children blocks={children} />
           </div>
         </details>
@@ -238,7 +238,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
     // ── 구분선 ───────────────────────────────────────────────────────────────────────
 
     case 'divider':
-      return <hr className='my-10 border-black/10' />
+      return <hr className='my-10 border-white/10' />
 
     // ── 코드 ────────────────────────────────────────────────────────────────────────
 
@@ -260,7 +260,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
         <figure className='w-full my-2'>
           <img src={src} alt={caption} className='w-full object-cover' />
           {caption && (
-            <figcaption className='text-sm text-gray-400 mt-3 text-center italic tracking-wide'>{caption}</figcaption>
+            <figcaption className='mt-3 text-center text-sm italic tracking-wide text-gray-500'>{caption}</figcaption>
           )}
         </figure>
       )
@@ -339,7 +339,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
           download
           target='_blank'
           rel='noopener noreferrer'
-          className='inline-flex items-center gap-2 border border-black/20 px-4 py-2 text-sm font-medium hover:bg-black hover:text-white transition-colors'
+          className='inline-flex items-center gap-2 border border-white/20 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white hover:text-black'
         >
           ↓ {name}
         </a>
@@ -356,7 +356,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
           href={src}
           target='_blank'
           rel='noopener noreferrer'
-          className='inline-flex items-center gap-2 border border-black/20 px-4 py-2 text-sm font-medium hover:bg-black hover:text-white transition-colors'
+          className='inline-flex items-center gap-2 border border-white/20 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white hover:text-black'
         >
           PDF 열기 ↗
         </a>
@@ -370,7 +370,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
       if (embedUrl.includes('instagram.com')) {
         return <InstagramEmbed url={embedUrl} />
       }
-      return <iframe src={embedUrl} className='h-96 w-full border border-gray-200' allowFullScreen />
+      return <iframe src={embedUrl} className='h-96 w-full border border-white/10' allowFullScreen />
     }
 
     case 'bookmark': {
@@ -381,10 +381,10 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
           href={url}
           target='_blank'
           rel='noopener noreferrer'
-          className='flex items-center justify-between border border-gray-200 px-5 py-4 hover:border-black transition-colors group'
+          className='group flex items-center justify-between border border-white/10 px-5 py-4 transition-colors hover:border-white'
         >
-          <span className='text-sm text-gray-600 group-hover:text-black truncate'>{caption}</span>
-          <span className='text-gray-400 shrink-0 ml-4'>↗</span>
+          <span className='truncate text-sm text-gray-400 group-hover:text-white'>{caption}</span>
+          <span className='ml-4 shrink-0 text-gray-500'>↗</span>
         </a>
       )
     }
@@ -395,10 +395,10 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
           href={block.link_preview.url}
           target='_blank'
           rel='noopener noreferrer'
-          className='flex items-center justify-between border border-gray-200 px-5 py-4 hover:border-black transition-colors group'
+          className='group flex items-center justify-between border border-white/10 px-5 py-4 transition-colors hover:border-white'
         >
-          <span className='text-sm text-gray-600 group-hover:text-black truncate'>{block.link_preview.url}</span>
-          <span className='text-gray-400 shrink-0 ml-4'>↗</span>
+          <span className='truncate text-sm text-gray-400 group-hover:text-white'>{block.link_preview.url}</span>
+          <span className='ml-4 shrink-0 text-gray-500'>↗</span>
         </a>
       )
 
@@ -415,7 +415,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
                   <tr
                     key={row.id}
                     className={
-                      ri === 0 ? 'bg-black text-white font-semibold' : 'border-b border-gray-100 even:bg-gray-50'
+                      ri === 0 ? 'bg-white/10 font-semibold text-white' : 'border-b border-white/5 even:bg-white/5'
                     }
                   >
                     {(row as any).table_row.cells.map((cell: RichTextItemResponse[], ci: number) => (
@@ -463,14 +463,14 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'child_page':
       return (
-        <div className='border border-gray-200 px-5 py-4 text-sm text-gray-600'>
+        <div className='border border-white/10 px-5 py-4 text-sm text-gray-400'>
           📄 {(block as any).child_page?.title || 'Child Page'}
         </div>
       )
 
     case 'child_database':
       return (
-        <div className='border border-gray-200 px-5 py-4 text-sm text-gray-600'>
+        <div className='border border-white/10 px-5 py-4 text-sm text-gray-400'>
           🗄 {(block as any).child_database?.title || 'Child Database'}
         </div>
       )
@@ -482,7 +482,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     default:
       return (
-        <div className='text-xs text-gray-400 border border-dashed border-gray-200 px-3 py-2'>
+        <div className='border border-dashed border-white/10 px-3 py-2 text-xs text-gray-600'>
           {`[unsupported block: ${type}]`}
         </div>
       )

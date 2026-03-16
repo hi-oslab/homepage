@@ -49,9 +49,18 @@ export const metadata: Metadata = {
     description: METADATA.description,
     locale: 'ko_KR',
     url: METADATA.url,
-    images: {
-      url: '/icons/op-image.png',
+    images: [{ url: '/icons/op-image.png', width: 1200, height: 630, alt: 'Open Source Lab' }],
+  },
+  twitter: {
+    card: METADATA.twitter.card,
+    site: METADATA.twitter.site,
+    creator: METADATA.twitter.creator,
+    title: {
+      default: METADATA.title,
+      template: METADATA.titleTemplate,
     },
+    description: METADATA.description,
+    images: ['/icons/op-image.png'],
   },
   referrer: 'origin-when-cross-origin',
   robots: {
@@ -93,11 +102,28 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
+    <html lang='ko'>
       <head>
         <link rel="preload" href="/fonts/D2Coding.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/D2CodingBold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/SawarabiMincho.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Open Source Lab',
+              alternateName: '오픈소스랩',
+              url: 'https://hioslab.com',
+              logo: 'https://hioslab.com/icons/op-image.png',
+              description: METADATA.description,
+              email: 'hi.oslab@gmail.com',
+              foundingDate: '2018',
+              sameAs: ['https://www.instagram.com/opensource_lab/'],
+            }),
+          }}
+        />
       </head>
       <body className={`${pretendard.variable} antialiased`}>
         <Layout>{children}</Layout>

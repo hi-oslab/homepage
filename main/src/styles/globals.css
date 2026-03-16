@@ -70,7 +70,7 @@
   input:focus,
   textarea:focus {
     outline: none;
-    caret-color: #000000;
+    caret-color: #ffffff;
   }
 
   input:-internal-autofill-selected {

@@ -1,8 +1,8 @@
-import { ParsedType } from '@/types'
 import { MdAlternateEmail, MdLink } from 'react-icons/md'
+import { MembersItem } from '@/app/api/schema'
 
-type MemberCardProps = {
-  member: ParsedType['members']
+interface MemberCardProps {
+  member: MembersItem
 }
 
 export const MemberCard = ({ member }: MemberCardProps) => {
