@@ -6,61 +6,67 @@ type MemberCardProps = {
 }
 
 export const MemberCard = ({ member }: MemberCardProps) => {
-  const linkShortener = (url: string) => {
-    // url에 http:// 또는 https:// 가 포함되어 있으면 제거
-    if (url.startsWith('http://')) {
-      url = url.replace('http://', '')
-    } else if (url.startsWith('https://')) {
-      url = url.replace('https://', '')
-    }
+  const { name, subName, role, coverImage, email, website, field } = member.properties
 
-    //url 끝에 / 가 있으면 제거
-    if (url.endsWith('/')) {
-      url = url.slice(0, -1)
-    }
-
-    // url이 너무 길면 20자 이후로는 ... 으로 대체
-    if (url.length > 20) {
-      return url.slice(0, 20) + '...'
-    }
-    return url
+  const shortUrl = (url: string) => {
+    return url.replace(/^https?:\/\//, '').replace(/\/$/, '').slice(0, 24) + (url.replace(/^https?:\/\//, '').length > 24 ? '...' : '')
   }
 
   return (
-    <div key={member.id} className='w-full h-fit grid grid-cols-[1fr_3fr] grid-rows-[1fr_auto] gap-4'>
-      <div className='w-full h-auto aspect-square flex justify-center items-center relative'>
-        {member.properties.role && (
-          <div className='absolute top-0 left-0 bg-neutral-50 uppercase text-black px-2 py-1 leading-none text-sm rounded-full shadow-sm'>
-            {member.properties.role}
-          </div>
-        )}
-        <img src={member.properties.coverImage} alt={member.properties.name} className='w-auto h-full aspect-square' />
-      </div>
-      <div className='w-full flex flex-col justify-start items-start'>
-        <h3 className='text-base'>{member.properties.subName}</h3>
-        <h2 className='text-2xl font-bold text-white mb-2'>{member.properties.name}</h2>
-        <a className='text-base flex items-center' href={`mailto:${member.properties.email}`}>
-          <MdAlternateEmail className='mr-2' />
-          {member.properties.email}
-        </a>
-        <a
-          className='text-base flex items-center'
-          href={member.properties.website}
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          <MdLink className='mr-2' />
-          {linkShortener(member.properties.website)}
-        </a>
+    <div className='group w-full flex flex-col gap-4 border border-neutral-800 rounded-2xl p-5 hover:border-neutral-600 transition-colors duration-200'>
+      {/* 이미지 + 이름 영역 */}
+      <div className='flex items-center gap-4'>
+        <div className='relative shrink-0 w-16 h-16 rounded-full overflow-hidden bg-neutral-800'>
+          {coverImage ? (
+            <img src={coverImage} alt={name} className='w-full h-full object-cover' />
+          ) : (
+            <div className='w-full h-full bg-neutral-700' />
+          )}
+        </div>
+        <div className='flex flex-col gap-1 min-w-0'>
+          {subName && <p className='text-xs text-neutral-400 truncate'>{subName}</p>}
+          <h2 className='text-lg font-bold text-white leading-tight truncate'>{name}</h2>
+          {role && (
+            <span className='self-start text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700'>
+              {role}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className='col-span-full w-full h-fit flex flex-wrap justify-start items-start'>
-        {member.properties.field.map((field) => (
-          <span key={field} className='inline-block bg-neutral-800 text-white text-xs px-3 py-1 mr-2 mb-2 rounded-full'>
-            {field}
-          </span>
-        ))}
-        {/* <p className='mt-4 text-lg'>{member.properties.description}</p> */}
+      {/* 분야 태그 */}
+      {field.length > 0 && (
+        <div className='flex flex-wrap gap-1.5'>
+          {field.map((f) => (
+            <span key={f} className='text-xs px-2.5 py-1 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-800'>
+              {f}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* 연락처 */}
+      <div className='flex flex-col gap-1.5 mt-auto pt-2 border-t border-neutral-800'>
+        {email && (
+          <a
+            href={`mailto:${email}`}
+            className='flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors truncate'
+          >
+            <MdAlternateEmail className='shrink-0 text-base' />
+            <span className='truncate'>{email}</span>
+          </a>
+        )}
+        {website && (
+          <a
+            href={website}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors truncate'
+          >
+            <MdLink className='shrink-0 text-base' />
+            <span className='truncate'>{shortUrl(website)}</span>
+          </a>
+        )}
       </div>
     </div>
   )
