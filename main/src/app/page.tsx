@@ -10,9 +10,6 @@ export default async function Page() {
       <InView className='h-[calc(100dvh-64px)] flex items-center justify-center'>
         <Scene />
       </InView>
-      <InView className='px-4 md:px-8 h-[calc(100dvh-64px)] flex items-center justify-center'>
-        <span className='text-4xl'>●▲☰</span>
-      </InView>
     </>
   )
 }

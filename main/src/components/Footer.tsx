@@ -32,8 +32,7 @@ function TypingCode() {
   }, [isInView])
 
   return (
-    // invisible 전체 텍스트로 높이 고정, 타이핑 텍스트를 absolute로 오버레이
-    <div ref={ref} className='relative text-xs md:text-sm w-full lg:w-[60%] font-mono whitespace-pre-wrap'>
+    <div ref={ref} className='relative whitespace-pre-wrap font-mono text-xs text-neutral-300'>
       <code className='invisible'>{CODE}▊</code>
       <code className='absolute inset-0'>
         {displayed}
@@ -43,37 +42,55 @@ function TypingCode() {
   )
 }
 
+const CONTACTS = [
+  { label: '@opensource_lab', href: 'https://www.instagram.com/opensource_lab/' },
+  { label: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' },
+]
+
 export const Footer = () => {
   return (
-    <footer className='w-full h-fit p-4 md:p-8 bg-black text-white flex flex-col gap-8 md:gap-28 items-center justify-between md:justify-center'>
-      <div className='w-full h-fit flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-0'>
-        <TypingCode />
-        <div className='w-full lg:w-[40%] text-lg h-full flex flex-col gap-4 lg:gap-0 lg:flex-row justify-between items-start'>
-          <div className='w-full h-full flex flex-row md:flex-col font-mono gap-6 md:gap-2 justify-start items-start'>
-            {[
-              { value: '@opensource_lab', href: 'https://www.instagram.com/opensource_lab/' },
-              { value: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' },
-            ].map((item) => (
-              <div
-                key={item.value}
-                className='w-fit flex flex-row text-sm md:text-base gap-2 lg:gap-4 md:justify-end items-center'
-              >
-                <a
-                  className='w-fit h-fit hover:opacity-50 active:scale-95 transition-all'
-                  href={item.href}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  {item.value}
-                </a>
-              </div>
-            ))}
-          </div>
+    <footer className='h-fit w-full bg-black p-4 text-white md:p-8'>
+      {/* ── 터미널 윈도우 ── */}
+      <div className='w-full border border-neutral-800 font-mono'>
+        {/* 타이틀바 */}
+        <div className='flex items-center gap-2 border-b border-neutral-800 bg-neutral-950 px-4 py-2'>
+          <span className='text-xs text-neutral-600'>●</span>
+          <span className='text-xs text-neutral-600'>●</span>
+          <span className='text-xs text-neutral-600'>●</span>
+          <span className='ml-3 text-xs tracking-widest text-neutral-600'>OSL TERMINAL</span>
+          <span className='ml-auto text-xs text-neutral-700'>python delicious_source.py</span>
+        </div>
+
+        {/* 코드 영역 */}
+        <div className='p-4 md:p-6'>
+          <p className='mb-3 text-xs text-neutral-600'>$ python delicious_source.py</p>
+          <TypingCode />
         </div>
       </div>
-      <div className='w-full h-fit flex flex-col-reverse lg:flex-row justify-between items-start gap-4 lg:gap-0 lg:items-end'>
-        <p className='text-sm lg:text-base'>© {new Date().getFullYear()} Open Source Lab. All rights reserved.</p>
-        <span className='text-4xl leading-none'>●▲☰</span>
+
+      {/* ── 하단 정보 ── */}
+      <div className='mt-6 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end'>
+        {/* 연락처 */}
+        <div className='flex flex-col gap-1.5 font-mono'>
+          {CONTACTS.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-xs text-neutral-500 transition-colors hover:text-white'
+            >
+              <span className='mr-1 text-neutral-700'>&gt;</span>
+              {item.label}
+            </a>
+          ))}
+        </div>
+
+        {/* 저작권 + 로고 */}
+        <div className='flex flex-col items-start gap-2 md:items-end'>
+          <span className='text-2xl leading-none'>●▲☰</span>
+          <p className='text-xs text-neutral-700'>© {new Date().getFullYear()} Open Source Lab. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   )
