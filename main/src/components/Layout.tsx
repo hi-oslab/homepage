@@ -18,12 +18,13 @@
 import React from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { PageTransition } from './PageTransition'
 
 export const Layout = ({ children }) => {
   return (
     <div className='w-screen min-h-dvh h-fit'>
       <Header />
-      {children}
+      <PageTransition>{children}</PageTransition>
       <Footer />
     </div>
   )
