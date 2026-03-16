@@ -18,7 +18,10 @@ export const Scene = () => {
         <Suspense
           fallback={
             <Html center>
-              <div className='text-white text-lg'>Loading...</div>
+              <div className='space-y-1 text-left font-mono text-sm text-neutral-400'>
+                <p>&gt; initializing 3d scene...</p>
+                <p>&gt; loading model<span className='cursor-blink'>▊</span></p>
+              </div>
             </Html>
           }
         >

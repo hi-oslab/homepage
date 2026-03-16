@@ -1,8 +1,16 @@
 import type { Metadata } from 'next'
 import { METADATA } from './metadata'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
+import localFont from 'next/font/local'
 import '@/styles/globals.css'
 import { Layout } from '@/components'
+
+const pretendard = localFont({
+  src: '../../public/fonts/PretendardVariable.woff2',
+  variable: '--font-pretendard',
+  display: 'swap',
+  weight: '45 920',
+})
 
 export const metadata: Metadata = {
   alternates: {
@@ -91,7 +99,7 @@ export default function RootLayout({
         <link rel="preload" href="/fonts/D2CodingBold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/SawarabiMincho.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body className={`antialiased`}>
+      <body className={`${pretendard.variable} antialiased`}>
         <Layout>{children}</Layout>
       </body>
       <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />

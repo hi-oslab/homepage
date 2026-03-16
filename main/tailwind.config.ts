@@ -32,6 +32,7 @@ export default {
       fontFamily: {
         d2Coding: ['var(--font-d2coding)', 'sans-serif'],
         sawarabiMincho: ['var(--font-sawarabi-mincho)', 'serif'],
+        pretendard: ['var(--font-pretendard)', 'sans-serif'],
       },
       aspectRatio: {},
     },

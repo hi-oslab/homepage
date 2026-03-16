@@ -1,5 +1,6 @@
 import { RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints'
 import { BlockWithChildren } from '@/app/api/notion'
+import { InstagramEmbed } from './InstagramEmbed'
 
 const NOTION_HOST = 'https://designersejinoh.notion.site'
 
@@ -157,6 +158,13 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
         </h3>
       )
 
+    case 'heading_4' as any:
+      return (
+        <h4 className='mt-6 mb-1 text-lg font-semibold tracking-tight text-black md:text-xl'>
+          <RichText texts={(block as any).heading_4.rich_text} />
+        </h4>
+      )
+
     // ── 리스트 ──────────────────────────────────────────────────────────────────────
 
     case 'bulleted_list_item':
@@ -247,6 +255,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
       const src =
         block.image.type === 'file' ? notionImageUrl(block.image.file.url, block.id) : block.image.external.url
       const caption = block.image.caption?.map((t) => t.plain_text).join('') || ''
+      if (!src) return null
       return (
         <figure className='w-full my-2'>
           <img src={src} alt={caption} className='w-full object-cover' />
@@ -258,14 +267,49 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
     }
 
     case 'video': {
-      const src =
-        block.video.type === 'file'
-          ? `${NOTION_HOST}/video/${encodeURIComponent(block.video.file.url)}?table=block&id=${block.id}&cache=v2`
-          : block.video.external.url
+      if (block.video.type === 'file') {
+        return (
+          <div className='w-full'>
+            <video controls className='w-full'>
+              <source src={block.video.file.url} />
+            </video>
+          </div>
+        )
+      }
+
+      const url = block.video.external.url
+      const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)
+      const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
+
+      if (youtubeMatch) {
+        return (
+          <div className='aspect-video w-full'>
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeMatch[1]}`}
+              className='size-full'
+              allowFullScreen
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+            />
+          </div>
+        )
+      }
+
+      if (vimeoMatch) {
+        return (
+          <div className='aspect-video w-full'>
+            <iframe
+              src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
+              className='size-full'
+              allowFullScreen
+            />
+          </div>
+        )
+      }
+
       return (
         <div className='w-full'>
           <video controls className='w-full'>
-            <source src={src} type='video/mp4' />
+            <source src={url} />
           </video>
         </div>
       )
@@ -321,8 +365,13 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     // ── 링크 / 임베드 ────────────────────────────────────────────────────────────────
 
-    case 'embed':
-      return <iframe src={block.embed.url} className='w-full h-96 border border-gray-200' allowFullScreen />
+    case 'embed': {
+      const embedUrl = block.embed.url
+      if (embedUrl.includes('instagram.com')) {
+        return <InstagramEmbed url={embedUrl} />
+      }
+      return <iframe src={embedUrl} className='h-96 w-full border border-gray-200' allowFullScreen />
+    }
 
     case 'bookmark': {
       const url = block.bookmark.url
@@ -403,6 +452,31 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
           <Children blocks={children} />
         </div>
       )
+
+    // ── 기타 블록 ────────────────────────────────────────────────────────────────
+
+    case 'synced_block':
+      return <Children blocks={children} />
+
+    case 'table_of_contents':
+      return null
+
+    case 'child_page':
+      return (
+        <div className='border border-gray-200 px-5 py-4 text-sm text-gray-600'>
+          📄 {(block as any).child_page?.title || 'Child Page'}
+        </div>
+      )
+
+    case 'child_database':
+      return (
+        <div className='border border-gray-200 px-5 py-4 text-sm text-gray-600'>
+          🗄 {(block as any).child_database?.title || 'Child Database'}
+        </div>
+      )
+
+    case 'breadcrumb':
+      return null
 
     // ── 미지원 블록 (개발 시 확인용) ────────────────────────────────────────────────
 

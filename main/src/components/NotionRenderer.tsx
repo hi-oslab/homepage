@@ -6,7 +6,7 @@ export const NotionRenderer = ({ blocks }: { blocks: BlockWithChildren[] }) => {
   const groups = groupBlocks(blocks)
 
   return (
-    <div className='w-full space-y-4'>
+    <div className='w-full space-y-4 font-pretendard'>
       {groups.length > 0 ? (
         groups.map((group, i) => {
           if (group.kind === 'bulleted')
