@@ -22,7 +22,10 @@ export default function Client({ works }: { works: WorksItem[] }) {
 
   const filtered = works
     .filter((w) => activeCategory === 'All' || w.properties.category === activeCategory)
-    .filter((w) => activeTags.size === 0 || Array.from(activeTags).every((tag) => w.properties.tags.some((t) => t.name === tag)))
+    .filter(
+      (w) =>
+        activeTags.size === 0 || Array.from(activeTags).every((tag) => w.properties.tags.some((t) => t.name === tag)),
+    )
     .slice()
     .sort((a, b) => {
       const cmp = a.properties.projectDate.start.localeCompare(b.properties.projectDate.start)
@@ -30,7 +33,7 @@ export default function Client({ works }: { works: WorksItem[] }) {
     })
 
   return (
-    <div className='w-full h-full flex flex-col p-4 justify-start items-start gap-4 md:gap-8 pb-32 md:pb-48'>
+    <div className='w-full h-full font-pretendard flex flex-col p-4 md:p-8 justify-start items-start gap-4 md:gap-8 pb-32 md:pb-48'>
       {/* Category Tabs + Sort */}
       <div className='w-full flex flex-wrap items-center justify-between gap-2'>
         <div className='flex flex-wrap gap-2'>
@@ -62,7 +65,7 @@ export default function Client({ works }: { works: WorksItem[] }) {
           <button
             key={tag}
             onClick={() => toggleTag(tag)}
-            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+            className={`px-3 py-1 text-xs border transition-colors ${
               activeTags.has(tag)
                 ? 'bg-white text-black border-white'
                 : 'bg-transparent text-neutral-400 border-neutral-700 hover:border-neutral-400 hover:text-white'
@@ -98,15 +101,12 @@ export const WorkCard = ({ work }: { work: WorksItem }) => {
         )}
       </div>
       <div className='w-full md:w-2/3 h-fit flex flex-col justify-start items-start gap-2'>
-        <h2 className='w-full text-left text-xl md:text-2xl font-semibold'>{title}</h2>
-        <p className='w-full text-left text-base leading  relaxed break-keep'>{description}</p>
+        <h2 className='w-full text-left text-xl md:text-2xl font-medium'>{title}</h2>
+        <p className='w-full text-left text-base leading-relaxed break-keep'>{description}</p>
         <p className='w-full text-left text-sm text-neutral-500'>{year}</p>
         <div className='w-full text-left mt-2'>
           {tags.map((tag) => (
-            <span
-              key={tag.name}
-              className='inline-block bg-neutral-800 text-white text-xs px-3 py-1 mr-2 mb-2 rounded-full'
-            >
+            <span key={tag.name} className='inline-block text-xs mr-2 mb-2'>
               {tag.name}
             </span>
           ))}

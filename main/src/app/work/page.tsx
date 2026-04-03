@@ -21,9 +21,9 @@ export default async function Page() {
 
   return (
     <>
-      <InView className='w-full min-h-dvh h-fit flex flex-col gap-8 md:gap-16 p-4 md:p-8 justify-start items-center'>
-        <div className='w-full h-fit flex flex-col items-center justify-center text-center'>
-          <h1 className='text-4xl font-bold uppercase'>[ our works ]</h1>
+      <InView className='w-full min-h-dvh h-fit flex flex-col justify-start items-center'>
+        <div className='w-full h-48 flex flex-col items-start justify-center p-4 md:p-8 text-center'>
+          <h1 className='text-4xl font-bold uppercase'>our works</h1>
         </div>
         <Client works={works} />
       </InView>

@@ -50,8 +50,11 @@ export function ConsoleLoading({ lines = DEFAULT_LINES }: Props) {
   const bar = '█'.repeat(filled) + '░'.repeat(20 - filled)
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black'>
-      <div className='mx-4 flex w-full max-w-lg flex-col border border-neutral-800 bg-black font-mono text-sm' style={{ height: '50vh' }}>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-white'>
+      <div
+        className='mx-4 flex w-full max-w-lg flex-col border border-neutral-800 bg-black font-mono text-sm'
+        style={{ height: '50vh' }}
+      >
         {/* 타이틀바 */}
         <div className='flex shrink-0 items-center gap-2 border-b border-neutral-800 bg-neutral-950 px-4 py-2'>
           <span className='text-xs text-neutral-600'>●</span>

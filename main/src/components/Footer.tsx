@@ -12,7 +12,7 @@ const CONTACTS = [
 
 export const Footer = () => {
   return (
-    <footer className='h-fit w-full bg-black p-4 text-white md:p-8'>
+    <footer className='h-fit w-full uppercase bg-white p-4 text-black md:p-8'>
       {/* 코드 텍스트 */}
       <div className='mb-6 font-mono'>
         <p className='mb-3 text-xs text-neutral-600'>$ python delicious_source.py</p>

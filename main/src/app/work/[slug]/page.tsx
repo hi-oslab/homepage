@@ -60,7 +60,7 @@ export default async function Page({ params }: { params: PageParams }) {
   return (
     <>
       {/* header */}
-      <div className='w-full h-fit px-4 md:px-8 py-6 md:py-12 flex flex-col items-start justify-start gap-4'>
+      <div className='w-full max-w-5xl mx-auto h-fit px-4 md:px-8 py-6 md:py-12 flex flex-col items-start justify-start gap-4'>
         <Breadcrumbs />
         <span className='text-4xl md:text-6xl font-semibold leading-none'>{title}</span>
         <span className='text-lg md:text-xl'>{subTitle}</span>

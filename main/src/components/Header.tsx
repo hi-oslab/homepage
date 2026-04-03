@@ -29,7 +29,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className='sticky top-0 w-full h-14 text-white mix-blend-difference px-4 md:px-8 py-4 md:py-8 flex flex-row justify-between items-center z-10'>
+      <header className='sticky top-0 w-full h-14 uppercase text-white mix-blend-difference px-4 md:px-8 py-4 md:py-8 flex flex-row justify-between items-center z-10'>
         <div className='w-fit h-fit flex flex-row gap-16 items-center justify-start'>
           <div className='cursor-pointer hover:text-gray-500' onClick={goHome}>
             {/* <Logo className='h-4 md:h-6 w-auto' /> */}

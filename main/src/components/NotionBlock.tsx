@@ -132,35 +132,35 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'paragraph':
       return (
-        <p className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
+        <p className='text-base md:text-lg leading-8 tracking-wide'>
           <RichText texts={block.paragraph.rich_text} />
         </p>
       )
 
     case 'heading_1':
       return (
-        <h1 className='text-4xl md:text-5xl font-bold tracking-tight text-white mt-14 mb-4'>
+        <h1 className='text-4xl md:text-5xl font-bold tracking-tight mt-14 mb-4'>
           <RichText texts={block.heading_1.rich_text} />
         </h1>
       )
 
     case 'heading_2':
       return (
-        <h2 className='text-2xl md:text-3xl font-bold tracking-tight text-white mt-12 mb-3 pb-2 border-b border-white/10'>
+        <h2 className='text-2xl md:text-3xl font-bold tracking-tight mt-12 mb-3 pb-2 border-b border-black/10'>
           <RichText texts={block.heading_2.rich_text} />
         </h2>
       )
 
     case 'heading_3':
       return (
-        <h3 className='text-xl md:text-2xl font-semibold tracking-tight text-white mt-8 mb-2'>
+        <h3 className='text-xl md:text-2xl font-semibold tracking-tight mt-8 mb-2'>
           <RichText texts={block.heading_3.rich_text} />
         </h3>
       )
 
     case 'heading_4' as any:
       return (
-        <h4 className='mt-6 mb-1 text-lg font-semibold tracking-tight text-white md:text-xl'>
+        <h4 className='mt-6 mb-1 text-lg font-semibold tracking-tight md:text-xl'>
           <RichText texts={(block as any).heading_4.rich_text} />
         </h4>
       )
@@ -169,7 +169,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'bulleted_list_item':
       return (
-        <li className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
+        <li className='text-base md:text-lg leading-8 tracking-wide'>
           <RichText texts={block.bulleted_list_item.rich_text} />
           <Children blocks={children} />
         </li>
@@ -177,7 +177,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
 
     case 'numbered_list_item':
       return (
-        <li className='text-base md:text-lg leading-8 text-gray-300 tracking-wide'>
+        <li className='text-base md:text-lg leading-8 tracking-wide'>
           <RichText texts={block.numbered_list_item.rich_text} />
           <Children blocks={children} />
         </li>
@@ -186,9 +186,9 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
     case 'to_do':
       return (
         <label className='flex items-start gap-3 cursor-pointer'>
-          <input type='checkbox' defaultChecked={block.to_do.checked} disabled className='mt-2 accent-white' />
+          <input type='checkbox' defaultChecked={block.to_do.checked} disabled className='mt-2 accent-black' />
           <span
-            className={`text-base md:text-lg leading-8 tracking-wide ${block.to_do.checked ? 'line-through text-gray-600' : 'text-gray-300'}`}
+            className={`text-base md:text-lg leading-8 tracking-wide ${block.to_do.checked ? 'line-through text-gray-300' : 'text-gray-600'}`}
           >
             <RichText texts={block.to_do.rich_text} />
           </span>
@@ -297,11 +297,7 @@ export const NotionBlock = ({ block }: { block: BlockWithChildren }) => {
       if (vimeoMatch) {
         return (
           <div className='aspect-video w-full'>
-            <iframe
-              src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
-              className='size-full'
-              allowFullScreen
-            />
+            <iframe src={`https://player.vimeo.com/video/${vimeoMatch[1]}`} className='size-full' allowFullScreen />
           </div>
         )
       }
