@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getParsedDataByTableType } from '@/app/api/notion'
+import { getPublishedWorks } from '@/lib/cms'
 import { InView } from '@/components'
 import Client from './client'
 
@@ -17,16 +17,23 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const works = await getParsedDataByTableType('works')
+  const works = await getPublishedWorks()
 
   return (
-    <>
-      <InView className='w-full min-h-dvh h-fit flex flex-col justify-start items-center'>
-        <div className='w-full h-48 flex flex-col items-start justify-center p-4 md:p-8 text-center'>
-          <h1 className='text-4xl font-bold uppercase'>our works</h1>
+    <div className='flex w-full flex-col px-4 pb-32 md:px-8 md:pb-48'>
+      <InView className='flex min-h-[50dvh] flex-col justify-between gap-16 pt-6 pb-16 md:pt-8 md:pb-24'>
+        <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
+          <span className='md:col-span-4'>Works</span>
+          <span className='text-mute md:col-span-4'>Exhibitions, performances & projects</span>
         </div>
-        <Client works={works} />
+        <h1 className='flex items-start gap-3 text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] tracking-[-0.05em]'>
+          Works
+          <sup className='mt-[0.4em] text-base font-normal tracking-normal text-mute md:text-xl'>
+            ({String(works.length).padStart(2, '0')})
+          </sup>
+        </h1>
       </InView>
-    </>
+      <Client works={works} />
+    </div>
   )
 }

@@ -1,12 +1,14 @@
 'use client'
 
-import { WorksItem } from '@/app/api/schema'
-import Link from 'next/link'
+import classNames from 'classnames'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
+import type { Work } from '@/types/cms'
+import { WorkTile } from '@/components'
 
-export default function Client({ works }: { works: WorksItem[] }) {
-  const categories = ['All', ...Array.from(new Set(works.map((w) => w.properties.category).filter(Boolean)))]
-  const allTags = Array.from(new Set(works.flatMap((w) => w.properties.tags.map((t) => t.name))))
+export default function Client({ works }: { works: Work[] }) {
+  const categories = ['All', ...Array.from(new Set(works.map((w) => w.category).filter(Boolean)))]
+  const allTags = Array.from(new Set(works.flatMap((w) => w.tags)))
 
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set())
@@ -21,97 +23,93 @@ export default function Client({ works }: { works: WorksItem[] }) {
   }
 
   const filtered = works
-    .filter((w) => activeCategory === 'All' || w.properties.category === activeCategory)
-    .filter(
-      (w) =>
-        activeTags.size === 0 || Array.from(activeTags).every((tag) => w.properties.tags.some((t) => t.name === tag)),
-    )
+    .filter((w) => activeCategory === 'All' || w.category === activeCategory)
+    .filter((w) => activeTags.size === 0 || Array.from(activeTags).every((tag) => w.tags.includes(tag)))
     .slice()
     .sort((a, b) => {
-      const cmp = a.properties.projectDate.start.localeCompare(b.properties.projectDate.start)
+      const cmp = a.year - b.year || (a.project_date ?? '').localeCompare(b.project_date ?? '')
       return sortDesc ? -cmp : cmp
     })
 
   return (
-    <div className='w-full h-full font-pretendard flex flex-col p-4 md:p-8 justify-start items-start gap-4 md:gap-8 pb-32 md:pb-48'>
-      {/* Category Tabs + Sort */}
-      <div className='w-full flex flex-wrap items-center justify-between gap-2'>
-        <div className='flex flex-wrap gap-2'>
+    <div className='flex w-full flex-col gap-12 md:gap-16'>
+      {/* 필터 */}
+      <div className='grid grid-cols-1 gap-6 text-sm md:grid-cols-12 md:gap-8'>
+        <FilterGroup label='Category' className='md:col-span-4'>
           {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 text-sm border transition-colors ${
-                activeCategory === cat
-                  ? 'bg-white text-black border-white'
-                  : 'bg-transparent text-neutral-400 border-neutral-600 hover:border-white hover:text-white'
-              }`}
-            >
+            <Toggle key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>
               {cat}
-            </button>
+            </Toggle>
           ))}
-        </div>
-        <button
-          onClick={() => setSortDesc((v) => !v)}
-          className='flex items-center gap-1 px-3 py-1.5 text-sm border border-neutral-600 text-neutral-400 hover:border-white hover:text-white transition-colors'
-        >
-          Date {sortDesc ? '↓' : '↑'}
-        </button>
+        </FilterGroup>
+        <FilterGroup label='Keywords' className='md:col-span-6'>
+          {allTags.map((tag) => (
+            <Toggle key={tag} active={activeTags.has(tag)} onClick={() => toggleTag(tag)}>
+              {tag.toLowerCase()}
+            </Toggle>
+          ))}
+        </FilterGroup>
+        <FilterGroup label='Sort' className='md:col-span-2 md:items-end md:text-right'>
+          <Toggle active onClick={() => setSortDesc((v) => !v)}>
+            {sortDesc ? 'Newest ↓' : 'Oldest ↑'}
+          </Toggle>
+        </FilterGroup>
       </div>
 
-      {/* Tag Filter */}
-      <div className='w-full flex flex-wrap gap-2'>
-        {allTags.map((tag) => (
-          <button
-            key={tag}
-            onClick={() => toggleTag(tag)}
-            className={`px-3 py-1 text-xs border transition-colors ${
-              activeTags.has(tag)
-                ? 'bg-white text-black border-white'
-                : 'bg-transparent text-neutral-400 border-neutral-700 hover:border-neutral-400 hover:text-white'
-            }`}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-
-      {/* Work Items */}
-      {filtered.map((work) => (
-        <WorkCard key={work.id} work={work} />
-      ))}
+      {/* 목록 */}
+      {filtered.length > 0 ? (
+        <motion.div layout className='grid grid-cols-1 gap-x-4 gap-y-12 sm:grid-cols-2 md:grid-cols-3 md:gap-x-8 md:gap-y-16'>
+          <AnimatePresence mode='popLayout' initial={false}>
+            {filtered.map((work) => (
+              <motion.div
+                key={work.id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <WorkTile work={work} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      ) : (
+        <p className='py-24 text-center text-sm text-mute'>조건에 맞는 작업이 없습니다.</p>
+      )}
     </div>
   )
 }
 
-export const WorkCard = ({ work }: { work: WorksItem }) => {
-  const { title, description, year, thumbnail, tags } = work.properties
+const FilterGroup = ({
+  label,
+  className,
+  children,
+}: {
+  label: string
+  className?: string
+  children: React.ReactNode
+}) => (
+  <div className={classNames('flex flex-col gap-3', className)}>
+    <span className='text-mute'>{label}</span>
+    <div className='flex flex-wrap gap-x-4 gap-y-1'>{children}</div>
+  </div>
+)
 
-  return (
-    <Link
-      href={`/work/${work.properties.slug}`}
-      key={work.id}
-      className='w-full h-fit flex flex-col md:flex-row gap-2 md:gap-8 justify-between items-start'
-    >
-      <div className='w-full md:w-1/3 h-auto aspect-video bg-neutral-800 mb-4 flex justify-center items-center'>
-        {thumbnail ? (
-          <img src={thumbnail} alt={title} className='w-full h-full object-cover' />
-        ) : (
-          <span className='text-neutral-500'>No Image</span>
-        )}
-      </div>
-      <div className='w-full md:w-2/3 h-fit flex flex-col justify-start items-start gap-2'>
-        <h2 className='w-full text-left text-xl md:text-2xl font-medium'>{title}</h2>
-        <p className='w-full text-left text-base leading-relaxed break-keep'>{description}</p>
-        <p className='w-full text-left text-sm text-neutral-500'>{year}</p>
-        <div className='w-full text-left mt-2'>
-          {tags.map((tag) => (
-            <span key={tag.name} className='inline-block text-xs mr-2 mb-2'>
-              {tag.name}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Link>
-  )
-}
+const Toggle = ({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) => (
+  <button
+    type='button'
+    onClick={onClick}
+    className={classNames('transition-colors', active ? 'text-ink' : 'text-ink/30 hover:text-ink/60')}
+  >
+    {children}
+  </button>
+)

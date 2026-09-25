@@ -1,101 +1,160 @@
-'use client'
+import Link from 'next/link'
+import { getCurrentUser, isApproved } from '@/lib/admin-auth'
+import { getAdminMembers, getAdminUsers, getAdminWorks, getMember } from '@/lib/cms'
+import { PageHeader, Panel } from '@/components/admin/ui'
+import { Arrow } from '@/components/Typography'
+import { createWorkAction } from './works/actions'
+import { DashboardActions, RelativeTime } from './DashboardActions'
 
-import { useState } from 'react'
-import { checkPassword, revalidateAll } from './actions'
+export const dynamic = 'force-dynamic'
 
-export default function AdminPage() {
-  const [password, setPassword] = useState('')
-  const [authed, setAuthed] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [showPassword, setShowPassword] = useState(false)
+export default async function AdminDashboardPage() {
+  // 대시보드에서는 리다이렉트하지 않는다 (승인 대기 안내는 레이아웃이 보여주므로 여기서 /admin 으로 보내면 무한 루프)
+  const user = await getCurrentUser().catch(() => null)
+  if (!isApproved(user)) return null
+  const isMaster = user.is_master
+  const [works, members, users, profile] = await Promise.all([
+    getAdminWorks('updated_at', isMaster ? undefined : user.id),
+    isMaster ? getAdminMembers() : Promise.resolve([]),
+    isMaster ? getAdminUsers() : Promise.resolve([]),
+    user.member_id ? getMember(user.member_id) : Promise.resolve(null),
+  ])
+  const pendingUsers = users.filter((item) => item.status === 'pending')
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const ok = await checkPassword(password)
-    if (ok) {
-      setAuthed(true)
-    } else {
-      alert('비밀번호가 틀렸습니다.')
-    }
-  }
+  const publishedWorks = works.filter((work) => work.published).length
+  const publishedMembers = members.filter((member) => member.published).length
+  const drafts = works.filter((work) => !work.published)
+  const missingThumbnail = works.filter((work) => work.published && !work.thumbnail_url)
 
-  const handleRevalidate = async () => {
-    setStatus('loading')
-    const { ok } = await revalidateAll()
-    setStatus(ok ? 'success' : 'error')
-  }
-
-  if (!authed) {
-    return (
-      <div className='w-full min-h-dvh flex flex-col items-center justify-center gap-4 p-8'>
-        <h1 className='text-2xl font-bold uppercase'>Admin</h1>
-        <form onSubmit={handleAuth} className='flex flex-col gap-3 w-full max-w-xs'>
-          <div className='flex items-center gap-2 relative bg-neutral-800 border border-neutral-700 px-4 py-2 text-white '>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder='Password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className='outline-none bg-transparent w-full'
-            />
-            <button
-              type='button'
-              onClick={() => setShowPassword(!showPassword)}
-              className='text-sm text-neutral-400 hover:text-neutral-200 absolute right-2 top-1/2 -translate-y-1/2'
-            >
-              {showPassword ? (
-                <>
-                  <div className='w-4 h-4 relative'>
-                    <div className='w-full h-0.5 bg-neutral-400 absolute top-1/2 left-0 -translate-y-1/2 rotate-45' />
-                    <div className='w-full h-0.5 bg-neutral-400 absolute top-1/2 left-0 -translate-y-1/2 -rotate-45' />
-                  </div>
-                </>
-              ) : (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-4 w-4'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'
-                  />
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-          <button type='submit' className='bg-white text-black px-4 py-2 font-semibold hover:bg-neutral-200'>
-            Enter
-          </button>
-        </form>
-      </div>
-    )
-  }
+  const stats = isMaster
+    ? [
+        { label: '공개 작품', value: publishedWorks, sub: `전체 ${works.length}`, href: '/admin/works' },
+        { label: '비공개 작품', value: drafts.length, sub: '작성 중', href: '/admin/works?status=draft' },
+        { label: '승인 대기 회원', value: pendingUsers.length, sub: `공개 멤버 ${publishedMembers}`, href: '/admin/users' },
+      ]
+    : [
+        { label: '내 공개 작품', value: publishedWorks, sub: `전체 ${works.length}`, href: '/admin/works' },
+        { label: '내 비공개 작품', value: drafts.length, sub: '작성 중', href: '/admin/works?status=draft' },
+        {
+          label: '내 프로필',
+          value: profile ? (profile.published ? '공개' : '비공개') : '없음',
+          sub: profile ? profile.name : '만들어 주세요',
+          href: '/admin/profile',
+        },
+      ]
 
   return (
-    <div className='w-full min-h-dvh flex flex-col items-center justify-center gap-8 p-8'>
-      <h1 className='text-2xl font-bold uppercase'>Admin</h1>
-      <div className='flex flex-col items-center gap-3'>
-        <p className='text-neutral-400 text-sm'>노션 수정 후 아래 버튼을 눌러 페이지를 즉시 갱신하세요.</p>
-        <button
-          onClick={handleRevalidate}
-          disabled={status === 'loading'}
-          className='bg-white text-black px-6 py-3 font-semibold hover:bg-neutral-200 disabled:opacity-50'
-        >
-          {status === 'loading' ? 'Revalidating...' : 'Revalidate'}
-        </button>
-        {status === 'success' && <p className='text-green-400 text-sm'>완료! 페이지가 갱신되었습니다.</p>}
-        {status === 'error' && <p className='text-red-400 text-sm'>오류가 발생했습니다. 다시 시도해주세요.</p>}
+    <div className='flex flex-col gap-3'>
+      <PageHeader
+        title={`안녕하세요, ${user.name}님`}
+        description={isMaster ? '오픈소스랩 웹사이트의 작품과 멤버를 관리합니다.' : '내 프로필과 작품을 관리합니다.'}
+        actions={
+          <form action={createWorkAction}>
+            <button className='btn btn-primary'>+ 새 작품</button>
+          </form>
+        }
+      />
+
+      {/* 현황 */}
+      <div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
+        {stats.map((stat) => (
+          <Link
+            key={stat.label}
+            href={stat.href}
+            className='group flex flex-col justify-between gap-8 rounded-xl bg-surface p-5 transition-colors hover:bg-ink hover:text-white'
+          >
+            <span className='flex items-center justify-between text-sm text-mute group-hover:text-white/60'>
+              {stat.label}
+              <Arrow className='size-4' />
+            </span>
+            <span className='flex items-baseline gap-2'>
+              <span className='text-5xl font-medium tracking-[-0.04em]'>{stat.value}</span>
+              <span className='text-xs text-mute group-hover:text-white/60'>{stat.sub}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      <div className='grid grid-cols-1 gap-3 lg:grid-cols-3'>
+        {/* 최근 수정 */}
+        <Panel title={isMaster ? '최근 수정한 작품' : '최근 수정한 내 작품'} className='lg:col-span-2'>
+          <ul className='-mx-2 flex flex-col'>
+            {works.slice(0, 6).map((work) => (
+              <li key={work.id}>
+                <Link
+                  href={`/admin/works/${work.id}`}
+                  className='flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-field'
+                >
+                  <span className='h-9 w-12 shrink-0 overflow-hidden rounded-md bg-field'>
+                    {work.thumbnail_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={work.thumbnail_url} alt='' className='size-full object-cover' />
+                    )}
+                  </span>
+                  <span className='min-w-0 flex-1 truncate text-sm'>{work.title}</span>
+                  {!work.published && <span className='text-xs text-mute'>비공개</span>}
+                  <RelativeTime iso={work.updated_at} />
+                </Link>
+              </li>
+            ))}
+            {works.length === 0 && (
+              <li className='px-2 py-6 text-sm text-mute'>아직 작품이 없습니다. 오른쪽 위 &apos;새 작품&apos;으로 시작해 보세요.</li>
+            )}
+          </ul>
+        </Panel>
+
+        <div className='flex flex-col gap-3'>
+          {isMaster && pendingUsers.length > 0 && (
+            <Panel title='가입 승인 대기'>
+              <ul className='-mx-2 flex flex-col text-sm'>
+                {pendingUsers.slice(0, 5).map((item) => (
+                  <li key={item.id}>
+                    <Link href='/admin/users' className='flex justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-field'>
+                      <span className='truncate'>{item.name}</span>
+                      <span className='shrink-0 text-xs text-mute'>@{item.username}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          )}
+
+          {/* 확인이 필요한 항목 */}
+          <Panel title='확인이 필요해요'>
+            {!profile && (
+              <Link href='/admin/profile' className='-mx-2 flex justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-field'>
+                <span>내 멤버 프로필</span>
+                <span className='text-xs text-danger'>아직 없음</span>
+              </Link>
+            )}
+            {drafts.length === 0 && missingThumbnail.length === 0 ? (
+              <p className='text-sm'>모두 정리되어 있어요.</p>
+            ) : (
+              <ul className='-mx-2 flex flex-col text-sm'>
+                {missingThumbnail.map((work) => (
+                  <li key={work.id}>
+                    <Link href={`/admin/works/${work.id}`} className='flex justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-field'>
+                      <span className='truncate'>{work.title}</span>
+                      <span className='shrink-0 text-xs text-danger'>썸네일 없음</span>
+                    </Link>
+                  </li>
+                ))}
+                {drafts.slice(0, 5).map((work) => (
+                  <li key={work.id}>
+                    <Link href={`/admin/works/${work.id}`} className='flex justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-field'>
+                      <span className='truncate'>{work.title}</span>
+                      <span className='shrink-0 text-xs text-mute'>비공개</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          <Panel title='사이트'>
+            <DashboardActions />
+          </Panel>
+        </div>
       </div>
     </div>
   )

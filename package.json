@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@motionone/utils": "^10.18.0"
+  }
+}

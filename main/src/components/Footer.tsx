@@ -1,51 +1,80 @@
-const CODE = `# Delicious Source ^^* - Discovery Creative Extension
-오소랩 = "괴짜 창의력 폭발!"
-핵심가치 = ["Discovery", "Creativity", "Extension"]
-for 가치 in 핵심가치: print(f"{가치} - 오소랩 모드 ON!")
-print("Delicious Source^^*")
-print("오소랩 방향: 창의력 무한 확장!")`
+'use client'
 
-const CONTACTS = [
-  { label: '@opensource_lab', href: 'https://www.instagram.com/opensource_lab/' },
-  { label: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' },
+import Link from 'next/link'
+
+const COLUMNS = [
+  {
+    title: 'Menu',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'Members', href: '/members' },
+      { label: 'Works', href: '/work' },
+      { label: 'Lab Space', href: '/lab-space' },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    title: 'Contact',
+    links: [{ label: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' }],
+  },
+  {
+    title: 'Social',
+    links: [{ label: 'Instagram', href: 'https://www.instagram.com/opensource_lab/', external: true }],
+  },
+  {
+    title: 'Members only',
+    links: [
+      { label: 'Login', href: '/login' },
+      { label: 'Join', href: '/join' },
+    ],
+  },
 ]
 
 export const Footer = () => {
   return (
-    <footer className='h-fit w-full uppercase bg-white p-4 text-black md:p-8'>
-      {/* 코드 텍스트 */}
-      <div className='mb-6 font-mono'>
-        <p className='mb-3 text-xs text-neutral-600'>$ python delicious_source.py</p>
-        <div className='whitespace-pre-wrap text-xs text-neutral-400'>
-          {CODE}
-          <span className='cursor-blink inline-block text-neutral-400'>▊</span>
+    <footer className='flex w-full flex-col gap-24 bg-ink px-4 pt-16 pb-20 text-white md:gap-40 md:px-8 md:pt-20 md:pb-24'>
+      <div className='grid grid-cols-2 gap-x-4 gap-y-10 text-sm md:grid-cols-12 md:gap-x-8'>
+        <div className='col-span-2 flex flex-col justify-between gap-6 md:col-span-4'>
+          <p className='max-w-xs break-keep leading-snug text-white/50'>
+            Interactive media art crew
+            <br />
+            since 2018.
+          </p>
+          <p className='text-white/40'>© {new Date().getFullYear()} OSL</p>
         </div>
+        {COLUMNS.map((column) => (
+          <div key={column.title} className='flex flex-col gap-3 md:col-span-2'>
+            <span className='text-white/40'>{column.title}</span>
+            <ul className='flex flex-col gap-1'>
+              {column.links.map((link) => (
+                <li key={link.label}>
+                  {'external' in link || link.href.startsWith('mailto:') ? (
+                    <a
+                      href={link.href}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='transition-colors hover:text-white/50'
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className='transition-colors hover:text-white/50'>
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {/* 하단 정보 */}
-      <div className='flex flex-col items-start justify-between gap-6 md:flex-row md:items-end'>
-        {/* 연락처 */}
-        <div className='flex flex-col gap-1.5 font-mono'>
-          {CONTACTS.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-xs text-neutral-500 transition-colors hover:text-white'
-            >
-              <span className='mr-1 text-neutral-600'>&gt;</span>
-              {item.label}
-            </a>
-          ))}
-        </div>
-
-        {/* 저작권 + 로고 */}
-        <div className='flex flex-col items-start gap-2 md:items-end'>
-          <span className='text-2xl leading-none'>●▲☰</span>
-          <p className='text-xs text-neutral-600'>© {new Date().getFullYear()} Open Source Lab. All rights reserved.</p>
-        </div>
-      </div>
+      <p
+        aria-hidden
+        className='select-none whitespace-nowrap text-[13.2vw] font-semibold leading-[0.8] tracking-[-0.05em]'
+      >
+        Open Source Lab
+      </p>
     </footer>
   )
 }

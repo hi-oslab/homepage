@@ -1,15 +1,15 @@
 import type { MetadataRoute } from 'next'
-import { getParsedDataByTableType } from '@/app/api/notion'
+import { getPublishedWorks } from '@/lib/cms'
 
 const BASE_URL = 'https://hioslab.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const works = await getParsedDataByTableType('works')
+  const works = await getPublishedWorks()
 
   const workUrls: MetadataRoute.Sitemap = works.map((work) => ({
-    url: `${BASE_URL}/work/${work.properties.slug}`,
-    lastModified: work.properties.lastEditedTime
-      ? new Date(work.properties.lastEditedTime)
+    url: `${BASE_URL}/work/${work.slug}`,
+    lastModified: work.updated_at
+      ? new Date(work.updated_at)
       : new Date(),
     changeFrequency: 'monthly',
     priority: 0.7,
@@ -24,6 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${BASE_URL}/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/members`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,

@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin/', '/api/'],
+      disallow: ['/admin/', '/admin-reset/', '/api/'],
     },
     sitemap: 'https://hioslab.com/sitemap.xml',
   }

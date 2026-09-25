@@ -1,14 +1,5 @@
-import { ConsoleLoading } from '@/components'
+import { TerminalLoader } from '@/components/TerminalLoader'
 
 export default function Loading() {
-  return (
-    <ConsoleLoading
-      lines={[
-        '> initializing work page...',
-        '> connecting to open source lab...',
-        '> fetching projects...',
-        '> rendering...',
-      ]}
-    />
-  )
+  return <TerminalLoader />
 }

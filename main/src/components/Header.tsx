@@ -1,18 +1,28 @@
 'use client'
-import React, { useEffect } from 'react'
-import { useState, useCallback } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+
+import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
+import { MainMotionTitle } from './MainMotionTitle'
+import classNames from 'classnames'
+import { RandomizedTextEffect } from './RandomizedTextEffect'
+import { ImageTitle } from './ImageTitle'
+import { IoMailOutline, IoMenu } from 'react-icons/io5'
+import { NotchMenu } from './NotchMenu'
 
 export const Header = () => {
   const router = useRouter()
   const pathname = usePathname()
-
   const [isMobileOpen, setMobileOpen] = useState(false)
 
-  const toggleMobile = useCallback(() => setMobileOpen((prev) => !prev), [])
+  const toggleMobile = useCallback(() => setMobileOpen((previous) => !previous), [])
+
   useEffect(() => {
     document.body.style.overflow = isMobileOpen ? 'hidden' : 'auto'
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
   }, [isMobileOpen])
 
   const goHome = () => {
@@ -20,127 +30,94 @@ export const Header = () => {
     router.push('/')
   }
 
-  const navItems = [
-    { name: 'About', path: '/about' },
-    { name: 'Work', path: '/work' },
-    { name: 'Lab Space', path: '/lab-space' },
-    { name: 'Contact', path: '/contact' },
-  ]
-
   return (
     <>
-      <header className='sticky top-0 w-full h-14 uppercase text-white mix-blend-difference px-4 md:px-8 py-4 md:py-8 flex flex-row justify-between items-center z-10'>
-        <div className='w-fit h-fit flex flex-row gap-16 items-center justify-start'>
-          <div className='cursor-pointer hover:text-gray-500' onClick={goHome}>
-            {/* <Logo className='h-4 md:h-6 w-auto' /> */}
-            Open Source Lab
-          </div>
-        </div>
-        <nav className='ml-auto hidden md:block'>
-          <ul className='flex flex-row gap-12'>
-            {navItems.map((item) => (
-              <li key={item.name}>
-                <a
-                  href={item.path}
-                  className={`hover:text-gray-500 transition-all duration-300 ease-in-out ${pathname === item.path ? '' : ''}`}
-                >
-                  {item.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        {/* 
-        <div className='hidden md:flex w-fit h-fit flex-row gap-6 items-center justify-end'>
-        <a
-            href='https://www.instagram.com/opensource_lab/'
-            className='text-lg uppercase hover:text-gray-500 transition-all duration-300 ease-in-out'
-          >
-            Instagram
-          </a>
-        </div> 
-        */}
-        <motion.button
-          className='block md:hidden'
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-          onClick={toggleMobile}
-        >
-          <motion.svg
-            animate={{ rotate: isMobileOpen ? 90 : 0 }}
+      <NotchMenu />
+      {/* <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{ width: 'auto' }}
+        className={classNames(
+          'fixed left-1/2 bottom-0 z-40 h-fit -translate-x-1/2',
+          'rounded-t-2xl bg-black shadow-xl',
+          'px-4 py-2 text-base font-mono text-white md:px-6',
+          'flex flex-col items-center gap-1.5',
+        )}
+      >
+        <div className='flex w-full flex-row items-center justify-between gap-6 md:gap-12'>
+          <nav className='hidden flex-1 flex-row items-center justify-between gap-4 md:flex'>
+            <div className={classNames('cursor-pointer text-2xl')}>About</div>
+          </nav>
+          <nav className='hidden flex-1 flex-row items-center justify-between gap-4 md:flex'>
+            <div className={classNames('cursor-pointer text-2xl')}>Members</div>
+          </nav>
+          <nav className='hidden flex-1 flex-row items-center justify-between gap-4 md:flex'>
+            <div className={classNames('cursor-pointer text-2xl')}>Works</div>
+          </nav>
+          <nav className='hidden flex-1 flex-row items-center justify-between gap-4 md:flex'>
+            <div className={classNames('cursor-pointer text-2xl')}>Contact</div>
+          </nav>
+
+          <motion.button
+            type='button'
+            aria-label={isMobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+            className='block md:hidden'
+            whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className='w-6 h-6'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
+            onClick={toggleMobile}
           >
-            {isMobileOpen ? (
-              <motion.path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={1.5}
-                d='M6 18L18 6M6 6l12 12'
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-            ) : (
-              <motion.path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={1.5}
-                d='M4 6h16M4 12h16M4 18h16'
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-            )}
-          </motion.svg>
-        </motion.button>
-      </header>
-      <AnimatePresence>
-        {isMobileOpen && (
-          <>
-            <motion.nav
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className='fixed inset-0 w-full z-10 h-dvh flex flex-col justify-start bg-white'
+            <motion.svg
+              animate={{ rotate: isMobileOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+              className='size-8'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
             >
-              <div className='w-full h-14 flex flex-row justify-between items-center px-4 text-black'>
-                <div className='cursor-pointer' onClick={goHome}>
-                  Open Source Lab
-                </div>
-                <motion.button
-                  className='block'
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={toggleMobile}
-                >
-                  <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M6 18L18 6M6 6l12 12' />
-                  </svg>
-                </motion.button>
-              </div>
-              {navItems.map((item, idx) => (
-                <div
+              <motion.path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={1.5}
+                d={isMobileOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.2 }}
+              />
+            </motion.svg>
+          </motion.button>
+        </div>
+        <AnimatePresence>
+          {isMobileOpen && (
+            <motion.nav
+              initial={{ height: 0 }}
+              animate={{ height: `calc(100dvh - 4rem)` }}
+              exit={{ height: 0 }}
+              transition={{ duration: 0.5 }}
+              className='z-10 flex w-full col-span-full flex-col justify-start'
+            >
+              {[
+                { name: 'ABOUT', path: '/about' },
+                { name: 'MEMBERS', path: '/members' },
+              ].map((item) => (
+                <button
+                  type='button'
                   key={item.name}
-                  className='px-4 py-4 w-full h-fit text-sm flex flex-row justify-between items-center active:opacity-70 transition-all cursor-pointer'
+                  className={classNames('flex h-fit w-full cursor-pointer flex-row items-center justify-between')}
                   onClick={() => {
                     router.push(item.path)
                     setMobileOpen(false)
                   }}
                 >
-                  <span className={`text-black ${pathname === item.path ? 'underline underline-offset-4' : ''}`}>
-                    {item.name}
-                  </span>
-                </div>
+                  <div className={classNames('px-1', pathname === item.path ? 'bg-black text-white' : '')}>
+                    <RandomizedTextEffect text={item.name} />
+                  </div>
+                </button>
               ))}
             </motion.nav>
-          </>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </motion.header> */}
     </>
   )
 }

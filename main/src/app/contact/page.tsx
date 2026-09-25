@@ -1,21 +1,23 @@
 'use client'
 
-import { InView } from '@/components'
-import { useRef, useState } from 'react'
+import { Arrow, InView } from '@/components'
+import { useState } from 'react'
 
 const CONTACTS = [
-  { key: 'instagram', value: '@opensource_lab', href: 'https://www.instagram.com/opensource_lab/' },
-  { key: 'email', value: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' },
+  { label: 'Email', value: 'hi.oslab@gmail.com', href: 'mailto:hi.oslab@gmail.com' },
+  { label: 'Instagram', value: '@opensource_lab', href: 'https://www.instagram.com/opensource_lab/' },
 ]
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
+
+const inputClassName =
+  'w-full rounded-md bg-tile px-4 py-3 text-base text-ink outline-none transition-colors placeholder:text-ink/30 focus:bg-[#e2e2de] disabled:opacity-50'
 
 export default function Contact() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<Status>('idle')
-  const nameRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
@@ -32,111 +34,97 @@ export default function Contact() {
   }
 
   return (
-    <InView className='flex h-[calc(100dvh-128px)] items-center justify-center px-4 md:px-8'>
-      <div className='w-full max-w-xl border border-neutral-800 font-mono'>
-        {/* 타이틀바 */}
-        <div className='flex items-center gap-2 border-b border-neutral-800 bg-neutral-950 px-4 py-2'>
-          <span className='text-xs text-neutral-600'>●</span>
-          <span className='text-xs text-neutral-600'>●</span>
-          <span className='text-xs text-neutral-600'>●</span>
-          <span className='ml-3 text-xs tracking-widest text-neutral-600'>OSL TERMINAL</span>
-          <span className='ml-auto text-xs text-neutral-700'>contact --list</span>
+    <div className='flex w-full flex-col px-4 md:px-8'>
+      <InView className='grid grid-cols-1 gap-16 pt-6 pb-32 md:grid-cols-12 md:gap-8 md:pt-8 md:pb-48'>
+        {/* 좌측: 큰 문장 */}
+        <div className='flex flex-col gap-8 md:col-span-6'>
+          <span className='text-sm'>Contact</span>
+          <h1 className='max-w-[12ch] break-keep text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
+            함께 만들고 싶은 이야기가 있다면.
+          </h1>
         </div>
 
-        {/* 터미널 본문 */}
-        <div className='space-y-1 p-6'>
-          {/* contact --list */}
-          <p className='text-sm text-white'>
-            &gt; contact --list &nbsp;<span className='text-neutral-600'># 연락처</span>
-          </p>
-          <p className='text-xs text-neutral-500'>resolving contact info...</p>
-          <div className='h-3' />
-          {CONTACTS.map((contact) => (
-            <a
-              key={contact.key}
-              href={contact.href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='block text-sm text-neutral-300 transition-colors hover:text-white'
-            >
-              <span className='mr-2 text-neutral-600'>$</span>
-              <span className='mr-2 text-neutral-500'>{contact.key.padEnd(10)}</span>
-              <span className='mr-2 text-neutral-400'>→</span>
-              <span className='hover:underline'>{contact.value}</span>
-            </a>
-          ))}
-          <div className='h-3' />
-          <p className='text-xs text-neutral-600'>
-            done. <span className='cursor-blink inline-block text-neutral-400'>▊</span>
-          </p>
+        {/* 우측: 연락처 + 폼 */}
+        <div className='flex flex-col gap-16 md:col-span-6 md:gap-20 md:pt-13'>
+          <div className='flex flex-col gap-6'>
+            {CONTACTS.map((contact) => (
+              <Row key={contact.label} label={contact.label}>
+                <a
+                  href={contact.href}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='group inline-flex items-center gap-1 text-base transition-colors hover:text-mute'
+                >
+                  {contact.value}
+                  <Arrow className='size-4' />
+                </a>
+              </Row>
+            ))}
+          </div>
 
-          {/* send --mail */}
-          <div className='pt-2'>
-            <p className='mb-4 text-sm text-white'>
-              &gt; send --mail &nbsp;<span className='text-neutral-600'># 메일 보내기</span>
-            </p>
+          <Row label='Message'>
             {status === 'sent' ? (
-              <p className='text-xs text-neutral-400'>
-                <span className='text-neutral-600'>$</span> 메시지가 전송되었습니다. 곧 연락드릴게요. ✓
-              </p>
+              <div className='flex flex-col gap-2 rounded-md bg-ink p-6 text-white'>
+                <span className='text-2xl font-medium tracking-[-0.03em]'>Thank you.</span>
+                <span className='text-sm text-white/60'>메시지가 전송되었습니다. 곧 연락드릴게요.</span>
+              </div>
             ) : (
-              <form onSubmit={handleSubmit} className='space-y-2'>
-                <label className='flex items-center gap-2 text-sm'>
-                  <span className='w-20 shrink-0 text-neutral-500'>[name]</span>
+              <form onSubmit={handleSubmit} className='flex flex-col gap-2'>
+                <div className='grid grid-cols-1 gap-2 lg:grid-cols-2'>
                   <input
-                    ref={nameRef}
                     type='text'
+                    aria-label='이름'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                     disabled={status === 'sending'}
-                    className='flex-1 border-b border-neutral-700 bg-transparent text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-neutral-500 disabled:opacity-50'
-                    placeholder='이름 / your name'
+                    className={inputClassName}
+                    placeholder='Name'
                   />
-                </label>
-                <label className='flex items-center gap-2 text-sm'>
-                  <span className='w-20 shrink-0 text-neutral-500'>[email]</span>
                   <input
                     type='email'
+                    aria-label='이메일'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={status === 'sending'}
-                    className='flex-1 border-b border-neutral-700 bg-transparent text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-neutral-500 disabled:opacity-50'
-                    placeholder='이메일 / your@email.com'
+                    className={inputClassName}
+                    placeholder='Email'
                   />
-                </label>
-                <label className='flex flex-col gap-2 text-sm'>
-                  <span className='text-neutral-500'>[message]</span>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    required
-                    disabled={status === 'sending'}
-                    rows={3}
-                    className='resize-none border border-neutral-800 bg-transparent p-2 text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-neutral-600 disabled:opacity-50'
-                    placeholder='메시지를 입력하세요 / write your message...'
-                  />
-                </label>
-                {status === 'error' && (
-                  <p className='text-xs text-red-500'>
-                    오류: 전송에 실패했습니다. 다시 시도해주세요. / failed to send. please try again.
-                  </p>
-                )}
-                <div className='flex justify-end pt-1'>
-                  <button
-                    type='submit'
-                    disabled={status === 'sending'}
-                    className='border border-neutral-700 px-4 py-1 text-xs text-neutral-400 transition-colors hover:border-neutral-500 hover:text-white disabled:opacity-50'
-                  >
-                    {status === 'sending' ? 'sending...' : 'send →'}
-                  </button>
                 </div>
+                <textarea
+                  aria-label='메시지'
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  disabled={status === 'sending'}
+                  rows={6}
+                  className={`${inputClassName} resize-none`}
+                  placeholder='프로젝트, 전시, 협업 등 무엇이든 적어주세요.'
+                />
+                {status === 'error' && (
+                  <p className='text-sm text-red-600'>전송에 실패했습니다. 다시 시도해주세요.</p>
+                )}
+                <button
+                  type='submit'
+                  disabled={status === 'sending'}
+                  className='group mt-2 flex items-center justify-between rounded-md bg-ink px-5 py-4 text-base text-white transition-opacity hover:opacity-85 disabled:opacity-50'
+                >
+                  {status === 'sending' ? 'Sending…' : 'Send message'}
+                  <Arrow direction='right' className='size-5' />
+                </button>
               </form>
             )}
-          </div>
+          </Row>
         </div>
-      </div>
-    </InView>
+      </InView>
+    </div>
   )
 }
+
+const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <section className='grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-8'>
+    <h2 className='text-sm text-mute'>{label}</h2>
+    <div className='sm:col-span-2'>{children}</div>
+  </section>
+)

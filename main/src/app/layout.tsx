@@ -1,18 +1,49 @@
 import type { Metadata } from 'next'
 import { METADATA } from './metadata'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
-import localFont from 'next/font/local'
 import '@/styles/globals.css'
 import { Layout } from '@/components'
 
-const pretendard = localFont({
-  src: '../../public/fonts/PretendardVariable.woff2',
-  variable: '--font-pretendard',
-  display: 'swap',
-  weight: '45 920',
-})
+import { monoplex, pretendard } from '@/theme/fonts'
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang='ko'>
+      <head>
+        <link rel='preload' href='/fonts/SawarabiMincho.woff2' as='font' type='font/woff2' crossOrigin='anonymous' />
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Open Source Lab',
+              alternateName: '오픈소스랩',
+              url: 'https://hioslab.com',
+              logo: 'https://hioslab.com/icons/op-image.png',
+              description: METADATA.description,
+              email: 'hi.oslab@gmail.com',
+              foundingDate: '2018',
+              sameAs: ['https://www.instagram.com/opensource_lab/'],
+            }),
+          }}
+        />
+      </head>
+      <body className={`${monoplex.variable} ${pretendard.variable} antialiased`}>
+        <Layout>{children}</Layout>
+      </body>
+      <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+    </html>
+  )
+}
 
 export const metadata: Metadata = {
+  metadataBase: new URL(METADATA.url),
   alternates: {
     canonical: METADATA.url,
   },
@@ -94,42 +125,4 @@ export const metadata: Metadata = {
       color: '#000000',
     },
   },
-}
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang='ko'>
-      <head>
-        <link rel="preload" href="/fonts/D2Coding.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/D2CodingBold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/SawarabiMincho.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Open Source Lab',
-              alternateName: '오픈소스랩',
-              url: 'https://hioslab.com',
-              logo: 'https://hioslab.com/icons/op-image.png',
-              description: METADATA.description,
-              email: 'hi.oslab@gmail.com',
-              foundingDate: '2018',
-              sameAs: ['https://www.instagram.com/opensource_lab/'],
-            }),
-          }}
-        />
-      </head>
-      <body className={`${pretendard.variable} antialiased`}>
-        <Layout>{children}</Layout>
-      </body>
-      <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
-      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-    </html>
-  )
 }
