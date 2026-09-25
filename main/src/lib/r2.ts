@@ -7,6 +7,7 @@ import {
   type _Object,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { mediaKeyFromUrl, mediaUrl } from './media-url'
 
 function env(name: string): string {
   const value = process.env[name]?.trim()
@@ -39,8 +40,15 @@ export async function deleteR2Object(key: string) {
   await client().send(new DeleteObjectCommand({ Bucket: env('R2_BUCKET_NAME'), Key: key }))
 }
 
-export async function getR2Object(key: string) {
-  return client().send(new GetObjectCommand({ Bucket: env('R2_BUCKET_NAME'), Key: key }))
+export async function getR2Object(key: string, options: { range?: string; ifNoneMatch?: string } = {}) {
+  return client().send(
+    new GetObjectCommand({
+      Bucket: env('R2_BUCKET_NAME'),
+      Key: key,
+      Range: options.range,
+      IfNoneMatch: options.ifNoneMatch,
+    }),
+  )
 }
 
 export async function putR2Object(key: string, body: Buffer, contentType: string) {
@@ -69,11 +77,9 @@ export async function listR2Objects(): Promise<_Object[]> {
 }
 
 export function publicR2Url(key: string): string {
-  return `${env('NEXT_PUBLIC_R2_PUBLIC_URL')}/${key}`
+  return mediaUrl(key)
 }
 
 export function keyFromPublicR2Url(url: string): string | null {
-  const base = env('NEXT_PUBLIC_R2_PUBLIC_URL')
-  if (!url.startsWith(`${base}/`)) return null
-  return decodeURIComponent(url.slice(base.length + 1))
+  return mediaKeyFromUrl(url)
 }

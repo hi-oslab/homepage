@@ -1,6 +1,7 @@
 'use client'
 
 import imageCompression from 'browser-image-compression'
+import { mediaKeyFromUrl } from './media-url'
 
 export async function uploadImage(file: File, _bucket = 'project-media', path = 'projects'): Promise<string> {
   const shouldConvert = file.type === 'image/png' || file.type === 'image/jpeg'
@@ -43,6 +44,5 @@ export async function deleteImage(url: string): Promise<void> {
 }
 
 export function isOwnStorageUrl(url: string): boolean {
-  const base = process.env.NEXT_PUBLIC_R2_PUBLIC_URL?.replace(/\/$/, '')
-  return Boolean(base && url.startsWith(`${base}/`))
+  return mediaKeyFromUrl(url) !== null
 }

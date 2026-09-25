@@ -12,7 +12,6 @@ const required = (name) => {
 const apply = process.argv.includes('--apply')
 const supabaseUrl = required('NEXT_PUBLIC_SUPABASE_URL')
 const supabaseKey = required('SUPABASE_SECRET_KEY')
-const publicBase = required('NEXT_PUBLIC_R2_PUBLIC_URL').replace(/\/$/, '')
 const bucket = required('R2_BUCKET_NAME')
 const r2 = new S3Client({
   region: 'auto',
@@ -23,7 +22,16 @@ const r2 = new S3Client({
   },
 })
 const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
-const urlPattern = /https?:\/\/[^\s"'<>\\)]+/g
+// 미디어 주소 → R2 key (src/lib/media-url.ts 와 같은 규칙: /media/<key> 또는 옛 r2.dev 주소)
+const MEDIA_BASE = '/media'
+const legacyBase = process.env.NEXT_PUBLIC_R2_PUBLIC_URL?.trim().replace(/\/$/, '') || null
+const mediaPattern = /https?:\/\/[^\s"'<>\\)]+|\/media\/[^\s"'<>\\)]+/g
+const keyFromUrl = (url) => {
+  for (const base of [MEDIA_BASE, legacyBase]) {
+    if (base && url?.startsWith(`${base}/`)) return decodeURIComponent(url.slice(base.length + 1))
+  }
+  return null
+}
 
 async function loadReferences() {
   const [worksResponse, membersResponse] = await Promise.all([
@@ -33,10 +41,11 @@ async function loadReferences() {
   if (!worksResponse.ok || !membersResponse.ok) throw new Error('Failed to load Supabase media references')
   const works = await worksResponse.json()
   const members = await membersResponse.json()
+  // 사용 중인 R2 key 목록 (옛 r2.dev 주소와 /media 주소 모두)
   return new Set([
-    ...works.flatMap((work) => [work.thumbnail_url, ...(work.content.match(urlPattern) ?? [])]),
+    ...works.flatMap((work) => [work.thumbnail_url, ...(work.content.match(mediaPattern) ?? [])]),
     ...members.map((member) => member.cover_image_url),
-  ].filter(Boolean))
+  ].map(keyFromUrl).filter(Boolean))
 }
 
 async function listObjects() {
@@ -54,7 +63,7 @@ const [references, objects] = await Promise.all([loadReferences(), listObjects()
 const unusedImages = []
 
 for (const object of objects) {
-  if (!object.Key || references.has(`${publicBase}/${object.Key}`)) continue
+  if (!object.Key || references.has(object.Key)) continue
   const metadata = await r2.send(new HeadObjectCommand({ Bucket: bucket, Key: object.Key }))
   if (!metadata.ContentType?.toLowerCase().startsWith('image/')) continue
   unusedImages.push({ key: object.Key, size: object.Size ?? 0, contentType: metadata.ContentType })

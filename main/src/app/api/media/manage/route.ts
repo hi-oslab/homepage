@@ -4,6 +4,7 @@ import sharp from 'sharp'
 import { requireMaster } from '@/lib/admin-auth'
 import { createAdminSupabaseClient } from '@/lib/supabase'
 import { deleteR2Object, getR2Object, listR2Objects, publicR2Url, putR2Object } from '@/lib/r2'
+import { MEDIA_BASE, mediaKeyFromUrl } from '@/lib/media-url'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,6 +14,8 @@ type WorkRow = { id: string; title: string; slug: string; thumbnail_url: string 
 type MemberRow = { id: string; name: string; cover_image_url: string | null }
 
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp'])
+// 본문(JSON) 안의 미디어 주소: 절대 주소(옛 r2.dev) 또는 /media 상대 주소
+const MEDIA_URL_PATTERN = new RegExp(`https?://[^\\s"'<>\\\\)]+|${MEDIA_BASE}/[^\\s"'<>\\\\)]+`, 'g')
 
 function extension(key: string) {
   return key.split('.').pop()?.toLowerCase() ?? ''
@@ -40,17 +43,19 @@ async function loadReferences() {
   if (worksError) throw worksError
   if (membersError) throw membersError
 
+  // 사용처는 R2 key 기준으로 모은다 (옛 r2.dev 주소와 /media 주소를 모두 인식)
   const references = new Map<string, Reference[]>()
   const add = (url: string | null, reference: Reference) => {
-    if (!url) return
-    const current = references.get(url) ?? []
+    const key = url ? mediaKeyFromUrl(url) : null
+    if (!key) return
+    const current = references.get(key) ?? []
     current.push(reference)
-    references.set(url, current)
+    references.set(key, current)
   }
 
   for (const work of (works ?? []) as WorkRow[]) {
     add(work.thumbnail_url, { kind: 'work', id: work.id, title: work.title, source: '썸네일' })
-    for (const match of Array.from(work.content.matchAll(/https?:\/\/[^\s"'<>\\)]+/g))) {
+    for (const match of Array.from(work.content.matchAll(MEDIA_URL_PATTERN))) {
       add(match[0], { kind: 'work', id: work.id, title: work.title, source: '본문' })
     }
   }
@@ -76,7 +81,7 @@ export async function GET() {
           lastModified: object.LastModified?.toISOString() ?? null,
           mimeType: mimeFromKey(key),
           optimizable: IMAGE_EXTENSIONS.has(extension(key)),
-          references: references.get(url) ?? [],
+          references: references.get(key) ?? [],
         }
       })
       .sort((a, b) => b.size - a.size)
@@ -87,20 +92,26 @@ export async function GET() {
   }
 }
 
-async function replaceReferences(oldUrl: string, newUrl: string, works: WorkRow[], members: MemberRow[]) {
+/** oldKey를 가리키는 모든 주소(옛 r2.dev 형식 포함)를 newUrl로 바꾼다 */
+async function replaceReferences(oldKey: string, newUrl: string, works: WorkRow[], members: MemberRow[]) {
   const supabase = createAdminSupabaseClient()
+  const isOld = (url: string | null) => Boolean(url) && mediaKeyFromUrl(url!) === oldKey
+  const replaceInContent = (content: string) =>
+    content.replace(MEDIA_URL_PATTERN, (url) => (mediaKeyFromUrl(url) === oldKey ? newUrl : url))
+
   for (const work of works) {
-    const thumbnailChanged = work.thumbnail_url === oldUrl
-    const contentChanged = work.content.includes(oldUrl)
+    const thumbnailChanged = isOld(work.thumbnail_url)
+    const nextContent = replaceInContent(work.content)
+    const contentChanged = nextContent !== work.content
     if (!thumbnailChanged && !contentChanged) continue
     const { error } = await supabase.from('works').update({
       ...(thumbnailChanged ? { thumbnail_url: newUrl } : {}),
-      ...(contentChanged ? { content: work.content.replaceAll(oldUrl, newUrl) } : {}),
+      ...(contentChanged ? { content: nextContent } : {}),
     }).eq('id', work.id)
     if (error) throw error
   }
   for (const member of members) {
-    if (member.cover_image_url !== oldUrl) continue
+    if (!isOld(member.cover_image_url)) continue
     const { error } = await supabase.from('members').update({ cover_image_url: newUrl }).eq('id', member.id)
     if (error) throw error
   }
@@ -114,9 +125,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: '최적화할 수 없는 파일입니다.' }, { status: 400 })
     }
 
-    const oldUrl = publicR2Url(key)
     const [{ works, members, references }, object] = await Promise.all([loadReferences(), getR2Object(key)])
-    const usage = references.get(oldUrl) ?? []
+    const usage = references.get(key) ?? []
     if (usage.length === 0) {
       return NextResponse.json({ message: '사용 중인 이미지가 아니므로 최적화하지 않았습니다.' }, { status: 409 })
     }
@@ -144,7 +154,7 @@ export async function POST(request: NextRequest) {
     const newUrl = publicR2Url(newKey)
     await putR2Object(newKey, optimized, 'image/webp')
     try {
-      await replaceReferences(oldUrl, newUrl, works, members)
+      await replaceReferences(key, newUrl, works, members)
     } catch (error) {
       await deleteR2Object(newKey).catch(() => undefined)
       throw error

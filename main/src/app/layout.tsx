@@ -43,7 +43,8 @@ export default function RootLayout({
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(METADATA.url),
+  // OG 이미지 등 상대 주소(/media/…)의 기준 도메인. beta 배포에서는 NEXT_PUBLIC_SITE_URL=https://beta.hioslab.com
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || METADATA.url),
   alternates: {
     canonical: METADATA.url,
   },
