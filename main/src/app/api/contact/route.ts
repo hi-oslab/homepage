@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { CONTACT_FROM, CONTACT_TO } from '@/lib/contact'
 import { NextRequest, NextResponse } from 'next/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -11,8 +12,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { error } = await resend.emails.send({
-    from: 'OSL Contact <onboarding@resend.dev>',
-    to: 'hi.oslab@gmail.com',
+    from: CONTACT_FROM,
+    to: CONTACT_TO,
     subject: `[OSL] New message from ${name}`,
     replyTo: email,
     html: `

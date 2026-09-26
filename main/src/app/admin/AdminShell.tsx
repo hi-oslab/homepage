@@ -11,6 +11,7 @@ import {
   GoHome,
   GoLinkExternal,
   GoPeople,
+  GoPulse,
   GoPerson,
   GoShieldCheck,
   GoSignOut,
@@ -32,6 +33,7 @@ const NAV = [
   { label: '연혁', href: '/admin/history', icon: GoHistory, master: true },
   { label: '회원 관리', href: '/admin/users', icon: GoShieldCheck, master: true, badge: 'pending' as const },
   { label: '미디어', href: '/admin/media', icon: GoFileMedia, master: true },
+  { label: '시스템 상태', href: '/admin/system', icon: GoPulse, master: true },
 ]
 
 export function AdminShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
