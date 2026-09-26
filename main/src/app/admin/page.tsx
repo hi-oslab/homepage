@@ -5,6 +5,8 @@ import { PageHeader, Panel } from '@/components/admin/ui'
 import { Arrow } from '@/components/Typography'
 import { createWorkAction } from './works/actions'
 import { DashboardActions, RelativeTime } from './DashboardActions'
+import { CommunityBoard } from './CommunityBoard'
+import { getCommunityFeed } from '@/lib/community'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,11 +15,12 @@ export default async function AdminDashboardPage() {
   const user = await getCurrentUser().catch(() => null)
   if (!isApproved(user)) return null
   const isMaster = user.is_master
-  const [works, members, users, profile] = await Promise.all([
+  const [works, members, users, profile, posts] = await Promise.all([
     getAdminWorks('updated_at', isMaster ? undefined : user.id),
     isMaster ? getAdminMembers() : Promise.resolve([]),
     isMaster ? getAdminUsers() : Promise.resolve([]),
     user.member_id ? getMember(user.member_id) : Promise.resolve(null),
+    getCommunityFeed(),
   ])
   const pendingUsers = users.filter((item) => item.status === 'pending')
 
@@ -74,6 +77,9 @@ export default async function AdminDashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* 커뮤니티 */}
+      <CommunityBoard initialPosts={posts} me={{ id: user.id, isMaster }} />
 
       <div className='grid grid-cols-1 gap-3 lg:grid-cols-3'>
         {/* 최근 수정 */}
