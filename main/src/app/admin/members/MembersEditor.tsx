@@ -141,7 +141,7 @@ export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) 
         {/* 편집 */}
         {selected && draft ? (
           <div className='flex min-w-0 flex-col gap-3'>
-            <div className='sticky top-7 z-10 -mx-1 flex items-center justify-between gap-3 bg-paper px-1 py-2'>
+            <div className='sticky top-header z-10 -mx-1 flex items-center justify-between gap-3 bg-paper px-1 py-2'>
               <span className='truncate text-2xl font-medium tracking-[-0.03em]'>{draft.name || '이름 없음'}</span>
               <div className='flex shrink-0 items-center gap-2'>
                 {dirty && <span className='hidden text-xs text-mute sm:inline'>저장 안 된 변경</span>}

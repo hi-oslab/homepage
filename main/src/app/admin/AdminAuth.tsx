@@ -29,7 +29,7 @@ export const AuthScreen = ({
   label?: string
   children: React.ReactNode
 }) => (
-  <main className='admin flex min-h-[calc(100dvh-1.75rem)] w-full flex-col justify-between gap-16 px-4 pt-6 pb-10 md:px-8 md:pt-8'>
+  <main className='admin flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col justify-between gap-16 px-4 pt-6 pb-10 md:px-8 md:pt-8'>
     <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
       <span className='md:col-span-4'>{label}</span>
       <span className='text-mute md:col-span-4'>Open Source Lab</span>

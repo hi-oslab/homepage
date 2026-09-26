@@ -107,7 +107,7 @@ export const Location = ({ className }: LocationProps) => {
             key={level}
             className={classNames(
               'hidden w-0.5 rounded-sm transition-colors duration-300 md:block',
-              level <= getSignalLevel(4) ? 'bg-white' : 'bg-white/30',
+              level <= getSignalLevel(4) ? 'bg-ink' : 'bg-ink/10',
             )}
             style={{ height: `${level * 2}px` }}
           />
@@ -117,7 +117,7 @@ export const Location = ({ className }: LocationProps) => {
             key={level}
             className={classNames(
               'w-0.5 rounded-sm transition-colors duration-300 md:hidden',
-              level <= getSignalLevel(3) ? 'bg-white' : 'bg-white/30',
+              level <= getSignalLevel(3) ? 'bg-ink' : 'bg-ink/10',
             )}
             style={{ height: `${level * 2}px` }}
           />

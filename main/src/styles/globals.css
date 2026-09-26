@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
+  /* 상단 헤더(아일랜드) 높이: pt-header, top-header, calc(…var(--spacing-header)) */
+  --spacing-header: 3.25rem;
   /* Custom font sizes (xxxs/xxs not in v4 defaults) */
   --text-xxxs: 0.6rem;
   /* 10px */

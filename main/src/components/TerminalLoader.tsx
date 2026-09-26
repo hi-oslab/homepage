@@ -18,12 +18,12 @@ const SCRIPTS: Record<string, LoadingScript> = {
   about: {
     title: 'About',
     command: 'osl about --history',
-    lines: ['reading lab manifesto', 'collecting history since 2018', 'counting crew members', 'ready'],
+    lines: ['reading lab manifesto', 'collecting history since 2018', 'counting collective members', 'ready'],
   },
   members: {
     title: 'Members',
-    command: 'osl crew --all',
-    lines: ['opening crew database', 'requesting member profiles', 'mapping creative fields', 'all members online'],
+    command: 'osl members --all',
+    lines: ['opening member database', 'requesting member profiles', 'mapping creative fields', 'all members online'],
   },
   works: {
     title: 'Works',
@@ -67,7 +67,7 @@ const SCRIPTS: Record<string, LoadingScript> = {
   },
   adminMembers: {
     title: 'Admin / Members',
-    command: 'osl admin crew',
+    command: 'osl admin members',
     lines: ['verifying session', 'fetching member profiles', 'ready'],
   },
   adminUsers: {
@@ -296,7 +296,7 @@ export function TerminalLoader({
     <div
       role='status'
       aria-live='polite'
-      className='fixed inset-x-0 top-7 bottom-0 z-40 flex animate-[loader-in_0.3s_ease-out_0.15s_both] flex-col justify-between bg-paper px-4 pt-6 pb-10 md:px-8 md:pt-8 md:pb-12'
+      className='fixed inset-x-0 top-header bottom-0 z-40 flex animate-[loader-in_0.3s_ease-out_0.15s_both] flex-col justify-between bg-paper px-4 pt-6 pb-10 md:px-8 md:pt-8 md:pb-12'
     >
       <span className='sr-only'>{script.title} 불러오는 중</span>
       <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>

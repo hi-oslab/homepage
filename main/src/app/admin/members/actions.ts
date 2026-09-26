@@ -10,7 +10,7 @@ type MemberInput = Partial<Omit<Member, 'id' | 'created_at' | 'updated_at' | 'di
 // 멤버 정보가 노출되는 공개 페이지들
 function revalidateMemberPages() {
   revalidatePath('/members')
-  revalidatePath('/about')
+  revalidatePath('/')
   revalidatePath('/admin', 'layout')
 }
 

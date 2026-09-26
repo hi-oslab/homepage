@@ -18,6 +18,10 @@ const nextConfig = {
   // },
   reactStrictMode: true, // Recommended for the `pages` directory, default in `app`.
   images: {},
+  // About 내용은 메인(/)으로 합쳤다. 예전 주소는 페이지를 그리기 전에 영구 이동(308)
+  async redirects() {
+    return [{ source: '/about', destination: '/', permanent: true }]
+  },
   webpack(config, { isServer }) {
     if (!isServer) {
       // We're in the browser build, so we can safely exclude the sharp module

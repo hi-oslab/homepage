@@ -8,7 +8,8 @@
  * @example
  * return (
  *    <Layout>
- *      <Header />
+ *      <ScrollReset />
+      <Header />
  *      <Component />
  *      <Footer />
  *    </Layout>
@@ -17,11 +18,10 @@
 
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { ComputerStatusBar } from './ComputerStatusBar'
 import classNames from 'classnames'
 
 interface LayoutProps {
@@ -31,17 +31,43 @@ interface LayoutProps {
 export const Layout = (props: LayoutProps) => {
   const { children } = props
   const pathname = usePathname()
-  // 어드민은 자체 사이드바를 쓰므로 노치 메뉴와 푸터를 숨긴다
+  // 어드민은 자체 사이드바를 쓰므로 푸터를 숨긴다
   const isAdmin = pathname.startsWith('/admin')
-  // 로그인/가입 화면은 폼이 하단에 있어 노치 메뉴만 숨긴다
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/join')
 
   return (
     <div className={classNames('w-screen h-fit')}>
-      <ComputerStatusBar />
-      {!isAdmin && !isAuth && <Header />}
-      <div className='w-full min-h-dvh h-fit bg-paper pt-7'>{children}</div>
+      <ScrollReset />
+      <Header />
+      <div className='w-full min-h-dvh h-fit bg-paper pt-header'>{children}</div>
       {!isAdmin && <Footer />}
     </div>
   )
+}
+
+/**
+ * 새 페이지로 이동하면 맨 위에서 시작한다.
+ * (Next 기본 동작은 로딩 화면·고정 헤더 때문에 이전 스크롤 위치가 남는 경우가 있다)
+ * 뒤로/앞으로 가기는 브라우저가 원래 위치를 복원하도록 건드리지 않는다.
+ */
+const ScrollReset = () => {
+  const pathname = usePathname()
+  const fromHistory = useRef(false)
+
+  useEffect(() => {
+    const onPopState = () => {
+      fromHistory.current = true
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  useEffect(() => {
+    if (fromHistory.current) {
+      fromHistory.current = false
+      return
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
+
+  return null
 }

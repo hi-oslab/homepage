@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { OG_IMAGE } from '@/app/metadata'
 import { getPublishedMembers } from '@/lib/cms'
-import { InView, Label } from '@/components'
-import { MemberCard } from './components'
+import { InView } from '@/components'
+import { MemberVoronoi } from './components/MemberVoronoi'
 
 export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
 
@@ -23,7 +23,7 @@ export default async function Page() {
 
   return (
     <div className='flex w-full flex-col px-4 md:px-8'>
-      <InView className='flex min-h-[60dvh] flex-col justify-between gap-16 pt-6 pb-16 md:pt-8 md:pb-24'>
+      <InView className='flex min-h-[40dvh] flex-col justify-between gap-12 pt-6 pb-4 md:pt-8'>
         <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
           <span className='md:col-span-4'>Members</span>
           <span className='text-mute md:col-span-4'>We are OSL creators</span>
@@ -41,14 +41,11 @@ export default async function Page() {
         </div>
       </InView>
 
-      <InView className='flex flex-col gap-8 pb-32 md:pb-48'>
-        <Label index='01'>People</Label>
-        <div className='grid grid-cols-2 gap-x-4 gap-y-14 sm:grid-cols-2 md:gap-x-8 lg:grid-cols-4'>
-          {members.map((member) => (
-            <MemberCard key={member.id} member={member} />
-          ))}
-        </div>
+      <InView className='w-full h-fit px-4 md:px-8'>
+        {/* 평면 보로노이 멤버 맵 (스크롤 줌 버전: components/MemberSpace) */}
+        <MemberVoronoi members={members} />
       </InView>
+      <div className='pb-24 md:pb-32' />
     </div>
   )
 }

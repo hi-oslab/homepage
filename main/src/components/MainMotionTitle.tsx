@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import classNames from 'classnames'
 
 interface MainMotionTitleProps {
@@ -12,7 +12,6 @@ interface MainMotionTitleProps {
   align?: 'start' | 'center'
   /** 1은 기본 속도, 2는 2배 빠르게, 0.5는 절반 속도로 재생합니다. */
   speed?: number
-  cursorColor?: string
 }
 
 const TEXTS_IMAGES = [
@@ -40,8 +39,6 @@ const WORD_RANGES = [
 // 글자별 타이핑 딜레이(ms): 사람이 치는 것처럼 불규칙하게, 단어 사이(OPEN|SOURCE|LAB)는 조금 쉬었다가
 const TYPING_START_DELAY = 400
 const TYPING_DELAYS = [110, 140, 90, 130, 320, 120, 100, 150, 90, 120, 340, 130, 110]
-// 타이핑이 끝난 뒤 커서가 깜빡이다 사라지기까지의 시간(ms)
-const CURSOR_LINGER = 2400
 
 export const MainMotionTitle = ({
   className,
@@ -49,22 +46,17 @@ export const MainMotionTitle = ({
   animate = true,
   layout = 'inline',
   align = 'start',
-  speed = 1,
-  cursorColor = 'black',
+  speed = 1.5,
 }: MainMotionTitleProps) => {
   const [typedCount, setTypedCount] = useState(animate ? 0 : TEXTS_IMAGES.length)
-  const [showCursor, setShowCursor] = useState(animate)
-  const isTyping = typedCount < TEXTS_IMAGES.length
 
   useEffect(() => {
     if (!animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setTypedCount(TEXTS_IMAGES.length)
-      setShowCursor(false)
       return
     }
 
     setTypedCount(0)
-    setShowCursor(true)
     const timers: number[] = []
     const safeSpeed = Number.isFinite(speed) && speed > 0 ? speed : 1
     let elapsed = TYPING_START_DELAY / safeSpeed
@@ -72,7 +64,6 @@ export const MainMotionTitle = ({
       timers.push(window.setTimeout(() => setTypedCount(index + 1), elapsed))
       elapsed += delay / safeSpeed
     })
-    timers.push(window.setTimeout(() => setShowCursor(false), elapsed + CURSOR_LINGER / safeSpeed))
     return () => timers.forEach(window.clearTimeout)
   }, [animate, speed])
 
@@ -86,23 +77,6 @@ export const MainMotionTitle = ({
         alt={image.text}
       />
     ))
-
-  const cursor = showCursor && (
-    <motion.span
-      key='cursor'
-      aria-hidden
-      style={{ backgroundColor: cursorColor }}
-      className='ml-[0.3%] h-[85%] w-[2px] shrink-0'
-      initial={{ opacity: 1 }}
-      // 타이핑 중에는 계속 켜져 있고, 멈추면 깜빡임
-      animate={isTyping ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}
-      exit={{ opacity: 0, transition: { duration: 0.2 } }}
-      transition={isTyping ? { duration: 0 } : { duration: 1, times: [0, 0.5, 0.5, 1], repeat: Infinity }}
-    />
-  )
-
-  const activeWordIndex = WORD_RANGES.findIndex(({ end }) => typedCount < end)
-  const cursorWordIndex = activeWordIndex === -1 ? WORD_RANGES.length - 1 : activeWordIndex
 
   return (
     <motion.div
@@ -122,10 +96,9 @@ export const MainMotionTitle = ({
       )}
     >
       {layout === 'stacked' ? (
-        WORD_RANGES.map(({ start, end }, wordIndex) => (
+        WORD_RANGES.map(({ start, end }) => (
           <div key={start} className='flex h-1/3 flex-row items-center justify-start'>
             {renderImages(start, end)}
-            <AnimatePresence>{cursorWordIndex === wordIndex && cursor}</AnimatePresence>
           </div>
         ))
       ) : (
@@ -135,7 +108,6 @@ export const MainMotionTitle = ({
           {renderImages(4, 10)}
           {typedCount >= 10 && <span aria-hidden className='h-full aspect-1/2 shrink-0' />}
           {renderImages(10, 13)}
-          <AnimatePresence>{cursor}</AnimatePresence>
         </>
       )}
     </motion.div>

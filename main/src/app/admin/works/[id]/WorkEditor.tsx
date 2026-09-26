@@ -116,7 +116,7 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
   return (
     <div className='flex flex-col gap-6'>
       {/* 상단 바 */}
-      <div className='sticky top-7 z-20 -mx-4 -mt-4 flex items-center justify-between gap-3 bg-paper px-4 py-3 md:-mx-8 md:-mt-8 md:px-8 md:py-4'>
+      <div className='sticky top-header z-20 -mx-4 -mt-4 flex items-center justify-between gap-3 bg-paper px-4 py-3 md:-mx-8 md:-mt-8 md:px-8 md:py-4'>
         <Link
           href='/admin/works'
           onClick={(event) => {

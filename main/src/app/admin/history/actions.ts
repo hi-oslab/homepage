@@ -29,7 +29,7 @@ async function run(task: () => Promise<Result>): Promise<Result> {
   try {
     await requireMaster()
     const result = await task()
-    revalidatePath('/about')
+    revalidatePath('/')
     return result
   } catch (error) {
     console.error(error)

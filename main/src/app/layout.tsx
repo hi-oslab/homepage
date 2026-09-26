@@ -23,7 +23,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Open Source Lab',
-              alternateName: '오픈소스랩',
+              alternateName: ['Interactive Media Art Collective, Open Source Lab', '오픈소스랩'],
               url: SITE_URL,
               logo: absoluteUrl('/icons/share.png'),
               description: METADATA.description,

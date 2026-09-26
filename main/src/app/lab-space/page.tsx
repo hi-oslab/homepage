@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className='flex w-full flex-col px-4 md:px-8'>
-      <InView className='flex min-h-[calc(100dvh-1.75rem)] flex-col justify-between gap-16 pt-6 pb-24 md:pt-8 md:pb-32'>
+      <InView className='flex min-h-[calc(100dvh-var(--spacing-header))] flex-col justify-between gap-16 pt-6 pb-24 md:pt-8 md:pb-32'>
         <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
           <span className='md:col-span-4'>Lab Space</span>
           <span className='flex items-center gap-2 text-mute md:col-span-4'>

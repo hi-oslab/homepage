@@ -56,9 +56,9 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
   }
 
   return (
-    <div className='admin flex min-h-[calc(100dvh-1.75rem)] w-full flex-col md:flex-row'>
+    <div className='admin flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col md:flex-row'>
       {/* 사이드바 (모바일에서는 상단 가로 탭) */}
-      <aside className='z-30 flex shrink-0 flex-col gap-6 bg-paper px-4 pt-4 pb-2 md:sticky md:top-7 md:h-[calc(100dvh-1.75rem)] md:w-56 md:px-5 md:pt-8 md:pb-6'>
+      <aside className='z-30 flex shrink-0 flex-col gap-6 bg-paper px-4 pt-4 pb-2 md:sticky md:top-header md:h-[calc(100dvh-var(--spacing-header))] md:w-56 md:px-5 md:pt-8 md:pb-6'>
         <Link href='/admin' className='hidden flex-col gap-0.5 md:flex'>
           <span className='text-xl font-medium tracking-[-0.03em]'>OSL Members</span>
           <span className='text-xs text-mute'>Content manager</span>

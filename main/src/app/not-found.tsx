@@ -7,7 +7,7 @@ import { Arrow } from '@/components'
 
 export default function NotFound() {
   return (
-    <div className='flex min-h-[calc(100dvh-1.75rem)] w-full flex-col justify-between gap-16 px-4 pt-6 pb-24 md:px-8 md:pt-8 md:pb-32'>
+    <div className='flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col justify-between gap-16 px-4 pt-6 pb-24 md:px-8 md:pt-8 md:pb-32'>
       <span className='text-sm'>404</span>
       <div className='flex flex-col gap-10'>
         <h1 className='text-[clamp(3.5rem,13vw,13rem)] font-medium leading-[0.85] tracking-[-0.05em]'>
