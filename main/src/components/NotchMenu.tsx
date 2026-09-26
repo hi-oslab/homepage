@@ -58,7 +58,7 @@ export const NotchMenu = () => {
         setExpanded(false)
         mouseX.set(Infinity)
       }}
-      className='fixed bottom-0 left-1/2 z-40 flex -translate-x-1/2 flex-row items-end justify-center'
+      className='fixed drop-shadow-[0_-4px_12px_rgba(0,0,0,0.1)] bottom-0 left-1/2 z-40 flex -translate-x-1/2 flex-row items-end justify-center'
     >
       <motion.svg
         xmlns='http://www.w3.org/2000/svg'
@@ -160,7 +160,7 @@ const DockItem = ({
         ref={labelRef}
         style={{ scale, transformOrigin: 'bottom center' }}
         className={classNames(
-          'block whitespace-nowrap text-[0.95rem] leading-none sm:text-[1.25rem] transition-colors duration-200 hover:text-white',
+          'block whitespace-nowrap text-[1rem] leading-none sm:text-[1.25rem] transition-colors duration-200 hover:text-white',
           active ? 'text-white' : 'text-[#888888]',
         )}
       >

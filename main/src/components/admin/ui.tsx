@@ -30,7 +30,15 @@ export const PageHeader = ({
   </header>
 )
 
-export const Panel = ({ title, children, className }: { title?: string; children: React.ReactNode; className?: string }) => (
+export const Panel = ({
+  title,
+  children,
+  className,
+}: {
+  title?: string
+  children: React.ReactNode
+  className?: string
+}) => (
   <section className={classNames('flex flex-col gap-4 rounded-xl bg-surface p-5', className)}>
     {title && <h2 className='text-sm text-mute'>{title}</h2>}
     {children}
@@ -142,7 +150,10 @@ export const TagInput = ({
         onClick={() => inputRef.current?.focus()}
       >
         {value.map((item) => (
-          <span key={item} className='inline-flex items-center gap-1 rounded-md bg-surface py-0.5 pr-1 pl-2 text-[13px]'>
+          <span
+            key={item}
+            className='inline-flex items-center gap-1 rounded-md bg-surface py-0.5 pr-1 pl-2 text-[13px]'
+          >
             {item}
             <button
               type='button'
@@ -206,7 +217,7 @@ export const ImageDrop = ({
   url,
   onUpload,
   onRemove,
-  aspect = 'aspect-video',
+  aspect = 'aspect-square',
   label = '이미지를 끌어다 놓거나 클릭해서 업로드',
 }: {
   url: string | null
@@ -263,11 +274,20 @@ export const ImageDrop = ({
 
       {url && (
         <div className='absolute inset-x-2 bottom-2 flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
-          <button type='button' onClick={() => inputRef.current?.click()} className='btn btn-sm bg-ink/80 text-white hover:bg-ink'>
+          <button
+            type='button'
+            onClick={() => inputRef.current?.click()}
+            className='btn btn-sm bg-ink/80 text-white hover:bg-ink'
+          >
             교체
           </button>
           {onRemove && (
-            <button type='button' onClick={onRemove} className='btn btn-sm bg-ink/80 text-white hover:bg-danger' aria-label='이미지 제거'>
+            <button
+              type='button'
+              onClick={onRemove}
+              className='btn btn-sm bg-ink/80 text-white hover:bg-danger'
+              aria-label='이미지 제거'
+            >
               <GoTrash size={12} />
             </button>
           )}

@@ -58,36 +58,38 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
       {/* 사이드바 (모바일에서는 상단 가로 탭) */}
       <aside className='z-30 flex shrink-0 flex-col gap-6 bg-paper px-4 pt-4 pb-2 md:sticky md:top-7 md:h-[calc(100dvh-1.75rem)] md:w-56 md:px-5 md:pt-8 md:pb-6'>
         <Link href='/admin' className='hidden flex-col gap-0.5 md:flex'>
-          <span className='text-xl font-medium tracking-[-0.03em]'>OSL Admin</span>
+          <span className='text-xl font-medium tracking-[-0.03em]'>OSL Members</span>
           <span className='text-xs text-mute'>Content manager</span>
         </Link>
 
         <nav className='-mx-1 flex gap-1 overflow-x-auto md:mx-0 md:flex-col md:overflow-visible'>
-          {NAV.filter((item) => !item.master || user.isMaster).map(({ label, memberLabel, href, icon: Icon, exact, badge }) => (
-            <Link
-              key={href}
-              href={href}
-              className={classNames(
-                'flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-                isActive(href, exact) ? 'bg-ink text-white' : 'text-ink/60 hover:bg-tile hover:text-ink',
-              )}
-            >
-              <Icon size={15} />
-              {!user.isMaster && memberLabel ? memberLabel : label}
-              {badge && user.pendingCount > 0 && (
-                <span className='ml-auto flex size-5 items-center justify-center rounded-full bg-danger text-[11px] text-white'>
-                  {user.pendingCount}
-                </span>
-              )}
-            </Link>
-          ))}
+          {NAV.filter((item) => !item.master || user.isMaster).map(
+            ({ label, memberLabel, href, icon: Icon, exact, badge }) => (
+              <Link
+                key={href}
+                href={href}
+                className={classNames(
+                  'flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                  isActive(href, exact) ? 'bg-ink text-white' : 'text-ink/60 hover:bg-tile hover:text-ink',
+                )}
+              >
+                <Icon size={15} />
+                {!user.isMaster && memberLabel ? memberLabel : label}
+                {badge && user.pendingCount > 0 && (
+                  <span className='ml-auto flex size-5 items-center justify-center rounded-full bg-danger text-[11px] text-white'>
+                    {user.pendingCount}
+                  </span>
+                )}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className='mt-auto hidden flex-col gap-1 md:flex'>
           <div className='mb-2 flex flex-col gap-0.5 px-3'>
             <span className='flex items-center gap-1.5 truncate text-sm'>
               {user.name}
-              {user.isMaster && <span className='rounded bg-ink px-1.5 py-0.5 text-[10px] text-white'>MASTER</span>}
+              {user.isMaster && <span className='rounded bg-ink px-1.5 py-0.5 text-[10px] text-white'>ADMIN</span>}
             </span>
             <span className='truncate text-xs text-mute'>@{user.username}</span>
           </div>

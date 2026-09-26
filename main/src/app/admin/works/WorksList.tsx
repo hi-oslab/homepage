@@ -103,7 +103,9 @@ export function WorksList({
         title={isMaster ? '작품' : '내 작품'}
         count={works.length}
         description={
-          isMaster ? '드래그해서 사이트에 보이는 순서를 바꿀 수 있어요.' : '내가 작성한 작품을 관리합니다. 노출 순서는 마스터가 정해요.'
+          isMaster
+            ? '드래그해서 사이트에 보이는 순서를 바꿀 수 있어요.'
+            : '내가 작성한 작품을 관리합니다. 노출 순서는 관리자가 정해요.'
         }
         actions={
           <form action={createWorkAction}>
@@ -159,7 +161,9 @@ export function WorksList({
                 key={work.id}
                 work={work}
                 draggable={canReorder}
-                author={isMaster ? (work.author_id ? (authors[work.author_id] ?? '알 수 없음') : '작성자 없음') : undefined}
+                author={
+                  isMaster ? (work.author_id ? (authors[work.author_id] ?? '알 수 없음') : '작성자 없음') : undefined
+                }
                 onTogglePublished={(published) => togglePublished(work, published)}
                 onRemove={() => remove(work)}
               />

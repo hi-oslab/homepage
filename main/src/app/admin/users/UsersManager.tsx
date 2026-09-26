@@ -8,6 +8,7 @@ import { RelativeTime } from '../DashboardActions'
 import { formatJoined } from '../AccountFields'
 import type { AdminUser, AdminUserStatus, HelpRequest, Member } from '@/types/cms'
 import {
+  approveAsMasterAction,
   createResetLinkAction,
   deleteUserAction,
   linkUserMemberAction,
@@ -38,7 +39,11 @@ export function UsersManager({
   const [users, setUsers] = useState(initialUsers)
   const [requests, setRequests] = useState(initialRequests)
   const [tab, setTab] = useState<Tab>(() =>
-    initialUsers.some((user) => user.status === 'pending') ? 'pending' : initialRequests.length ? 'requests' : 'approved',
+    initialUsers.some((user) => user.status === 'pending')
+      ? 'pending'
+      : initialRequests.length
+        ? 'requests'
+        : 'approved',
   )
   const [busyId, setBusyId] = useState<string | null>(null)
   const [resetLink, setResetLink] = useState<{ userId: string; url: string; expiresAt: string } | null>(null)
@@ -77,13 +82,20 @@ export function UsersManager({
   }
 
   const resolve = (request: HelpRequest) =>
-    run(request.id, () => resolveHelpRequestAction(request.id), '문의를 처리 완료로 표시했습니다', () =>
-      setRequests((current) => current.filter((item) => item.id !== request.id)),
+    run(
+      request.id,
+      () => resolveHelpRequestAction(request.id),
+      '문의를 처리 완료로 표시했습니다',
+      () => setRequests((current) => current.filter((item) => item.id !== request.id)),
     )
 
   return (
     <div className='flex flex-col gap-4'>
-      <PageHeader title='회원 관리' count={users.length} description='가입 승인, 마스터 권한, 프로필 연결, 비밀번호 재설정 문의를 관리합니다.' />
+      <PageHeader
+        title='회원 관리'
+        count={users.length}
+        description='가입 승인, 관리자 권한, 프로필 연결, 비밀번호 재설정 문의를 관리합니다.'
+      />
 
       <div className='flex self-start overflow-x-auto rounded-lg bg-tile p-0.5'>
         {(Object.keys(TABS) as Tab[]).map((value) => (
@@ -121,7 +133,12 @@ export function UsersManager({
             </button>
           </div>
           <div className='flex flex-col gap-2 sm:flex-row'>
-            <input readOnly value={resetLink.url} onFocus={(event) => event.target.select()} className='bg-white/10! text-white! text-sm!' />
+            <input
+              readOnly
+              value={resetLink.url}
+              onFocus={(event) => event.target.select()}
+              className='bg-white/10! text-white! text-sm!'
+            />
             <button
               type='button'
               onClick={async () => {
@@ -135,20 +152,14 @@ export function UsersManager({
             </button>
           </div>
           <p className='text-xs leading-relaxed text-white/60'>
-            카톡 등으로 본인에게만 전달하세요. 한 번 사용하면 무효가 되고, {new Date(resetLink.expiresAt).toLocaleString('ko-KR')}에
-            만료됩니다. 이 화면을 닫으면 다시 볼 수 없어요.
+            카톡 등으로 본인에게만 전달하세요. 한 번 사용하면 무효가 되고,{' '}
+            {new Date(resetLink.expiresAt).toLocaleString('ko-KR')}에 만료됩니다. 이 화면을 닫으면 다시 볼 수 없어요.
           </p>
         </div>
       )}
 
       {tab === 'requests' ? (
-        <RequestList
-          requests={requests}
-          users={users}
-          busyId={busyId}
-          onIssue={issueResetLink}
-          onResolve={resolve}
-        />
+        <RequestList requests={requests} users={users} busyId={busyId} onIssue={issueResetLink} onResolve={resolve} />
       ) : (
         <ul className='flex flex-col gap-1'>
           {users
@@ -204,8 +215,17 @@ function UserRow({
     onRun(
       user.id,
       () => setUserStatusAction(user.id, status),
-      { approved: `${user.name}님을 승인했습니다`, rejected: `${user.name}님의 가입을 거절했습니다`, pending: '승인을 취소했습니다' }[status],
+      {
+        approved: `${user.name}님을 승인했습니다`,
+        rejected: `${user.name}님의 가입을 거절했습니다`,
+        pending: '승인을 취소했습니다',
+      }[status],
     )
+
+  const approveAsMaster = () => {
+    if (!confirm(`${user.name}님을 관리자로 승인할까요?\n모든 작품·멤버·회원을 관리할 수 있게 됩니다.`)) return
+    onRun(user.id, () => approveAsMasterAction(user.id), `${user.name}님을 관리자로 승인했습니다`)
+  }
 
   const remove = () => {
     if (!confirm(`'${user.name}' 계정을 삭제할까요?\n작성한 작품은 남고 작성자 정보만 비워집니다.`)) return
@@ -217,27 +237,40 @@ function UserRow({
     ['홍익대학교', user.is_hongik ? '예' : '아니요'],
     ['학번', user.student_id || '—'],
     ['오픈소스랩 가입', formatJoined(user.joined_year, user.joined_half)],
+    ['관리자 권한 신청', user.master_requested ? '신청함' : '—'],
   ]
 
   return (
-    <li className={classNames('flex flex-col gap-4 rounded-xl bg-surface p-4 transition-opacity', busy && 'opacity-50')}>
+    <li
+      className={classNames('flex flex-col gap-4 rounded-xl bg-surface p-4 transition-opacity', busy && 'opacity-50')}
+    >
       <div className='flex flex-col gap-3 md:flex-row md:items-center md:gap-4'>
         {/* 계정 요약 */}
-        <button type='button' onClick={() => setOpen((value) => !value)} className='flex min-w-0 flex-1 items-center gap-3 text-left'>
-          <span className='flex size-10 shrink-0 items-center justify-center rounded-full bg-field text-sm'>{user.name.slice(0, 1) || '?'}</span>
+        <button
+          type='button'
+          onClick={() => setOpen((value) => !value)}
+          className='flex min-w-0 flex-1 items-center gap-3 text-left'
+        >
+          <span className='flex size-10 shrink-0 items-center justify-center rounded-full bg-field text-sm'>
+            {user.name.slice(0, 1) || '?'}
+          </span>
           <span className='flex min-w-0 flex-col gap-0.5'>
             <span className='flex items-center gap-1.5 text-[15px]'>
               <span className='truncate'>{user.name}</span>
-              {user.is_master && <span className='rounded bg-ink px-1.5 py-0.5 text-[10px] text-white'>MASTER</span>}
+              {user.is_master && <span className='rounded bg-ink px-1.5 py-0.5 text-[10px] text-white'>ADMIN</span>}
+              {user.master_requested && !user.is_master && (
+                <span className='rounded bg-danger-soft px-1.5 py-0.5 text-[10px] text-danger'>관리자 신청</span>
+              )}
               {isMe && <span className='text-xs text-mute'>(나)</span>}
             </span>
             <span className='truncate text-xs text-mute'>
-              @{user.username} · {user.phone || '전화번호 없음'} · {formatJoined(user.joined_year, user.joined_half)} 가입 · 신청 <RelativeTime iso={user.created_at} />
+              @{user.username} · {user.phone || '전화번호 없음'} · {formatJoined(user.joined_year, user.joined_half)}{' '}
+              가입 · 신청 <RelativeTime iso={user.created_at} />
             </span>
           </span>
         </button>
 
-        {/* 승인된 계정: 프로필 연결 + 마스터 권한 */}
+        {/* 승인된 계정: 프로필 연결 + 관리자 권한 */}
         {user.status === 'approved' && (
           <div className='flex flex-wrap items-center gap-3'>
             <select
@@ -245,7 +278,11 @@ function UserRow({
               value={user.member_id ?? ''}
               disabled={busy}
               onChange={(event) =>
-                onRun(user.id, () => linkUserMemberAction(user.id, event.target.value || null), '프로필 연결을 변경했습니다')
+                onRun(
+                  user.id,
+                  () => linkUserMemberAction(user.id, event.target.value || null),
+                  '프로필 연결을 변경했습니다',
+                )
               }
               className='w-48! text-sm!'
             >
@@ -264,28 +301,58 @@ function UserRow({
               checked={user.is_master}
               disabled={busy}
               onChange={(value) => {
-                if (value && !confirm(`${user.name}님에게 마스터 권한을 줄까요?\n모든 작품·멤버·회원을 관리할 수 있게 됩니다.`)) return
-                onRun(user.id, () => setUserMasterAction(user.id, value), value ? '마스터 권한을 부여했습니다' : '마스터 권한을 해제했습니다')
+                if (
+                  value &&
+                  !confirm(`${user.name}님에게 관리자 권한을 줄까요?\n모든 작품·멤버·회원을 관리할 수 있게 됩니다.`)
+                )
+                  return
+                onRun(
+                  user.id,
+                  () => setUserMasterAction(user.id, value),
+                  value ? '관리자 권한을 부여했습니다' : '관리자 권한을 해제했습니다',
+                )
               }}
-              label='마스터'
+              label='관리자'
             />
           </div>
         )}
 
         {/* 상태 변경 */}
         <div className='flex shrink-0 items-center gap-1'>
+          {/* 관리자 권한을 신청한 가입자: 관리자로 승인 / 멤버로 승인 */}
+          {user.status !== 'approved' && user.master_requested && (
+            <button type='button' disabled={busy} onClick={approveAsMaster} className='btn btn-primary btn-sm'>
+              관리자로 승인
+            </button>
+          )}
           {user.status !== 'approved' && (
-            <button type='button' disabled={busy} onClick={() => setStatus('approved')} className='btn btn-primary btn-sm'>
-              승인
+            <button
+              type='button'
+              disabled={busy}
+              onClick={() => setStatus('approved')}
+              className={classNames('btn btn-sm', user.master_requested ? 'btn-secondary' : 'btn-primary')}
+            >
+              {user.master_requested ? '멤버로 승인' : '승인'}
             </button>
           )}
           {user.status === 'pending' && (
-            <button type='button' disabled={busy} onClick={() => setStatus('rejected')} className='btn btn-secondary btn-sm'>
+            <button
+              type='button'
+              disabled={busy}
+              onClick={() => setStatus('rejected')}
+              className='btn btn-secondary btn-sm'
+            >
               거절
             </button>
           )}
           {!isMe && (
-            <button type='button' disabled={busy} onClick={onIssueReset} className='icon-btn' title='비밀번호 재설정 링크 만들기'>
+            <button
+              type='button'
+              disabled={busy}
+              onClick={onIssueReset}
+              className='icon-btn'
+              title='비밀번호 재설정 링크 만들기'
+            >
               <GoKey size={14} />
             </button>
           )}
@@ -315,7 +382,12 @@ function UserRow({
             ))}
           </dl>
           {user.status === 'approved' && !isMe && (
-            <button type='button' disabled={busy} onClick={() => setStatus('pending')} className='btn btn-ghost btn-sm self-start'>
+            <button
+              type='button'
+              disabled={busy}
+              onClick={() => setStatus('pending')}
+              className='btn btn-ghost btn-sm self-start'
+            >
               승인 취소
             </button>
           )}
@@ -351,12 +423,16 @@ function RequestList({
             ? users.filter((user) => user.username === request.username)
             : users.filter(
                 (user) =>
-                  (request.phone && digits(user.phone) === digits(request.phone)) || (request.name && user.name === request.name),
+                  (request.phone && digits(user.phone) === digits(request.phone)) ||
+                  (request.name && user.name === request.name),
               )
         return (
           <li
             key={request.id}
-            className={classNames('flex flex-col gap-3 rounded-xl bg-surface p-4', busyId === request.id && 'opacity-50')}
+            className={classNames(
+              'flex flex-col gap-3 rounded-xl bg-surface p-4',
+              busyId === request.id && 'opacity-50',
+            )}
           >
             <div className='flex flex-wrap items-center justify-between gap-2'>
               <span className='flex flex-wrap items-center gap-2 text-[15px]'>
@@ -378,8 +454,10 @@ function RequestList({
               <span className='text-xs text-mute'>가입 정보와 비교</span>
               {matches.length === 0 && (
                 <span className='text-danger'>
-                  {request.kind === 'password' ? '해당 아이디의 계정이 없습니다.' : '실명·전화번호가 일치하는 계정이 없습니다.'} 본인에게
-                  직접 확인해 주세요.
+                  {request.kind === 'password'
+                    ? '해당 아이디의 계정이 없습니다.'
+                    : '실명·전화번호가 일치하는 계정이 없습니다.'}{' '}
+                  본인에게 직접 확인해 주세요.
                 </span>
               )}
               {matches.map((user) => {
@@ -390,7 +468,10 @@ function RequestList({
                 ]
                 const verified = checks.every((check) => check.ok)
                 return (
-                  <div key={user.id} className='flex flex-col gap-2 rounded-lg bg-field p-3 sm:flex-row sm:items-center sm:justify-between'>
+                  <div
+                    key={user.id}
+                    className='flex flex-col gap-2 rounded-lg bg-field p-3 sm:flex-row sm:items-center sm:justify-between'
+                  >
                     <div className='flex flex-wrap gap-x-4 gap-y-1'>
                       {request.kind === 'username' && (
                         <span>

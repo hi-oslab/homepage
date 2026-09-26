@@ -111,8 +111,10 @@ export const MainMotionTitle = ({
       style={{ aspectRatio: layout === 'stacked' ? '3914 / 2520' : '9176 / 840' }}
       transition={{ duration: 0.5 }}
       className={classNames(
-        'flex h-auto min-w-0 max-w-full cursor-pointer',
-        layout === 'stacked' ? 'flex-col items-center' : 'flex-row items-center',
+        'flex  cursor-pointer',
+        layout === 'stacked'
+          ? 'flex-col items-center w-auto min-h-0 max-h-full'
+          : 'flex-row items-center h-auto min-w-0 max-w-full',
         align === 'center' ? 'justify-center' : 'justify-start',
         className,
       )}

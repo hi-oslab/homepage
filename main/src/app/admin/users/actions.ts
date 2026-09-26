@@ -26,8 +26,23 @@ export async function setUserStatusAction(id: string, status: AdminUserStatus) {
     const user = await updateAdminUser(id, {
       status,
       approved_at: status === 'approved' ? new Date().toISOString() : null,
-      // 승인이 취소되면 마스터 권한도 함께 해제
+      // 승인이 취소되면 관리자 권한도 함께 해제
       ...(status !== 'approved' ? { is_master: false } : {}),
+      // 승인/거절로 처리되면 관리자 신청 표시는 지운다 (승인 취소로 대기로 돌릴 때는 유지)
+      ...(status !== 'pending' ? { master_requested: false } : {}),
+    })
+    return { ok: true, user }
+  })
+}
+
+/** 관리자 권한을 신청한 가입자를 관리자로 바로 승인 */
+export async function approveAsMasterAction(id: string) {
+  return run(async () => {
+    const user = await updateAdminUser(id, {
+      status: 'approved',
+      approved_at: new Date().toISOString(),
+      is_master: true,
+      master_requested: false,
     })
     return { ok: true, user }
   })
@@ -37,11 +52,13 @@ export async function setUserMasterAction(id: string, isMaster: boolean) {
   return run(async () => {
     if (!isMaster) {
       const masters = (await getAdminUsers()).filter((user) => user.is_master)
-      if (masters.length <= 1) return { ok: false, message: '마스터는 최소 한 명 있어야 합니다.' }
+      if (masters.length <= 1) return { ok: false, message: '관리자는 최소 한 명 있어야 합니다.' }
     }
     const user = await updateAdminUser(
       id,
-      isMaster ? { is_master: true, status: 'approved', approved_at: new Date().toISOString() } : { is_master: false },
+      isMaster
+        ? { is_master: true, master_requested: false, status: 'approved', approved_at: new Date().toISOString() }
+        : { is_master: false, master_requested: false },
     )
     return { ok: true, user }
   })

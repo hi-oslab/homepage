@@ -58,14 +58,19 @@ export function AccountEditor({ user }: { user: AdminUser }) {
 
   return (
     <div className='flex max-w-3xl flex-col gap-3'>
-      <PageHeader title='내 계정' description={`@${user.username}${user.is_master ? ' · 마스터' : ''}`} />
+      <PageHeader title='내 계정' description={`@${user.username}${user.is_master ? ' · 관리자' : ''}`} />
 
       <Panel title='계정 정보'>
         <Field label='아이디' hint='아이디는 바꿀 수 없어요.'>
           <input value={user.username} disabled className='opacity-60' />
         </Field>
         <AccountFields value={profile} onChange={setProfile} />
-        <button type='button' onClick={saveProfile} disabled={!dirty || isPending} className='btn btn-primary self-start'>
+        <button
+          type='button'
+          onClick={saveProfile}
+          disabled={!dirty || isPending}
+          className='btn btn-primary self-start'
+        >
           저장
         </button>
       </Panel>
@@ -108,9 +113,9 @@ export function AccountEditor({ user }: { user: AdminUser }) {
       <Panel title='탈퇴'>
         <ul className='flex list-disc flex-col gap-1 pl-4 text-sm text-ink/70'>
           <li>계정과 가입 정보가 삭제되고 되돌릴 수 없어요.</li>
-          <li>내가 쓴 작품은 사이트에 그대로 남고, 이후에는 마스터만 편집할 수 있어요.</li>
-          <li>연결된 멤버 프로필은 삭제되지 않고 비공개로 바뀌어요. 완전히 지우려면 마스터에게 요청해 주세요.</li>
-          {user.is_master && <li>마지막 마스터 계정은 탈퇴할 수 없어요. 먼저 다른 사람에게 마스터를 넘겨주세요.</li>}
+          <li>내가 쓴 작품은 사이트에 그대로 남고, 이후에는 관리자만 편집할 수 있어요.</li>
+          <li>연결된 멤버 프로필은 삭제되지 않고 비공개로 바뀌어요. 완전히 지우려면 관리자에게 요청해 주세요.</li>
+          {user.is_master && <li>마지막 관리자 계정은 탈퇴할 수 없어요. 먼저 다른 사람에게 관리자 권한을 넘겨주세요.</li>}
         </ul>
         <form onSubmit={withdraw} className='flex flex-col gap-2 sm:flex-row'>
           <input

@@ -110,7 +110,10 @@ export default async function AdminDashboardPage() {
                 {pendingUsers.slice(0, 5).map((item) => (
                   <li key={item.id}>
                     <Link href='/admin/users' className='flex justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-field'>
-                      <span className='truncate'>{item.name}</span>
+                      <span className='truncate'>
+                        {item.name}
+                        {item.master_requested && <span className='ml-1.5 text-xs text-danger'>관리자 신청</span>}
+                      </span>
                       <span className='shrink-0 text-xs text-mute'>@{item.username}</span>
                     </Link>
                   </li>

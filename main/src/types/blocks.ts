@@ -30,8 +30,9 @@ export interface MediaBlock extends BlockBase {
   url: string
   /** 여러 이미지를 세로로 표시한다. 없으면 기존 url 필드를 단일 이미지로 사용한다. */
   urls?: string[]
-  // mediaType === 'video'일 때: url에 입력한 Vimeo 링크에서 추출한 영상 ID
+  // mediaType === 'video'일 때: url에 입력한 링크에서 추출한 영상 ID (Vimeo 또는 YouTube 중 하나)
   vimeoId?: string
+  youtubeId?: string
   caption?: string
 }
 

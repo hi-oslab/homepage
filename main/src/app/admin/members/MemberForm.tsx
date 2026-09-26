@@ -36,7 +36,11 @@ export function MemberForm({
       <Panel>
         <div className='flex items-center justify-between'>
           <span className='text-sm'>공개 상태</span>
-          <Switch checked={draft.published} onChange={(value) => patch('published', value)} label={draft.published ? '공개' : '비공개'} />
+          <Switch
+            checked={draft.published}
+            onChange={(value) => patch('published', value)}
+            label={draft.published ? '공개' : '비공개'}
+          />
         </div>
         <p className='-mt-2 text-xs text-mute'>
           {draft.published ? '저장하면 Members 페이지에 표시됩니다.' : '비공개 프로필은 사이트에 표시되지 않습니다.'}
@@ -49,7 +53,7 @@ export function MemberForm({
             url={draft.cover_image_url}
             onUpload={onUpload}
             onRemove={() => patch('cover_image_url', null)}
-            aspect='aspect-[4/5]'
+            aspect='aspect-[5/5]'
             label='프로필 사진'
           />
           <div className='flex flex-col gap-3'>
@@ -60,7 +64,12 @@ export function MemberForm({
               <input value={draft.sub_name} onChange={(event) => patch('sub_name', event.target.value)} />
             </Field>
             <Field label='역할'>
-              <input list='member-roles' value={draft.role} onChange={(event) => patch('role', event.target.value)} placeholder='예: Lead Member' />
+              <input
+                list='member-roles'
+                value={draft.role}
+                onChange={(event) => patch('role', event.target.value)}
+                placeholder='예: Lead Member'
+              />
               <datalist id='member-roles'>
                 {roles.map((role) => (
                   <option key={role} value={role} />
@@ -83,7 +92,11 @@ export function MemberForm({
             <input type='email' value={draft.email} onChange={(event) => patch('email', event.target.value)} />
           </Field>
           <Field label='웹사이트'>
-            <input value={draft.website} onChange={(event) => patch('website', event.target.value)} placeholder='https://' />
+            <input
+              value={draft.website}
+              onChange={(event) => patch('website', event.target.value)}
+              placeholder='https://'
+            />
           </Field>
         </div>
       </Panel>

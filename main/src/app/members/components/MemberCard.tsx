@@ -12,7 +12,7 @@ export const MemberCard = ({ member }: MemberCardProps) => {
   return (
     <article className='group flex flex-col gap-4'>
       {/* 사진: hover 시 소개 문구 */}
-      <div className='relative aspect-[4/5] w-full overflow-hidden bg-tile'>
+      <div className='relative aspect-[5/5] w-full overflow-hidden bg-tile'>
         {coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

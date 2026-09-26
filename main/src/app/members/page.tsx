@@ -41,7 +41,7 @@ export default async function Page() {
 
       <InView className='flex flex-col gap-8 pb-32 md:pb-48'>
         <Label index='01'>People</Label>
-        <div className='grid grid-cols-1 gap-x-4 gap-y-14 sm:grid-cols-2 md:gap-x-8 lg:grid-cols-4'>
+        <div className='grid grid-cols-2 gap-x-4 gap-y-14 sm:grid-cols-2 md:gap-x-8 lg:grid-cols-4'>
           {members.map((member) => (
             <MemberCard key={member.id} member={member} />
           ))}

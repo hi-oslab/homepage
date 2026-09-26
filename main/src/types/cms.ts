@@ -60,6 +60,8 @@ export type AdminUser = {
   name: string
   status: AdminUserStatus
   is_master: boolean
+  /** 가입 시 관리자 권한을 신청했는지 (처리되면 false) */
+  master_requested: boolean
   member_id: string | null
   /** 학번 (선택) */
   student_id: string

@@ -21,7 +21,7 @@ import { createHelpRequest, updateAdminUser } from '@/lib/cms'
 import type { AccountProfileInput, HelpRequest } from '@/types/cms'
 
 type Result = { ok: true } | { ok: false; message: string }
-type SignUpInput = AccountProfileInput & { username: string; password: string }
+type SignUpInput = AccountProfileInput & { username: string; password: string; requestMaster?: boolean }
 
 const refreshAdmin = () => revalidatePath('/admin', 'layout')
 
@@ -48,11 +48,13 @@ export async function signUpAction(input: SignUpInput): Promise<Result> {
 
 /** 마스터가 아직 없을 때만, 기존 ADMIN_PASSWORD로 첫 마스터 계정을 만든다 */
 export async function setupMasterAction(input: SignUpInput & { setupPassword: string }): Promise<Result> {
-  if (await hasMaster()) return { ok: false, message: '이미 마스터 계정이 있습니다.' }
+  if (await hasMaster()) return { ok: false, message: '이미 관리자 계정이 있습니다.' }
   const expected = process.env.ADMIN_PASSWORD ?? ''
   const actual = input.setupPassword
   const valid =
-    expected.length > 0 && expected.length === actual.length && timingSafeEqual(Buffer.from(expected), Buffer.from(actual))
+    expected.length > 0 &&
+    expected.length === actual.length &&
+    timingSafeEqual(Buffer.from(expected), Buffer.from(actual))
   if (!valid) return { ok: false, message: '설정 비밀번호가 올바르지 않습니다.' }
 
   const result = await signUp(input, { master: true })

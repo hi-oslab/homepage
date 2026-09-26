@@ -67,8 +67,8 @@ export function ProfileEditor({
         <Panel className='items-start py-10'>
           <p className='text-2xl font-medium tracking-[-0.03em]'>아직 멤버 프로필이 없어요.</p>
           <p className='max-w-md break-keep text-sm leading-relaxed text-mute'>
-            프로필을 만들면 사진, 소개, 분야를 직접 작성할 수 있어요. 처음에는 비공개로 만들어지고, 준비가 되면 공개로 바꾸면
-            Members 페이지에 표시됩니다. 이미 사이트에 등록된 멤버라면 마스터에게 계정 연결을 요청해 주세요.
+            프로필을 만들면 사진, 소개, 분야를 직접 작성할 수 있어요. 처음에는 비공개로 만들어지고, 준비가 되면 공개로
+            바꾸면 Members 페이지에 표시됩니다. 이미 사이트에 등록된 멤버라면 관리자에게 계정 연결을 요청해 주세요.
           </p>
           <button
             type='button'
@@ -111,7 +111,13 @@ export function ProfileEditor({
 
       <div className='grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_280px]'>
         <div className='flex flex-col gap-3'>
-          <MemberForm draft={draft} patch={patch} onUpload={uploadPhoto} roles={roles} fieldSuggestions={fieldSuggestions} />
+          <MemberForm
+            draft={draft}
+            patch={patch}
+            onUpload={uploadPhoto}
+            roles={roles}
+            fieldSuggestions={fieldSuggestions}
+          />
         </div>
         <div className='flex flex-col gap-3 xl:sticky xl:top-12 xl:self-start'>
           <span className='text-xs text-mute'>사이트 카드</span>

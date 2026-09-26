@@ -151,7 +151,7 @@ export async function removeMember(id: string): Promise<void> {
 /* ─── 어드민 계정 ─────────────────────────────────────────────────────── */
 
 const ADMIN_USER_COLUMNS =
-  'id,username,name,status,is_master,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   const { data, error } = await createAdminSupabaseClient()
@@ -164,7 +164,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function updateAdminUser(
   id: string,
-  input: Partial<Pick<AdminUser, 'status' | 'is_master' | 'member_id' | 'approved_at'> & AccountProfileInput>,
+  input: Partial<Pick<AdminUser, 'status' | 'is_master' | 'master_requested' | 'member_id' | 'approved_at'> & AccountProfileInput>,
 ): Promise<AdminUser> {
   const { data, error } = await createAdminSupabaseClient()
     .from('admin_users')

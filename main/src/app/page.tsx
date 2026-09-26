@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import classNames from 'classnames'
-import { Arrow, InView, Label, WorkTile } from '@/components'
+import { Arrow, InView, Label, MainMotionTitle, WorkTile } from '@/components'
 import { PracticeList, type Practice } from '@/components/PracticeList'
 import { getPublishedWorks } from '@/lib/cms'
 
@@ -40,14 +40,10 @@ export default async function Page() {
     <div className='flex w-full flex-col px-4 md:px-8'>
       {/* Hero */}
       <InView className='flex min-h-[calc(100dvh-1.75rem)] flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
-        <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
-          <span className='md:col-span-4'>Open Source Lab</span>
-          <span className='text-mute md:col-span-4'>Interactive media art crew</span>
-          <span className='hidden text-mute md:col-span-4 md:block md:text-right'>Est. 2018</span>
-        </div>
-        <h1 className='max-w-[16ch] break-keep text-[clamp(2.5rem,6.4vw,6.5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
+        {/* <h1 className='max-w-[16ch] break-keep text-[clamp(2.5rem,6.4vw,6.5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
           코드와 사물로 이야기를 만드는 인터랙티브 미디어 아트 크루.
-        </h1>
+        </h1> */}
+        <MainMotionTitle layout='stacked' className='h-[80vh]' />
       </InView>
 
       {featured && (

@@ -3,9 +3,9 @@
 import { useRef, useState } from 'react'
 import type { Block, MediaBlock, GalleryBlock, GalleryItem } from '@/types/blocks'
 import { uploadImage } from '@/lib/storage'
-import { extractVimeoId } from '@/lib/blocks'
+import { extractVimeoId, extractYoutubeId } from '@/lib/blocks'
 import { GoTrash } from 'react-icons/go'
-import { VimeoPlayer } from '@/components/VimeoPlayer'
+import { VimeoPlayer, YoutubePlayer } from '@/components/EmbedVideoPlayer'
 
 function useImageUpload(projectId: string) {
   const [uploading, setUploading] = useState(false)
@@ -71,7 +71,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
           onClick={() => onChange({ ...block, mediaType: 'video' })}
           className={block.mediaType === 'video' ? 'btn btn-secondary btn-sm' : 'btn btn-ghost btn-sm'}
         >
-          영상 (Vimeo)
+          영상 (Vimeo · YouTube)
         </button>
       </div>
 
@@ -145,15 +145,17 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
           <input
             type='url'
             value={block.url}
-            placeholder='Vimeo 링크 (예: https://vimeo.com/123456789)'
+            placeholder='Vimeo 또는 YouTube 링크 (예: https://youtu.be/…, https://vimeo.com/123456789)'
             onChange={(e) => {
               const url = e.target.value
-              onChange({ ...block, url, vimeoId: extractVimeoId(url) ?? undefined })
+              const youtubeId = extractYoutubeId(url) ?? undefined
+              onChange({ ...block, url, youtubeId, vimeoId: youtubeId ? undefined : (extractVimeoId(url) ?? undefined) })
             }}
           />
-          {block.url && !block.vimeoId && (
-            <p className='text-xs text-danger'>Vimeo 링크에서 영상 ID를 찾지 못했습니다</p>
+          {block.url && !block.vimeoId && !block.youtubeId && (
+            <p className='text-xs text-danger'>Vimeo 또는 YouTube 영상 링크가 아닙니다</p>
           )}
+          {block.youtubeId && <YoutubePlayer source={block.url || block.youtubeId} title={block.caption || 'YouTube video'} />}
           {block.vimeoId && <VimeoPlayer source={block.url || block.vimeoId} title={block.caption || 'Vimeo video'} />}
           <input
             type='text'

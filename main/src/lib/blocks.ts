@@ -72,7 +72,7 @@ const MARKDOWN_IMAGE_URL_RE = /!\[[^\]]*\]\((https?:\/\/[^)]+)\)/g
 /**
  * 블록 배열 안에서 실제로 참조되는 (스토리지) 이미지 URL을 모두 모은다.
  * 저장 시 더 이상 참조되지 않는 이미지를 자동 정리하는 데 사용한다.
- * 영상(mediaType: 'video')은 Vimeo 링크이므로 대상에서 제외한다.
+ * 영상(mediaType: 'video')은 Vimeo/YouTube 링크이므로 대상에서 제외한다.
  */
 export function extractUrlsFromBlocks(blocks: Block[]): string[] {
   const urls: string[] = []
@@ -108,3 +108,5 @@ export function extractUrlsFromBlocks(blocks: Block[]): string[] {
 export function extractVimeoId(input: string): string | null {
   return parseVimeoSource(input)?.id ?? null
 }
+
+export { extractYoutubeId } from '@/lib/youtube'

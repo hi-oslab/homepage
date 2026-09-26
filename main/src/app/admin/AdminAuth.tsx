@@ -111,7 +111,7 @@ export function LoginForm({ hasMaster }: { hasMaster: boolean }) {
         <SubmitButton pending={isPending}>로그인</SubmitButton>
       </form>
       <div className='flex flex-wrap justify-between gap-x-4 gap-y-2'>
-        <TextLink href='/join'>{hasMaster ? '처음이신가요? 가입 신청하기 →' : '마스터 계정 만들기 →'}</TextLink>
+        <TextLink href='/join'>{hasMaster ? '처음이신가요? 가입 신청하기 →' : '관리자 계정 만들기 →'}</TextLink>
         <TextLink href='/login/help'>아이디나 비밀번호를 잊으셨나요?</TextLink>
       </div>
     </AuthScreen>
@@ -123,6 +123,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
   const router = useRouter()
   const [credentials, setCredentials] = useState({ username: '', password: '', confirm: '', setupPassword: '' })
   const [profile, setProfile] = useState<AccountProfileInput>(emptyAccountProfile)
+  const [requestMaster, setRequestMaster] = useState(false)
   const [error, setError] = useState('')
   const [usernameCheck, setUsernameCheck] = useState<{ available: boolean; message: string } | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -137,7 +138,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
     if (usernameCheck && !usernameCheck.available) return setError(usernameCheck.message)
     if (credentials.password !== credentials.confirm) return setError('비밀번호 확인이 일치하지 않습니다.')
     startTransition(async () => {
-      const input = { ...profile, username: credentials.username, password: credentials.password }
+      const input = { ...profile, username: credentials.username, password: credentials.password, requestMaster }
       const result = setup
         ? await setupMasterAction({ ...input, setupPassword: credentials.setupPassword })
         : await signUpAction(input)
@@ -150,8 +151,8 @@ export function JoinForm({ setup }: { setup: boolean }) {
     <AuthScreen title={setup ? 'Setup' : 'Join'}>
       <p className='break-keep text-sm leading-relaxed text-mute'>
         {setup
-          ? '아직 마스터 계정이 없습니다. 기존 관리자 비밀번호(ADMIN_PASSWORD)로 첫 마스터 계정을 만드세요.'
-          : '가입 신청 후 마스터 계정이 승인하면 내 프로필과 작품을 관리할 수 있어요.'}
+          ? '아직 관리자 계정이 없습니다. 기존 관리자 비밀번호(ADMIN_PASSWORD)로 첫 관리자 계정을 만드세요.'
+          : '가입 신청 후 관리자가 승인하면 내 프로필과 작품을 관리할 수 있어요.'}
       </p>
       <form onSubmit={submit} className='flex flex-col gap-2'>
         {setup && (
@@ -203,9 +204,28 @@ export function JoinForm({ setup }: { setup: boolean }) {
         <div className='mt-4'>
           <AccountFields value={profile} onChange={setProfile} large />
         </div>
+        {!setup && (
+          <div className='mt-3 flex flex-col gap-1.5'>
+            <span className='text-xs text-mute'>권한</span>
+            <Segmented<boolean>
+              large
+              value={requestMaster}
+              onChange={setRequestMaster}
+              options={[
+                { value: false, label: '멤버' },
+                { value: true, label: '관리자 권한 신청' },
+              ]}
+            />
+            <p className='break-keep text-[11px] leading-snug text-mute'>
+              {requestMaster
+                ? '관리자는 모든 작품·멤버·회원을 관리할 수 있어요. 기존 관리자가 확인한 뒤 권한을 줍니다.'
+                : '멤버는 내 프로필과 내가 쓴 작품을 관리할 수 있어요.'}
+            </p>
+          </div>
+        )}
         {error && <p className='text-sm text-danger'>{error}</p>}
         <div className='mt-2 flex flex-col'>
-          <SubmitButton pending={isPending}>{setup ? '마스터 계정 만들기' : '가입 신청'}</SubmitButton>
+          <SubmitButton pending={isPending}>{setup ? '관리자 계정 만들기' : '가입 신청'}</SubmitButton>
         </div>
       </form>
       <TextLink href='/login'>이미 계정이 있나요? 로그인 →</TextLink>
@@ -281,7 +301,14 @@ export function HelpRequestForm() {
                 className={bigInput}
               />
             )}
-            <input required placeholder='실명' aria-label='실명' value={form.name} onChange={set('name')} className={bigInput} />
+            <input
+              required
+              placeholder='실명'
+              aria-label='실명'
+              value={form.name}
+              onChange={set('name')}
+              className={bigInput}
+            />
             <input
               type='tel'
               required
@@ -342,7 +369,12 @@ function UsernameCheck({
 
   if (!username.trim()) return null
   return (
-    <p className={classNames('px-1 text-xs', checking ? 'text-mute' : result?.available ? 'text-success' : 'text-danger')}>
+    <p
+      className={classNames(
+        'px-1 text-xs',
+        checking ? 'text-mute' : result?.available ? 'text-success' : 'text-danger',
+      )}
+    >
       {checking ? '아이디 확인 중…' : result?.message}
     </p>
   )
@@ -359,12 +391,12 @@ export function AdminNotice({ kind, name }: { kind: 'pending' | 'rejected' | 'mi
   const content = {
     pending: {
       title: 'Pending',
-      body: `${name ?? ''}님, 가입 신청이 접수되었어요. 마스터 계정이 승인하면 바로 이용할 수 있습니다.`,
+      body: `${name ?? ''}님, 가입 신청이 접수되었어요. 관리자가 승인하면 바로 이용할 수 있습니다.`,
     },
     rejected: { title: 'Sorry', body: '가입 신청이 승인되지 않았습니다. 필요하면 관리자에게 문의해 주세요.' },
     migration: {
       title: 'Setup',
-      body: 'DB 마이그레이션이 필요합니다. supabase/migrations 폴더의 SQL 파일을 날짜 순서대로 Supabase SQL Editor에서 실행해 주세요.',
+      body: 'DB 마이그레이션이 필요합니다. 관리자에게 문의해주세요.',
     },
   }[kind]
 

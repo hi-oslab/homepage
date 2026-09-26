@@ -12,7 +12,7 @@ const COOKIE_NAME = 'osl_session'
 const SESSION_DAYS = 14
 const RESET_HOURS = 24
 export const USER_COLUMNS =
-  'id,username,name,status,is_master,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 type Result = { ok: true } | { ok: false; message: string }
 
@@ -36,7 +36,9 @@ async function verifyPassword(password: string, stored: string): Promise<boolean
 const USERNAME_PATTERN = /^[a-z][a-z0-9_]{3,19}$/
 export const normalizeUsername = (username: string) => username.trim().toLowerCase()
 export const usernameError = (username: string) =>
-  USERNAME_PATTERN.test(username) ? null : '아이디는 영문 소문자로 시작하는 4~20자 (영문 소문자, 숫자, _)로 입력해 주세요.'
+  USERNAME_PATTERN.test(username)
+    ? null
+    : '아이디는 영문 소문자로 시작하는 4~20자 (영문 소문자, 숫자, _)로 입력해 주세요.'
 
 const passwordError = (password: string) => (password.length < 8 ? '비밀번호는 8자 이상이어야 합니다.' : null)
 
@@ -114,7 +116,7 @@ export const hasMaster = cache(async (): Promise<boolean> => {
   // 최신 마이그레이션에서 생긴 컬럼(username, session_version)까지 조회해 실행 여부를 함께 확인
   const { data, error } = await createAdminSupabaseClient()
     .from('admin_users')
-    .select('id,username,session_version')
+    .select('id,username,session_version,master_requested')
     .eq('is_master', true)
     .limit(1)
   assertSchema(error)
@@ -124,7 +126,9 @@ export const hasMaster = cache(async (): Promise<boolean> => {
 /* ─── 가입 / 로그인 ───────────────────────────────────────────────────── */
 
 /** 가입·내 정보 수정 공통 검증. 통과하면 정리된 값을 돌려준다 */
-export function normalizeProfile(input: AccountProfileInput): { ok: true; value: AccountProfileInput } | { ok: false; message: string } {
+export function normalizeProfile(
+  input: AccountProfileInput,
+): { ok: true; value: AccountProfileInput } | { ok: false; message: string } {
   const name = input.name.trim()
   const phone = input.phone.replace(/[^\d]/g, '')
   const year = Number(input.joined_year)
@@ -134,7 +138,8 @@ export function normalizeProfile(input: AccountProfileInput): { ok: true; value:
   if (!Number.isInteger(year) || year < 2018 || year > thisYear) {
     return { ok: false, message: `가입 연도는 2018년부터 ${thisYear}년 사이로 선택해 주세요.` }
   }
-  if (input.joined_half !== 'H1' && input.joined_half !== 'H2') return { ok: false, message: '가입 시기(상반기/하반기)를 선택해 주세요.' }
+  if (input.joined_half !== 'H1' && input.joined_half !== 'H2')
+    return { ok: false, message: '가입 시기(상반기/하반기)를 선택해 주세요.' }
   return {
     ok: true,
     value: {
@@ -174,7 +179,7 @@ export async function signIn(username: string, password: string): Promise<boolea
 }
 
 export async function signUp(
-  input: AccountProfileInput & { username: string; password: string },
+  input: AccountProfileInput & { username: string; password: string; requestMaster?: boolean },
   options: { master?: boolean } = {},
 ): Promise<Result> {
   const username = normalizeUsername(input.username)
@@ -193,6 +198,7 @@ export async function signUp(
       password_hash: await hashPassword(input.password),
       status: options.master ? 'approved' : 'pending',
       is_master: Boolean(options.master),
+      master_requested: !options.master && Boolean(input.requestMaster),
       approved_at: options.master ? new Date().toISOString() : null,
     })
     .select('id,session_version')
@@ -206,7 +212,11 @@ export async function signUp(
 /* ─── 비밀번호 변경 / 탈퇴 (본인) ─────────────────────────────────────── */
 
 async function checkOwnPassword(userId: string, password: string) {
-  const { data, error } = await createAdminSupabaseClient().from('admin_users').select('password_hash').eq('id', userId).single()
+  const { data, error } = await createAdminSupabaseClient()
+    .from('admin_users')
+    .select('password_hash')
+    .eq('id', userId)
+    .single()
   assertSchema(error)
   return verifyPassword(password, data.password_hash)
 }
@@ -224,8 +234,13 @@ async function setPassword(userId: string, password: string): Promise<number> {
   return version
 }
 
-export async function changeOwnPassword(userId: string, currentPassword: string, nextPassword: string): Promise<Result> {
-  if (!(await checkOwnPassword(userId, currentPassword))) return { ok: false, message: '현재 비밀번호가 올바르지 않습니다.' }
+export async function changeOwnPassword(
+  userId: string,
+  currentPassword: string,
+  nextPassword: string,
+): Promise<Result> {
+  if (!(await checkOwnPassword(userId, currentPassword)))
+    return { ok: false, message: '현재 비밀번호가 올바르지 않습니다.' }
   const invalid = passwordError(nextPassword)
   if (invalid) return { ok: false, message: invalid }
   const version = await setPassword(userId, nextPassword)
@@ -243,7 +258,8 @@ export async function withdrawAccount(user: AdminUser, password: string): Promis
   const supabase = createAdminSupabaseClient()
   if (user.is_master) {
     const { data } = await supabase.from('admin_users').select('id').eq('is_master', true)
-    if ((data ?? []).length <= 1) return { ok: false, message: '마지막 마스터 계정은 탈퇴할 수 없습니다. 다른 사람에게 마스터를 넘겨주세요.' }
+    if ((data ?? []).length <= 1)
+      return { ok: false, message: '마지막 관리자 계정은 탈퇴할 수 없습니다. 다른 사람에게 관리자 권한을 넘겨주세요.' }
   }
   if (user.member_id) await supabase.from('members').update({ published: false }).eq('id', user.member_id)
   const { error } = await supabase.from('admin_users').delete().eq('id', user.id)
@@ -257,7 +273,10 @@ export async function withdrawAccount(user: AdminUser, password: string): Promis
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
 /** 새 링크를 만들면 그 사용자의 이전 링크는 모두 무효 */
-export async function createResetToken(userId: string, createdBy: string): Promise<{ token: string; expiresAt: string }> {
+export async function createResetToken(
+  userId: string,
+  createdBy: string,
+): Promise<{ token: string; expiresAt: string }> {
   const supabase = createAdminSupabaseClient()
   const now = new Date().toISOString()
   await supabase.from('admin_password_resets').update({ used_at: now }).eq('user_id', userId).is('used_at', null)
@@ -280,8 +299,14 @@ async function findValidReset(token: string) {
     .maybeSingle()
   assertSchema(error)
   if (!data || data.used_at || new Date(data.expires_at).getTime() < Date.now()) return null
-  const { data: account } = await supabase.from('admin_users').select('name,username').eq('id', data.user_id).maybeSingle()
-  return account ? { id: data.id as string, userId: data.user_id as string, name: account.name, username: account.username } : null
+  const { data: account } = await supabase
+    .from('admin_users')
+    .select('name,username')
+    .eq('id', data.user_id)
+    .maybeSingle()
+  return account
+    ? { id: data.id as string, userId: data.user_id as string, name: account.name, username: account.username }
+    : null
 }
 
 /** 링크 페이지에서 보여줄 계정 정보 (유효하지 않으면 null) */

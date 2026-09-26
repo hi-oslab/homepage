@@ -1,6 +1,7 @@
 import type { MediaBlock as MediaBlockType } from '@/types/blocks'
 import classNames from 'classnames'
-import { VimeoPlayer } from '@/components/VimeoPlayer'
+import { VimeoPlayer, YoutubePlayer } from '@/components/EmbedVideoPlayer'
+import { extractVimeoId, extractYoutubeId } from '@/lib/blocks'
 
 export function MediaBlock({
   block,
@@ -12,12 +13,17 @@ export function MediaBlock({
   onImageClick?: (url: string, alt: string) => void
 }) {
   const imageUrls = block.urls?.length ? block.urls : block.url ? [block.url] : []
+  // 저장된 ID가 없어도 주소로 공급자를 다시 판별한다
+  const youtubeId = block.youtubeId || (block.url ? extractYoutubeId(block.url) : null)
+  const vimeoId = youtubeId ? null : block.vimeoId || (block.url ? extractVimeoId(block.url) : null)
 
   return (
     <figure className={classNames('py-4 md:py-8', className)}>
       {block.mediaType === 'video' ? (
-        block.vimeoId ? (
-          <VimeoPlayer source={block.url || block.vimeoId} title={block.caption || 'Vimeo video'} />
+        youtubeId ? (
+          <YoutubePlayer source={block.url || youtubeId} title={block.caption || 'YouTube video'} />
+        ) : vimeoId ? (
+          <VimeoPlayer source={block.url || vimeoId} title={block.caption || 'Vimeo video'} />
         ) : block.url ? (
           <video src={block.url} controls playsInline className='w-full rounded-sm' />
         ) : null
