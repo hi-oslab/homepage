@@ -44,7 +44,7 @@ export default async function Page() {
   return (
     <div className='flex w-full flex-col '>
       {/* Hero */}
-      <InView className='flex min-h-[calc(100dvh-1.75rem)] bg-primary-300 flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
+      <InView className='flex min-h-[calc(100dvh-1.75rem)] bg-black flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
         {/* <h1 className='max-w-[16ch] break-keep text-[clamp(2.5rem,6.4vw,6.5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
           코드와 사물로 이야기를 만드는 인터랙티브 미디어 아트 크루.
         </h1> */}
