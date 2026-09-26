@@ -113,7 +113,9 @@ export const MainMotionTitle = ({
       className={classNames(
         'flex  cursor-pointer',
         layout === 'stacked'
-          ? 'flex-col items-center w-auto min-h-0 max-h-full'
+          ? // 폭을 기준으로 크기를 정하고 높이는 aspect-ratio로 계산 (높이 제한은 max-w로 넘겨받는다)
+            // min-h-0: 없으면 aspect-ratio 상자가 이미지 원본 높이만큼 늘어난다
+            'flex-col items-start w-full h-auto min-h-0 shrink-0'
           : 'flex-row items-center h-auto min-w-0 max-w-full',
         align === 'center' ? 'justify-center' : 'justify-start',
         className,

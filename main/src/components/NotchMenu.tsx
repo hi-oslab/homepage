@@ -62,14 +62,14 @@ export const NotchMenu = () => {
     >
       <motion.svg
         xmlns='http://www.w3.org/2000/svg'
-        className='-mr-px rotate-90'
+        className='-mr-px rotate-90 text-black'
         viewBox='0 0 51 50'
         fill='none'
         initial={false}
         animate={{ width: cornerSize, height: cornerSize }}
         transition={notchSpring}
       >
-        <path d='M51 0V50H50C50 22.3858 27.6142 0 0 0H51Z' fill='black' />
+        <path d='M51 0V50H50C50 22.3858 27.6142 0 0 0H51Z' fill='currentColor' />
       </motion.svg>
       <motion.div
         initial={false}
@@ -98,14 +98,14 @@ export const NotchMenu = () => {
       </motion.div>
       <motion.svg
         xmlns='http://www.w3.org/2000/svg'
-        className='-ml-px -rotate-90'
+        className='-ml-px -rotate-90 text-black'
         viewBox='0 0 51 50'
         fill='none'
         initial={false}
         animate={{ width: cornerSize, height: cornerSize }}
         transition={notchSpring}
       >
-        <path d='M0 0V50H1C1 22.3858 23.3858 0 51 0H0Z' fill='black' />
+        <path d='M0 0V50H1C1 22.3858 23.3858 0 51 0H0Z' fill='currentColor' />
       </motion.svg>
     </motion.nav>
   )

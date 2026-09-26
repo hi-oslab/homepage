@@ -44,11 +44,12 @@ export default async function Page() {
   return (
     <div className='flex w-full flex-col '>
       {/* Hero */}
-      <InView className='flex min-h-[calc(100dvh-1.75rem)] bg-black flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
+      <InView className='flex min-h-[calc(100dvh-1.75rem)] flex-col justify-center bg-black px-4 pt-6 pb-20 md:px-8 md:pt-8 md:pb-16'>
         {/* <h1 className='max-w-[16ch] break-keep text-[clamp(2.5rem,6.4vw,6.5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
           코드와 사물로 이야기를 만드는 인터랙티브 미디어 아트 크루.
         </h1> */}
-        <MainMotionTitle layout='stacked' className='h-[80vh] my-auto' />
+        {/* 화면 높이 80%와 화면 폭 중 작은 쪽에 맞춤 (비율 3914/2520) — 세로 화면에서 넘치지 않게 */}
+        <MainMotionTitle layout='stacked' cursorColor='white' className='max-w-[calc(80dvh*3914/2520)]' />
       </InView>
 
       {featured && (
