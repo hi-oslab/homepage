@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
+import { OG_IMAGE } from '@/app/metadata'
 import Link from 'next/link'
 import { Arrow, InView } from '@/components'
 
 export const metadata: Metadata = {
   title: 'Lab Space',
   description: '오픈소스랩의 새로운 공간, Lab Space가 곧 열립니다.',
+  openGraph: { title: 'Lab Space | Open Source Lab', url: '/lab-space', images: [OG_IMAGE] },
+  alternates: { canonical: '/lab-space' },
 }
 
 export default function Page() {

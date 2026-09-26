@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import classNames from 'classnames'
 import { Arrow, InView, Label, MainMotionTitle, WorkTile } from '@/components'
 import { PracticeList, type Practice } from '@/components/PracticeList'
 import { getPublishedWorks } from '@/lib/cms'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이트)
 
@@ -37,17 +42,17 @@ export default async function Page() {
   const recent = rest.slice(0, 6)
 
   return (
-    <div className='flex w-full flex-col px-4 md:px-8'>
+    <div className='flex w-full flex-col '>
       {/* Hero */}
-      <InView className='flex min-h-[calc(100dvh-1.75rem)] flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
+      <InView className='flex min-h-[calc(100dvh-1.75rem)] bg-primary-300 flex-col justify-between gap-16 pt-6 pb-20 md:pt-8 md:pb-16'>
         {/* <h1 className='max-w-[16ch] break-keep text-[clamp(2.5rem,6.4vw,6.5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
           코드와 사물로 이야기를 만드는 인터랙티브 미디어 아트 크루.
         </h1> */}
-        <MainMotionTitle layout='stacked' className='h-[80vh]' />
+        <MainMotionTitle layout='stacked' className='h-[80vh] my-auto' />
       </InView>
 
       {featured && (
-        <InView className='pb-24 md:pb-40'>
+        <InView className='pb-24 md:pb-40 pt-4 md:pt-8 px-4 md:px-8'>
           <Link href={`/work/${featured.slug}`} className='group flex flex-col gap-3'>
             <div className='aspect-[4/3] w-full overflow-hidden bg-tile md:aspect-[16/8]'>
               {featured.thumbnail_url && (
@@ -71,9 +76,9 @@ export default async function Page() {
       )}
 
       {/* (01) Studio */}
-      <InView className='grid grid-cols-1 gap-8 pb-24 md:grid-cols-12 md:pb-40'>
+      <InView className='grid grid-cols-1 gap-8 pb-24 md:grid-cols-12 md:pb-40 px-4 md:px-8'>
         <Label index='01' className='md:col-span-4'>
-          Studio
+          Open Source Lab
         </Label>
         <div className='flex flex-col items-start gap-8 md:col-span-8'>
           <p className='break-keep text-2xl font-medium leading-snug tracking-[-0.02em] md:text-4xl'>
@@ -86,7 +91,7 @@ export default async function Page() {
 
       {/* (02) Recent Works */}
       {recent.length > 0 && (
-        <InView className='flex flex-col gap-8 pb-24 md:pb-40'>
+        <InView className='flex flex-col gap-8 pb-24 md:pb-40 px-4 md:px-8'>
           <div className='flex items-baseline justify-between'>
             <Label index='02'>Recent Works</Label>
             <MoreLink href='/work'>All works</MoreLink>
@@ -100,13 +105,13 @@ export default async function Page() {
       )}
 
       {/* (03) Practice */}
-      <InView className='flex flex-col gap-10 pb-24 md:pb-40'>
+      <InView className='flex flex-col gap-10 pb-24 md:pb-40 px-4 md:px-8'>
         <Label index='03'>Practice</Label>
         <PracticeList items={PRACTICES} />
       </InView>
 
       {/* (04) Explore */}
-      <InView className='flex flex-col gap-8 pb-32 md:pb-48'>
+      <InView className='flex flex-col gap-8 pb-32 md:pb-48 px-4 md:px-8'>
         <Label index='04'>Explore</Label>
         <div className='grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-3'>
           {EXPLORE.map((item, index) => (

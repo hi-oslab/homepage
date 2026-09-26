@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { getPublishedWorks } from '@/lib/cms'
+import { SITE_URL } from '@/lib/site'
 
-const BASE_URL = 'https://hioslab.com'
+const BASE_URL = SITE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const works = await getPublishedWorks()

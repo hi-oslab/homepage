@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { METADATA } from './metadata'
+import { METADATA, OG_IMAGE } from './metadata'
+import { ALLOW_INDEXING, SITE_URL, absoluteUrl } from '@/lib/site'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import '@/styles/globals.css'
 import { Layout } from '@/components'
@@ -23,8 +24,8 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'Open Source Lab',
               alternateName: '오픈소스랩',
-              url: 'https://hioslab.com',
-              logo: 'https://hioslab.com/icons/op-image.png',
+              url: SITE_URL,
+              logo: absoluteUrl('/icons/share.png'),
               description: METADATA.description,
               email: 'hi.oslab@gmail.com',
               foundingDate: '2018',
@@ -43,11 +44,9 @@ export default function RootLayout({
 }
 
 export const metadata: Metadata = {
-  // OG 이미지 등 상대 주소(/media/…)의 기준 도메인. beta 배포에서는 NEXT_PUBLIC_SITE_URL=https://beta.hioslab.com
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || METADATA.url),
-  alternates: {
-    canonical: METADATA.url,
-  },
+  // 상대 주소(canonical, OG 이미지 /media/…)의 기준 도메인 — NEXT_PUBLIC_SITE_URL (src/lib/site.ts)
+  // canonical은 페이지마다 자기 경로로 지정한다 (여기서 지정하면 모든 페이지가 홈을 canonical로 상속함)
+  metadataBase: new URL(SITE_URL),
   title: {
     default: METADATA.title,
     template: METADATA.titleTemplate,
@@ -80,13 +79,11 @@ export const metadata: Metadata = {
     },
     description: METADATA.description,
     locale: 'ko_KR',
-    url: METADATA.url,
-    images: [{ url: '/icons/op-image.png', width: 1200, height: 630, alt: 'Open Source Lab' }],
+    url: SITE_URL,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: METADATA.twitter.card,
-    site: METADATA.twitter.site,
-    creator: METADATA.twitter.creator,
     title: {
       default: METADATA.title,
       template: METADATA.titleTemplate,
@@ -95,13 +92,13 @@ export const metadata: Metadata = {
     images: ['/icons/op-image.png'],
   },
   referrer: 'origin-when-cross-origin',
+  // 정식 도메인에서만 검색 노출 (beta는 noindex)
   robots: {
-    index: true,
-    follow: true,
+    index: ALLOW_INDEXING,
+    follow: ALLOW_INDEXING,
     googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: true,
+      index: ALLOW_INDEXING,
+      follow: ALLOW_INDEXING,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,

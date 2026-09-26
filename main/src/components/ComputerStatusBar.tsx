@@ -59,8 +59,8 @@ const StatusBarMenu = ({
         }}
         className={classNames(
           'flex h-full items-center whitespace-nowrap rounded-sm px-1.5 uppercase transition-colors',
-          disabled ? 'cursor-default' : 'cursor-pointer hover:bg-black/10',
-          isOpen && 'bg-black/10 text-black hover:bg-black/20',
+          disabled ? 'cursor-default' : 'cursor-pointer hover:bg-white/15',
+          isOpen && 'bg-white/15 text-white hover:bg-white/25',
         )}
       >
         {label}
@@ -216,7 +216,7 @@ export const ComputerStatusBar = () => {
     <aside
       ref={statusBarRef}
       aria-label='System status'
-      className='fixed inset-x-0 top-0 z-50 flex h-7 items-center justify-between px-1.5 font-mono text-[10px] font-medium leading-none border-b border-black/10 bg-paper text-ink md:px-3'
+      className='fixed inset-x-0 top-0 z-50 flex h-7 items-center justify-between px-1.5 font-mono text-[10px] font-medium leading-none bg-ink text-white md:px-3'
     >
       <div className='flex h-full min-w-0 items-center gap-1'>
         <StatusBarMenu
@@ -226,7 +226,6 @@ export const ComputerStatusBar = () => {
           setOpenMenu={setOpenMenu}
           options={[
             { text: '이 오픈소스랩에 관하여', onClick: () => router.push('/about') },
-            { text: '페이지 새로고침하기', onClick: () => router.refresh() },
             { text: '홈으로 가기', onClick: () => router.push('/') },
           ]}
         />
@@ -276,7 +275,7 @@ export const ComputerStatusBar = () => {
                   />
                   <span className='hidden sm:inline'>@{session.username}</span>
                   {session.isMaster && (
-                    <span className='hidden rounded-sm bg-ink px-1 py-0.5 text-[8px] text-white sm:inline'>ADMIN</span>
+                    <span className='hidden rounded-sm bg-white px-1 py-0.5 text-[8px] text-ink sm:inline'>ADMIN</span>
                   )}
                 </span>
               }

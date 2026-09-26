@@ -37,7 +37,11 @@ export const METADATA = {
   url: 'https://hioslab.com',
   twitter: {
     card: 'summary_large_image' as const,
-    site: '@opensource_lab',
-    creator: '@opensource_lab',
   },
 }
+
+/**
+ * 기본 공유 이미지 (1200×630).
+ * 페이지에서 openGraph를 지정하면 레이아웃의 openGraph가 통째로 대체되므로 페이지마다 images에 넣어준다.
+ */
+export const OG_IMAGE = { url: '/icons/op-image.png', width: 1200, height: 630, alt: 'Open Source Lab' }

@@ -154,7 +154,7 @@ const DockItem = ({
       ref={ref}
       style={{ width, height }}
       onClick={onClick}
-      className='relative flex items-end justify-center'
+      className='relative flex items-end justify-center cursor-pointer'
     >
       <motion.span
         ref={labelRef}

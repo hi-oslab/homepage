@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { OG_IMAGE } from '@/app/metadata'
 import { getPublishedMembers } from '@/lib/cms'
 import { InView, Label } from '@/components'
 import { MemberCard } from './components'
@@ -11,9 +12,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Members | Open Source Lab',
     description: '오픈소스랩을 함께 만들어가는 멤버들을 소개합니다.',
-    url: 'https://hioslab.com/members',
+    url: '/members',
+    images: [OG_IMAGE],
   },
-  alternates: { canonical: 'https://hioslab.com/members' },
+  alternates: { canonical: '/members' },
 }
 
 export default async function Page() {

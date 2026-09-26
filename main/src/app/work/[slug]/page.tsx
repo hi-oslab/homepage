@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { WorkDetailLayout } from '@/components/WorkDetailLayout'
 import { getPublishedWorkBySlug, getPublishedWorks } from '@/lib/cms'
+import { absoluteUrl } from '@/lib/site'
 
 type PageParams = Promise<{ slug: string }>
 
@@ -10,7 +11,7 @@ export const revalidate = 300
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
   const work = await getPublishedWorkBySlug((await params).slug)
   if (!work) return {}
-  const canonical = `https://hioslab.com/work/${work.slug}`
+  const canonical = `/work/${work.slug}`
 
   return {
     title: work.title,
@@ -39,5 +40,27 @@ export async function generateStaticParams() {
 export default async function Page({ params }: { params: PageParams }) {
   const work = await getPublishedWorkBySlug((await params).slug)
   if (!work) notFound()
-  return <WorkDetailLayout work={work} />
+
+  // 검색엔진용 작품 정보 (schema.org CreativeWork)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: work.title,
+    headline: work.subtitle || undefined,
+    description: work.description || work.subtitle || undefined,
+    url: absoluteUrl(`/work/${work.slug}`),
+    image: work.thumbnail_url ? absoluteUrl(work.thumbnail_url) : undefined,
+    dateCreated: work.project_date || String(work.year),
+    genre: work.category || undefined,
+    keywords: work.tags.length ? work.tags.join(', ') : undefined,
+    inLanguage: 'ko',
+    creator: { '@type': 'Organization', name: 'Open Source Lab', url: absoluteUrl('/') },
+  }
+
+  return (
+    <>
+      <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <WorkDetailLayout work={work} />
+    </>
+  )
 }

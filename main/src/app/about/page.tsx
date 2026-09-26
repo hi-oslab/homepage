@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { OG_IMAGE } from '@/app/metadata'
 import Link from 'next/link'
 import { getPublishedHistory, getPublishedMembers } from '@/lib/cms'
 import { Arrow, InView, Label } from '@/components'
@@ -14,9 +15,10 @@ export const metadata: Metadata = {
     title: 'About | Open Source Lab',
     description:
       '2018년 홍익대학교에서 시작된 인터랙티브 미디어 아트 크루, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅을 연구하고 공유합니다.',
-    url: 'https://hioslab.com/about',
+    url: '/about',
+    images: [OG_IMAGE],
   },
-  alternates: { canonical: 'https://hioslab.com/about' },
+  alternates: { canonical: '/about' },
 }
 
 const CONTENTS = {
@@ -44,14 +46,15 @@ export default async function Page() {
         {/* 좌측: 큰 문장 */}
         <div className='flex flex-col gap-8 md:col-span-6'>
           <span className='text-sm'>About</span>
-          <h1 className='max-w-[14ch] break-keep text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.08] tracking-[-0.04em] md:sticky md:top-12'>
+          <img src='/img/logo.svg' alt='OSL' className='h-auto w-[60%] rounded-md object-cover' />
+          <h1 className='w-[60%] break-keep text-[clamp(1rem,2vw,2rem)] font-medium leading-[1.08] tracking-[-0.04em] md:sticky md:top-12'>
             {CONTENTS.statement}
           </h1>
         </div>
 
         {/* 우측: 라벨 + 내용 행 */}
         <div className='flex flex-col gap-16 md:col-span-6 md:pt-13 md:gap-20'>
-          <Row label='Studio'>
+          <Row label='Introduction'>
             <div className='flex flex-col gap-5 break-keep text-base leading-relaxed'>
               {CONTENTS.description.map((paragraph) => (
                 <p key={paragraph.slice(0, 16)}>{paragraph}</p>
@@ -79,7 +82,10 @@ export default async function Page() {
           </Row>
 
           <Row label='Members'>
-            <Link href='/members' className='group inline-flex items-center gap-1 text-base transition-colors hover:text-mute'>
+            <Link
+              href='/members'
+              className='group inline-flex items-center gap-1 text-base transition-colors hover:text-mute'
+            >
               {members.length}명의 멤버가 함께합니다
               <Arrow className='size-4' />
             </Link>
@@ -130,7 +136,10 @@ const History = ({ items }: { items: HistoryItem[] }) => {
               {items
                 .filter((item) => item.year === year)
                 .map((item) => (
-                  <li key={item.id} className='grid grid-cols-[3rem_minmax(0,1fr)] gap-x-4 gap-y-1 sm:grid-cols-[3rem_7rem_minmax(0,1fr)]'>
+                  <li
+                    key={item.id}
+                    className='grid grid-cols-[3rem_minmax(0,1fr)] gap-x-4 gap-y-1 sm:grid-cols-[3rem_7rem_minmax(0,1fr)]'
+                  >
                     <span className='text-sm tabular-nums text-mute'>
                       {item.month ? String(item.month).padStart(2, '0') : ''}
                     </span>

@@ -32,11 +32,13 @@ const COLUMNS = [
 
 export const Footer = () => {
   return (
-    <footer className='flex w-full flex-col gap-24 bg-ink px-4 pt-16 pb-20 text-white md:gap-40 md:px-8 md:pt-20 md:pb-24'>
+    <footer className='flex w-full flex-col gap-24 bg-ink px-4 pt-12 pb-20 text-white md:gap-40 md:px-8 md:pt-16 md:pb-24'>
       <div className='grid grid-cols-2 gap-x-4 gap-y-10 text-sm md:grid-cols-12 md:gap-x-8'>
         <div className='col-span-2 flex flex-col justify-between gap-6 md:col-span-4'>
           <p className='max-w-xs break-keep leading-snug text-white/50'>
-            Interactive media art crew
+            Hongik Univ.
+            <br />
+            Interactive Media Art Crew
             <br />
             since 2018.
           </p>
