@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { canEditWork, requireMaster, requireUser } from '@/lib/admin-auth'
+import { canDeleteWork, canEditWork, requireMaster, requireUser } from '@/lib/admin-auth'
 import { createWork, getAdminWork, removeWork, reorderWorks, updateWork } from '@/lib/cms'
 import type { WorkInput } from '@/types/cms'
 
@@ -49,7 +49,9 @@ export async function reorderWorksAction(ids: string[]) {
 }
 
 export async function deleteWorkAction(id: string) {
-  const work = await requireEditableWork(id)
+  const user = await requireUser()
+  const work = await getAdminWork(id)
+  if (!work || !canDeleteWork(user, work)) throw new Error('Forbidden')
   await removeWork(id)
   revalidateWorkPages([work.slug])
 }

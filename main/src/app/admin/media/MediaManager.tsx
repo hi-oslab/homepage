@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { GoCheck, GoFileMedia, GoSearch, GoSync } from 'react-icons/go'
-import { PageHeader } from '@/components/admin/ui'
+import { Input, PageHeader, buttonClass } from '@/components/admin/ui'
 
 type Reference = { kind: 'work' | 'member'; id: string; title: string; source: string }
 type MediaFile = {
@@ -113,10 +113,10 @@ export function MediaManager() {
         description='R2에 저장된 파일의 사용처를 확인하고, 선택한 이미지를 WebP로 최적화합니다.'
         actions={
           <>
-            <button onClick={load} disabled={loading || optimizing} className='btn btn-secondary'>
+            <button onClick={load} disabled={loading || optimizing} className={buttonClass('secondary')}>
               <GoSync className={loading ? 'animate-spin' : ''} /> 새로고침
             </button>
-            <button onClick={optimize} disabled={selected.size === 0 || optimizing} className='btn btn-primary'>
+            <button onClick={optimize} disabled={selected.size === 0 || optimizing} className={buttonClass('primary')}>
               {optimizing ? `${progress.done}/${progress.total} 최적화 중` : `선택 최적화 (${selected.size})`}
             </button>
           </>
@@ -145,13 +145,13 @@ export function MediaManager() {
         <button
           onClick={() => setSelected(allVisibleSelected ? new Set() : new Set(selectable.map((file) => file.key)))}
           disabled={selectable.length === 0}
-          className='btn btn-ghost'
+          className={buttonClass('ghost')}
         >
           {allVisibleSelected ? '선택 해제' : '보이는 항목 모두 선택'}
         </button>
         <div className='relative ml-auto w-full sm:w-64'>
           <GoSearch className='pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-mute' size={14} />
-          <input type='search' value={query} onChange={(event) => setQuery(event.target.value)} placeholder='파일 경로 검색' className='bg-tile! pl-9!' />
+          <Input type='search' value={query} onChange={(event) => setQuery(event.target.value)} placeholder='파일 경로 검색' className='bg-tile pl-9' />
         </div>
       </div>
 

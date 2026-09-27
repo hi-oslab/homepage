@@ -3,7 +3,7 @@
 import classNames from 'classnames'
 import { useMemo, useState, useTransition } from 'react'
 import { GoLinkExternal, GoTrash } from 'react-icons/go'
-import { PageHeader, Panel, Switch, useToast } from '@/components/admin/ui'
+import { Input, PageHeader, Panel, Select, Switch, buttonClass, iconButtonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import type { HistoryInput, HistoryItem } from '@/types/cms'
 import { createHistoryAction, deleteHistoryAction, updateHistoryAction } from './actions'
 
@@ -25,7 +25,8 @@ const sortItems = (items: HistoryItem[]) =>
   items.slice().sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0) || b.created_at.localeCompare(a.created_at))
 
 export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] }) {
-  const [items, setItems] = useState(initialItems)
+  const [items, setItems] = useServerState(initialItems)
+  useRefreshOnFocus()
   const [draft, setDraft] = useState<HistoryInput>(emptyInput)
   const [isPending, startTransition] = useTransition()
   const toast = useToast()
@@ -85,13 +86,13 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
       {/* 빠른 추가 */}
       <Panel title='새 항목'>
         <form onSubmit={add} className='grid grid-cols-2 gap-2 md:grid-cols-[88px_96px_140px_minmax(0,1fr)]'>
-          <input
+          <Input
             type='number'
             aria-label='연도'
             value={draft.year}
             onChange={(event) => setDraft((current) => ({ ...current, year: Number(event.target.value) }))}
           />
-          <select
+          <Select
             aria-label='월'
             value={draft.month ?? ''}
             onChange={(event) => setDraft((current) => ({ ...current, month: event.target.value ? Number(event.target.value) : null }))}
@@ -102,15 +103,15 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
                 {month}월
               </option>
             ))}
-          </select>
-          <input
+          </Select>
+          <Input
             list='history-categories'
             aria-label='분류'
             placeholder='분류'
             value={draft.category}
             onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
           />
-          <input
+          <Input
             required
             aria-label='내용'
             placeholder='내용 — 예: 《일상행동:변주》 기획전시'
@@ -118,7 +119,7 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
             onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
             className='col-span-2 md:col-span-1'
           />
-          <input
+          <Input
             aria-label='상세'
             placeholder='상세 (선택) — 장소, 주최, 협업 기관'
             value={draft.detail}
@@ -126,14 +127,14 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
             className='col-span-2 md:col-span-3'
           />
           <div className='col-span-2 flex gap-2 md:col-span-1'>
-            <input
+            <Input
               type='url'
               aria-label='링크'
               placeholder='링크 (선택)'
               value={draft.link}
               onChange={(event) => setDraft((current) => ({ ...current, link: event.target.value }))}
             />
-            <button type='submit' disabled={isPending || !draft.title.trim()} className='btn btn-primary shrink-0'>
+            <button type='submit' disabled={isPending || !draft.title.trim()} className={buttonClass('primary', 'md', 'shrink-0')}>
               추가
             </button>
           </div>
@@ -191,14 +192,14 @@ function HistoryRow({
         !item.published && 'opacity-60',
       )}
     >
-      <input
+      <Input
         type='number'
         aria-label='연도'
         defaultValue={item.year}
         onBlur={(event) => commit('year', Number(event.target.value))}
         className={inline}
       />
-      <select
+      <Select
         aria-label='월'
         value={item.month ?? ''}
         onChange={(event) => commit('month', event.target.value ? Number(event.target.value) : null)}
@@ -210,10 +211,10 @@ function HistoryRow({
             {month}월
           </option>
         ))}
-      </select>
+      </Select>
       <div className='flex min-w-0 flex-col'>
         <div className='flex min-w-0 gap-1'>
-          <input
+          <Input
             list='history-categories'
             aria-label='분류'
             placeholder='분류'
@@ -221,21 +222,21 @@ function HistoryRow({
             onBlur={(event) => commit('category', event.target.value.trim())}
             className={classNames(inline, 'w-28! shrink-0 text-mute!')}
           />
-          <input
+          <Input
             aria-label='내용'
             defaultValue={item.title}
             onBlur={(event) => commit('title', event.target.value.trim())}
             className={inline}
           />
         </div>
-        <input
+        <Input
           aria-label='상세'
           placeholder='상세 (선택)'
           defaultValue={item.detail}
           onBlur={(event) => commit('detail', event.target.value.trim())}
           className={classNames(inline, 'text-sm! text-mute!')}
         />
-        <input
+        <Input
           type='url'
           aria-label='링크'
           placeholder='링크 (선택)'
@@ -247,11 +248,11 @@ function HistoryRow({
       <div className='flex items-center gap-1 pt-1'>
         <Switch checked={item.published} onChange={(value) => onUpdate({ published: value })} label={item.published ? '공개' : '숨김'} labelClassName='hidden sm:inline text-xs' />
         {item.link && (
-          <a href={item.link} target='_blank' rel='noopener noreferrer' className='icon-btn' title='링크 열기'>
+          <a href={item.link} target='_blank' rel='noopener noreferrer' className={iconButtonClass()} title='링크 열기'>
             <GoLinkExternal size={13} />
           </a>
         )}
-        <button type='button' onClick={onRemove} className='icon-btn hover:bg-danger-soft! hover:text-danger!' title='삭제'>
+        <button type='button' onClick={onRemove} className={iconButtonClass({ danger: true })} title='삭제'>
           <GoTrash size={13} />
         </button>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { LinkBlock, EmbedBlock } from '@/types/blocks'
+import { Input, Select, Textarea, buttonClass } from '@/components/admin/ui'
 
 export const LinkBlockField = ({
   block,
@@ -35,12 +36,12 @@ export const LinkBlockField = ({
 
   return (
     <div>
-      <select value={block.style} onChange={(e) => onChange({ ...block, style: e.target.value as 'bookmark' | 'inline' })}>
+      <Select value={block.style} onChange={(e) => onChange({ ...block, style: e.target.value as 'bookmark' | 'inline' })}>
         <option value='bookmark'>북마크 카드</option>
         <option value='inline'>인라인 링크</option>
-      </select>
+      </Select>
 
-      <input
+      <Input
         type='url'
         value={block.url}
         placeholder='https://...'
@@ -53,23 +54,23 @@ export const LinkBlockField = ({
             type='button'
             onClick={fetchMetadata}
             disabled={fetching || !block.url}
-            className='btn btn-secondary btn-sm mb-2'
+            className={buttonClass('secondary', 'sm', 'mb-2')}
           >
             {fetching ? '가져오는 중...' : '메타데이터 자동으로 가져오기'}
           </button>
-          <input
+          <Input
             type='text'
             value={block.title ?? ''}
             placeholder='제목'
             onChange={(e) => onChange({ ...block, title: e.target.value })}
           />
-          <textarea
+          <Textarea
             value={block.description ?? ''}
             placeholder='설명'
             rows={2}
             onChange={(e) => onChange({ ...block, description: e.target.value })}
           />
-          <input
+          <Input
             type='url'
             value={block.image ?? ''}
             placeholder='썸네일 이미지 URL'
@@ -83,7 +84,7 @@ export const LinkBlockField = ({
       )}
 
       {block.style === 'inline' && (
-        <input
+        <Input
           type='text'
           value={block.title ?? ''}
           placeholder='링크 텍스트 (비우면 URL 표시)'
@@ -102,13 +103,13 @@ export const EmbedBlockField = ({
   onChange: (block: EmbedBlock) => void
 }) => (
   <div>
-    <input
+    <Input
       type='url'
       value={block.url}
       placeholder='임베드할 iframe URL (Figma, CodeSandbox 등)'
       onChange={(e) => onChange({ ...block, url: e.target.value })}
     />
-    <input
+    <Input
       type='text'
       value={block.title ?? ''}
       placeholder='제목 (선택, 접근성용)'

@@ -94,7 +94,7 @@ export function GalleryBlock({
         </span>
       </div>
 
-      <div className='no-scroll-bar flex w-full gap-1.5 overflow-x-auto pt-2' aria-label='갤러리 이미지 목록'>
+      <div className='[scrollbar-width:none] flex w-full gap-1.5 overflow-x-auto pt-2' aria-label='갤러리 이미지 목록'>
         {items.map((item, index) => (
           <button
             key={`${item.url}-${index}`}

@@ -1,6 +1,6 @@
 'use client'
 
-import { Field, ImageDrop, Panel, Switch, TagInput } from '@/components/admin/ui'
+import { Field, ImageDrop, Input, Panel, Switch, TagInput, Textarea } from '@/components/admin/ui'
 import type { Member } from '@/types/cms'
 
 export type MemberDraft = Omit<Member, 'id' | 'created_at' | 'updated_at' | 'display_order'>
@@ -58,13 +58,13 @@ export function MemberForm({
           />
           <div className='flex flex-col gap-3'>
             <Field label='이름'>
-              <input value={draft.name} onChange={(event) => patch('name', event.target.value)} />
+              <Input value={draft.name} onChange={(event) => patch('name', event.target.value)} />
             </Field>
             <Field label='한 줄 소개' hint='이름 아래 회색으로 표시됩니다. 예: 재밌는 것을 따라가는'>
-              <input value={draft.sub_name} onChange={(event) => patch('sub_name', event.target.value)} />
+              <Input value={draft.sub_name} onChange={(event) => patch('sub_name', event.target.value)} />
             </Field>
             <Field label='역할'>
-              <input
+              <Input
                 list='member-roles'
                 value={draft.role}
                 onChange={(event) => patch('role', event.target.value)}
@@ -79,7 +79,7 @@ export function MemberForm({
           </div>
         </div>
         <Field label='자기소개' hint='사이트에서 사진에 마우스를 올리면 보입니다.'>
-          <textarea rows={3} value={draft.description} onChange={(event) => patch('description', event.target.value)} />
+          <Textarea rows={3} value={draft.description} onChange={(event) => patch('description', event.target.value)} />
         </Field>
         <Field label='분야'>
           <TagInput value={draft.fields} onChange={(value) => patch('fields', value)} suggestions={fieldSuggestions} />
@@ -89,10 +89,10 @@ export function MemberForm({
       <Panel title='연락처'>
         <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
           <Field label='이메일'>
-            <input type='email' value={draft.email} onChange={(event) => patch('email', event.target.value)} />
+            <Input type='email' value={draft.email} onChange={(event) => patch('email', event.target.value)} />
           </Field>
           <Field label='웹사이트'>
-            <input
+            <Input
               value={draft.website}
               onChange={(event) => patch('website', event.target.value)}
               placeholder='https://'

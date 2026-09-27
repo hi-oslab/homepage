@@ -1,6 +1,7 @@
 'use client'
 
 import type { HeadingBlock, ParagraphBlock, QuoteBlock, CalloutBlock, SectionIndexBlock } from '@/types/blocks'
+import { Input, Select, Textarea } from '@/components/admin/ui'
 
 export const SectionIndexBlockField = ({
   block,
@@ -11,7 +12,7 @@ export const SectionIndexBlockField = ({
 }) => (
   <div>
     <div className='grid grid-cols-[5rem_1fr] gap-1.5'>
-      <input
+      <Input
         type='text'
         value={block.number}
         placeholder='01'
@@ -19,7 +20,7 @@ export const SectionIndexBlockField = ({
         aria-label='인덱스 번호'
         onChange={(e) => onChange({ ...block, number: e.target.value })}
       />
-      <input
+      <Input
         type='text'
         value={block.title}
         placeholder='섹션 제목'
@@ -41,15 +42,15 @@ export const HeadingBlockField = ({
   onChange: (block: HeadingBlock) => void
 }) => (
   <div>
-    <select
+    <Select
       value={block.level}
       onChange={(e) => onChange({ ...block, level: Number(e.target.value) as 1 | 2 | 3 })}
     >
       <option value={1}>H1</option>
       <option value={2}>H2</option>
       <option value={3}>H3</option>
-    </select>
-    <input
+    </Select>
+    <Input
       type='text'
       value={block.text}
       placeholder='제목'
@@ -66,7 +67,7 @@ export const ParagraphBlockField = ({
   onChange: (block: ParagraphBlock) => void
 }) => (
   <div>
-    <textarea
+    <Textarea
       value={block.text}
       placeholder={'본문을 입력하세요. **굵게**, *기울임*, [링크](https://...) 지원'}
       rows={4}
@@ -83,13 +84,13 @@ export const QuoteBlockField = ({
   onChange: (block: QuoteBlock) => void
 }) => (
   <div>
-    <textarea
+    <Textarea
       value={block.text}
       placeholder='인용문'
       rows={3}
       onChange={(e) => onChange({ ...block, text: e.target.value })}
     />
-    <input
+    <Input
       type='text'
       value={block.cite ?? ''}
       placeholder='출처 (선택)'
@@ -106,7 +107,7 @@ export const CalloutBlockField = ({
   onChange: (block: CalloutBlock) => void
 }) => (
   <div>
-    <input
+    <Input
       type='text'
       value={block.icon ?? ''}
       placeholder='💡'
@@ -114,7 +115,7 @@ export const CalloutBlockField = ({
       style={{ width: '3em' }}
       onChange={(e) => onChange({ ...block, icon: e.target.value })}
     />
-    <textarea
+    <Textarea
       value={block.text}
       placeholder='강조 문구'
       rows={2}

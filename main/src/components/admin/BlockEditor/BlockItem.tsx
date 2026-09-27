@@ -18,6 +18,18 @@ import { CodeBlockField, HtmlBlockField } from './fields/CodeBlocks'
 import { ListBlockField } from './fields/ListBlock'
 import { LegacyMarkdownBlockField } from './fields/LegacyMarkdownBlock'
 import { GoCopy, GoTrash } from 'react-icons/go'
+import { iconButtonClass } from '@/components/admin/ui'
+
+// 툴바 버튼은 블록에 마우스를 올리거나 포커스했을 때만 보인다
+const TOOLBAR_BUTTON = 'opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100'
+
+// 블록 안 입력 필드 간격. 이 규칙이 필드 자체의 margin 클래스보다 뒤에 생성되므로
+// 필드에서 간격을 바꾸려면 mb-0! 처럼 !를 붙인다 (ListBlock, MediaBlocks)
+const BODY = [
+  '[&_:where(textarea,input[type=text],input[type=url])]:mb-1.5',
+  '[&_:where(select)]:mr-1.5 [&_:where(select)]:mb-1.5 [&_:where(select)]:inline-block [&_:where(select)]:w-auto',
+  '[&_hr]:my-2 [&_hr]:h-px [&_hr]:border-0 [&_hr]:bg-border',
+].join(' ')
 
 interface BlockItemProps {
   block: Block
@@ -61,26 +73,37 @@ export const BlockItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className='block-item'
+      className='group/block relative rounded-xl bg-surface pt-3 pr-4 pb-3.5 pl-10'
       data-editor-block-id={block.id}
       onPointerDownCapture={() => onActivate?.(block.id)}
       onFocusCapture={() => onActivate?.(block.id)}
     >
-      <button type='button' className='block-drag-handle' {...attributes} {...listeners} title='드래그해서 순서 변경'>
+      <button
+        type='button'
+        className='absolute inset-y-0 left-0 flex w-8 cursor-grab touch-none items-center justify-center rounded-l-xl text-ink/20 transition-colors hover:bg-field hover:text-ink'
+        {...attributes}
+        {...listeners}
+        title='드래그해서 순서 변경'
+      >
         ⠿
       </button>
 
-      <div className='block-item-toolbar'>
-        <span className='block-type-label'>{BLOCK_TYPE_LABELS[block.type]}</span>
-        <button type='button' onClick={onDuplicate} title='복제' className='icon-btn'>
+      <div className='mb-1.5 flex h-6 items-center gap-0.5'>
+        <span className='flex-1 text-xs text-mute'>{BLOCK_TYPE_LABELS[block.type]}</span>
+        <button type='button' onClick={onDuplicate} title='복제' className={iconButtonClass({ size: 'sm' }, TOOLBAR_BUTTON)}>
           <GoCopy size={13} />
         </button>
-        <button type='button' onClick={onRemove} title='삭제' className='icon-btn hover:bg-danger-soft! hover:text-danger!'>
+        <button
+          type='button'
+          onClick={onRemove}
+          title='삭제'
+          className={iconButtonClass({ danger: true, size: 'sm' }, TOOLBAR_BUTTON)}
+        >
           <GoTrash size={13} />
         </button>
       </div>
 
-      <div className='block-item-body' ref={bodyRef}>
+      <div className={BODY} ref={bodyRef}>
         <BlockFields block={block} projectId={projectId} onChange={onChange} onDeleteImage={onDeleteImage} />
       </div>
     </div>

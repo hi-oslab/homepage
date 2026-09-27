@@ -22,7 +22,7 @@ export const Scene = ({ children, className }: { children?: ReactNode; className
               <div className='space-y-1 text-left font-mono text-sm text-neutral-400'>
                 <p>&gt; initializing 3d scene...</p>
                 <p>
-                  &gt; loading model<span className='cursor-blink'>▊</span>
+                  &gt; loading model<span className='animate-cursor-blink'>▊</span>
                 </p>
               </div>
             </Html>

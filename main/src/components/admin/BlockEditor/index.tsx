@@ -80,7 +80,7 @@ export const BlockEditor = ({
   }
 
   return (
-    <div className='block-editor pb-12'>
+    <div className='flex flex-col pb-12'>
       {blocks.length > 0 && (
         <AddBlockMenu variant='inline' label='맨 위에 추가' onInsert={(type) => insertAt(0, type)} />
       )}

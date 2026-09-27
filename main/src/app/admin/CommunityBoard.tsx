@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState, useTransition } from 'react'
 import { GoChevronDown, GoTrash } from 'react-icons/go'
-import { useToast } from '@/components/admin/ui'
+import { Textarea, buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import { COMMENT_MAX, POST_MAX, type CommunityKind, type CommunityPost } from '@/lib/community-types'
 import { Segmented } from './AccountFields'
 import { RelativeTime } from './DashboardActions'
@@ -23,7 +23,10 @@ const expand = {
 
 /** 대시보드 커뮤니티: 공지 / 자유글 + 댓글. 목록은 접었다 펼 수 있다 */
 export function CommunityBoard({ initialPosts, me }: { initialPosts: CommunityPost[] | null; me: Me }) {
-  const [posts, setPosts] = useState(initialPosts ?? [])
+  // null(테이블 없음)을 그대로 넘겨야 렌더마다 새 배열로 바뀌지 않는다
+  const [serverPosts, setPosts] = useServerState(initialPosts)
+  const posts = useMemo(() => serverPosts ?? [], [serverPosts])
+  useRefreshOnFocus()
   // 가장 최근 공지는 기본으로 펼쳐 둔다
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set((initialPosts ?? []).filter((post) => post.kind === 'notice').slice(0, 1).map((post) => post.id)),
@@ -69,7 +72,7 @@ export function CommunityBoard({ initialPosts, me }: { initialPosts: CommunityPo
         <button
           type='button'
           onClick={() => setComposing((value) => !value)}
-          className={classNames('btn btn-sm', composing ? 'btn-ghost' : 'btn-secondary')}
+          className={buttonClass(composing ? 'ghost' : 'secondary', 'sm')}
         >
           {composing ? '닫기' : '+ 새 글 쓰기'}
         </button>
@@ -81,7 +84,7 @@ export function CommunityBoard({ initialPosts, me }: { initialPosts: CommunityPo
             <Composer
               isMaster={me.isMaster}
               onPosted={(post) => {
-                setPosts((current) => [post, ...current])
+                setPosts((current) => [post, ...(current ?? [])])
                 setOpenIds((current) => new Set(current).add(post.id))
                 setComposing(false)
                 toast.show('글을 올렸어요')
@@ -103,8 +106,8 @@ export function CommunityBoard({ initialPosts, me }: { initialPosts: CommunityPo
               me={me}
               open={openIds.has(post.id)}
               onToggle={() => toggle(post.id)}
-              onChange={(next) => setPosts((current) => current.map((item) => (item.id === next.id ? next : item)))}
-              onDelete={() => setPosts((current) => current.filter((item) => item.id !== post.id))}
+              onChange={(next) => setPosts((current) => (current ?? []).map((item) => (item.id === next.id ? next : item)))}
+              onDelete={() => setPosts((current) => (current ?? []).filter((item) => item.id !== post.id))}
               toast={toast.show}
             />
           ))}
@@ -112,7 +115,7 @@ export function CommunityBoard({ initialPosts, me }: { initialPosts: CommunityPo
       )}
 
       {sorted.length > visible && (
-        <button type='button' onClick={() => setVisible((value) => value + PAGE_SIZE)} className='btn btn-ghost btn-sm self-center'>
+        <button type='button' onClick={() => setVisible((value) => value + PAGE_SIZE)} className={buttonClass('ghost', 'sm', 'self-center')}>
           더 보기 ({sorted.length - visible})
         </button>
       )}
@@ -164,7 +167,7 @@ function Composer({
           />
         </div>
       )}
-      <textarea
+      <Textarea
         autoFocus
         rows={4}
         maxLength={POST_MAX}
@@ -177,13 +180,13 @@ function Composer({
           }
         }}
         placeholder={kind === 'notice' ? '멤버들에게 알릴 공지를 적어주세요.' : '하고 싶은 말을 자유롭게 남겨주세요.'}
-        className='resize-none bg-surface!'
+        className='resize-none bg-surface'
       />
       <div className='flex items-center justify-between text-xs text-mute'>
         <span>
           {body.length}/{POST_MAX} · ⌘+Enter로 등록
         </span>
-        <button type='submit' disabled={!body.trim() || isPending} className='btn btn-primary btn-sm'>
+        <button type='submit' disabled={!body.trim() || isPending} className={buttonClass('primary', 'sm')}>
           {isPending ? '올리는 중…' : kind === 'notice' ? '공지 올리기' : '올리기'}
         </button>
       </div>
@@ -310,7 +313,7 @@ function PostItem({
                   }}
                   className='flex items-end gap-2'
                 >
-                  <textarea
+                  <Textarea
                     rows={1}
                     maxLength={COMMENT_MAX}
                     value={comment}
@@ -323,9 +326,9 @@ function PostItem({
                     }}
                     placeholder='댓글 달기 (Enter로 등록, Shift+Enter 줄바꿈)'
                     aria-label='댓글'
-                    className='field-sizing-content min-h-9 resize-none py-2! text-sm!'
+                    className='field-sizing-content min-h-9 resize-none py-2 text-sm'
                   />
-                  <button type='submit' disabled={!comment.trim() || isPending} className='btn btn-secondary btn-sm shrink-0'>
+                  <button type='submit' disabled={!comment.trim() || isPending} className={buttonClass('secondary', 'sm', 'shrink-0')}>
                     등록
                   </button>
                 </form>

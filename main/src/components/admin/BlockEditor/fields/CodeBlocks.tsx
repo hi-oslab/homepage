@@ -1,6 +1,7 @@
 'use client'
 
 import type { CodeBlock, HtmlBlock } from '@/types/blocks'
+import { Input, Textarea } from '@/components/admin/ui'
 
 export const CodeBlockField = ({
   block,
@@ -10,13 +11,13 @@ export const CodeBlockField = ({
   onChange: (block: CodeBlock) => void
 }) => (
   <div>
-    <input
+    <Input
       type='text'
       value={block.language ?? ''}
       placeholder='language (예: tsx, css, bash)'
       onChange={(e) => onChange({ ...block, language: e.target.value })}
     />
-    <textarea
+    <Textarea
       value={block.code}
       placeholder='코드를 입력하세요'
       rows={8}
@@ -34,7 +35,7 @@ export const HtmlBlockField = ({
   onChange: (block: HtmlBlock) => void
 }) => (
   <div>
-    <textarea
+    <Textarea
       value={block.html}
       placeholder='HTML 코드를 직접 입력하세요'
       rows={8}

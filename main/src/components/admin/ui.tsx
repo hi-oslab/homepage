@@ -1,9 +1,53 @@
 'use client'
 
-import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { forwardRef, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { GoImage, GoTrash } from 'react-icons/go'
+
+import { cn } from '@/lib/cn'
+import {
+  buttonClass,
+  fieldClass,
+  iconButtonClass,
+  SELECT_CHEVRON,
+  selectClass,
+  type ButtonSize,
+  type ButtonVariant,
+} from './styles'
+
+export { buttonClass, fieldClass, iconButtonClass, selectClass }
+
+/* ─── 기본 요소 (버튼 · 입력 필드) ─────────────────────────────────────── */
+
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }
+
+export const Button = ({ variant = 'secondary', size = 'md', type = 'button', className, ...props }: ButtonProps) => (
+  <button type={type} className={buttonClass(variant, size, className)} {...props} />
+)
+
+type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { danger?: boolean; size?: 'md' | 'sm' }
+
+export const IconButton = ({ danger, size, type = 'button', className, ...props }: IconButtonProps) => (
+  <button type={type} className={iconButtonClass({ danger, size }, className)} {...props} />
+)
+
+export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, ...props }, ref) => <input ref={ref} className={fieldClass(className)} {...props} />,
+)
+Input.displayName = 'Input'
+
+export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  ({ className, ...props }, ref) => <textarea ref={ref} className={fieldClass(className)} {...props} />,
+)
+Textarea.displayName = 'Textarea'
+
+export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
+  ({ className, style, ...props }, ref) => (
+    <select ref={ref} className={selectClass(className)} style={{ backgroundImage: SELECT_CHEVRON, ...style }} {...props} />
+  ),
+)
+Select.displayName = 'Select'
 
 /* ─── 레이아웃 ─────────────────────────────────────────────────────────── */
 
@@ -39,7 +83,7 @@ export const Panel = ({
   children: React.ReactNode
   className?: string
 }) => (
-  <section className={classNames('flex flex-col gap-4 rounded-xl bg-surface p-5', className)}>
+  <section className={cn('flex flex-col gap-4 rounded-xl bg-surface p-5', className)}>
     {title && <h2 className='text-sm text-mute'>{title}</h2>}
     {children}
   </section>
@@ -58,7 +102,7 @@ export const Field = ({
   children: React.ReactNode
   className?: string
 }) => (
-  <label className={classNames('flex flex-col gap-1.5', className)}>
+  <label className={cn('flex flex-col gap-1.5', className)}>
     <span className='text-xs text-mute'>{label}</span>
     {children}
     {hint && <span className='text-[11px] leading-snug text-mute'>{hint}</span>}
@@ -92,7 +136,7 @@ export const Switch = ({
     className='group inline-flex items-center gap-2 text-sm disabled:opacity-40'
   >
     <span
-      className={classNames(
+      className={cn(
         'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200',
         checked ? 'bg-ink' : 'bg-[#d9d9d5]',
       )}
@@ -100,17 +144,17 @@ export const Switch = ({
       <motion.span
         layout
         transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-        className={classNames('absolute size-4 rounded-full bg-white', checked ? 'right-0.5' : 'left-0.5')}
+        className={cn('absolute size-4 rounded-full bg-white', checked ? 'right-0.5' : 'left-0.5')}
       />
     </span>
-    {label && <span className={classNames(checked ? 'text-ink' : 'text-mute', labelClassName)}>{label}</span>}
+    {label && <span className={cn(checked ? 'text-ink' : 'text-mute', labelClassName)}>{label}</span>}
   </button>
 )
 
 /** 상태 표시 점 + 텍스트 */
 export const StatusBadge = ({ published }: { published: boolean }) => (
-  <span className={classNames('inline-flex items-center gap-1.5 text-xs', published ? 'text-ink' : 'text-mute')}>
-    <span className={classNames('size-1.5 rounded-full', published ? 'bg-success' : 'bg-[#c9c9c4]')} />
+  <span className={cn('inline-flex items-center gap-1.5 text-xs', published ? 'text-ink' : 'text-mute')}>
+    <span className={cn('size-1.5 rounded-full', published ? 'bg-success' : 'bg-[#c9c9c4]')} />
     {published ? '공개' : '비공개'}
   </span>
 )
@@ -165,7 +209,7 @@ export const TagInput = ({
             </button>
           </span>
         ))}
-        <input
+        <Input
           ref={inputRef}
           list={listId}
           value={draft}
@@ -186,7 +230,7 @@ export const TagInput = ({
             }
           }}
           onBlur={() => draft && add(draft)}
-          className='min-w-24 flex-1 bg-transparent! px-1! py-0.5! text-sm'
+          className='min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm'
         />
         <datalist id={listId}>
           {remaining.map((item) => (
@@ -242,7 +286,7 @@ export const ImageDrop = ({
 
   return (
     <div
-      className={classNames(
+      className={cn(
         'group relative w-full overflow-hidden rounded-lg transition-colors',
         aspect,
         dragging ? 'bg-tile' : 'bg-field',
@@ -277,7 +321,7 @@ export const ImageDrop = ({
           <button
             type='button'
             onClick={() => inputRef.current?.click()}
-            className='btn btn-sm bg-ink/80 text-white hover:bg-ink'
+            className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-ink')}
           >
             교체
           </button>
@@ -285,7 +329,7 @@ export const ImageDrop = ({
             <button
               type='button'
               onClick={onRemove}
-              className='btn btn-sm bg-ink/80 text-white hover:bg-danger'
+              className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-danger')}
               aria-label='이미지 제거'
             >
               <GoTrash size={12} />
@@ -339,7 +383,7 @@ export function useToast() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-            className={classNames(
+            className={cn(
               'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm text-white',
               toast.kind === 'error' ? 'bg-danger' : 'bg-ink',
             )}
@@ -395,4 +439,39 @@ export function relativeTime(iso: string) {
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
   if (diff < 86400 * 30) return `${Math.floor(diff / 86400)}일 전`
   return new Date(iso).toLocaleDateString('ko-KR')
+}
+
+/* ─── 서버 데이터 동기화 ───────────────────────────────────────────────── */
+
+/**
+ * 서버에서 받은 목록을 화면에서 바로 고칠 수 있는 상태로 쓴다.
+ * 서버 값이 새로 오면(서버 액션 후 재검증, router.refresh) 그 값으로 다시 맞춘다.
+ */
+export function useServerState<T>(serverValue: T) {
+  const [value, setValue] = useState(serverValue)
+  const [synced, setSynced] = useState(serverValue)
+  if (serverValue !== synced) {
+    setSynced(serverValue)
+    setValue(serverValue)
+  }
+  return [value, setValue] as const
+}
+
+/** 창으로 돌아오면 최신 데이터를 다시 불러온다 (다른 관리자가 바꾼 내용, 새 가입 신청 등) */
+export function useRefreshOnFocus(minIntervalMs = 10_000) {
+  const router = useRouter()
+  useEffect(() => {
+    let last = Date.now()
+    const refresh = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - last < minIntervalMs) return
+      last = Date.now()
+      router.refresh()
+    }
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [router, minIntervalMs])
 }

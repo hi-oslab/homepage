@@ -1,10 +1,14 @@
 'use client'
 
 import classNames from 'classnames'
-import type { AccountProfileInput } from '@/types/cms'
+import type { AccountProfileInput, MemberAffiliation } from '@/types/cms'
+import { GoCheck, GoCheckCircle, GoCheckCircleFill } from 'react-icons/go'
+import { Input, Select } from '@/components/admin/ui'
+import { LARGE_FIELD } from '@/components/admin/styles'
 
 export const emptyAccountProfile = (): AccountProfileInput => ({
   name: '',
+  affiliation: null,
   student_id: '',
   is_hongik: true,
   phone: '',
@@ -12,7 +16,10 @@ export const emptyAccountProfile = (): AccountProfileInput => ({
   joined_half: new Date().getMonth() < 6 ? 'H1' : 'H2',
 })
 
-const YEARS = Array.from({ length: new Date().getFullYear() - 2018 + 1 }, (_, index) => new Date().getFullYear() - index)
+const YEARS = Array.from(
+  { length: new Date().getFullYear() - 2018 + 1 },
+  (_, index) => new Date().getFullYear() - index,
+)
 
 /** 두세 개 중 하나를 고르는 버튼 그룹 */
 export function Segmented<T extends string | boolean>({
@@ -34,47 +41,60 @@ export function Segmented<T extends string | boolean>({
           type='button'
           onClick={() => onChange(option.value)}
           className={classNames(
-            'flex-1 rounded-md px-3 text-sm transition-colors',
+            'flex-1 text-nowrap rounded-md px-3 text-sm transition-colors',
             large ? 'py-2.5' : 'py-1.5',
             value === option.value ? 'bg-surface text-ink' : 'text-mute hover:text-ink',
           )}
         >
-          {option.label}
+          {option.label}{' '}
+          {value === option.value && <GoCheckCircleFill className='ml-1 -mr-1 mb-0.5 inline-block size-4 text-ink' />}
         </button>
       ))}
     </div>
   )
 }
 
-/** 실명 · 전화번호 · 홍익대 여부 · 학번 · 오픈소스랩 가입 시기 */
-export function AccountFields({
-  value,
-  onChange,
-  large,
-}: {
+export const AFFILIATION_LABELS: Record<MemberAffiliation, string> = {
+  club: '학교 소모임',
+  external: '외부 활동',
+}
+
+type FieldsProps = {
   value: AccountProfileInput
   onChange: (value: AccountProfileInput) => void
   /** 로그인 화면처럼 큰 입력칸 */
   large?: boolean
-}) {
-  const set = <K extends keyof AccountProfileInput>(key: K, next: AccountProfileInput[K]) => onChange({ ...value, [key]: next })
-  const inputClass = large ? 'bg-tile! py-3.5! text-base!' : ''
-  const label = (text: string, optional?: boolean) => (
-    <span className='text-xs text-mute'>
-      {text}
-      {optional && <span className='ml-1 text-ink/30'>(선택)</span>}
-    </span>
-  )
+}
+
+const FieldLabel = ({ text, optional }: { text: string; optional?: boolean }) => (
+  <span className='text-xs text-mute'>
+    {text}
+    {optional && <span className='ml-1 text-ink/30'>(선택)</span>}
+  </span>
+)
+
+/** 실명 · 전화번호 */
+export function IdentityFields({ value, onChange, large, autoFocus }: FieldsProps & { autoFocus?: boolean }) {
+  const set = <K extends keyof AccountProfileInput>(key: K, next: AccountProfileInput[K]) =>
+    onChange({ ...value, [key]: next })
+  const inputClass = large ? LARGE_FIELD : ''
 
   return (
     <div className='flex flex-col gap-3'>
       <label className='flex flex-col gap-1.5'>
-        {label('실명')}
-        <input required autoComplete='name' value={value.name} onChange={(event) => set('name', event.target.value)} className={inputClass} />
+        <FieldLabel text='실명' />
+        <Input
+          required
+          autoFocus={autoFocus}
+          autoComplete='name'
+          value={value.name}
+          onChange={(event) => set('name', event.target.value)}
+          className={inputClass}
+        />
       </label>
       <label className='flex flex-col gap-1.5'>
-        {label('전화번호')}
-        <input
+        <FieldLabel text='전화번호' />
+        <Input
           required
           type='tel'
           inputMode='tel'
@@ -85,21 +105,77 @@ export function AccountFields({
           className={inputClass}
         />
       </label>
+    </div>
+  )
+}
+
+/** 소속(필수) · 홍익대 여부 · 학번 · 오픈소스랩 가입 시기 */
+export function AffiliationFields({ value, onChange, large }: FieldsProps) {
+  const set = <K extends keyof AccountProfileInput>(key: K, next: AccountProfileInput[K]) =>
+    onChange({ ...value, [key]: next })
+  const inputClass = large ? LARGE_FIELD : ''
+
+  return (
+    <div className='flex flex-col gap-3'>
       <div className='flex flex-col gap-1.5'>
-        {label('홍익대학교 학생(졸업생 포함)인가요?')}
-        <Segmented
-          large={large}
-          value={value.is_hongik}
-          onChange={(next) => set('is_hongik', next)}
-          options={[
-            { value: true, label: '네' },
-            { value: false, label: '아니요' },
-          ]}
-        />
+        <FieldLabel text='소속' />
+        <div className='grid grid-cols-2 gap-2'>
+          {(
+            [
+              { value: 'club', label: AFFILIATION_LABELS.club, hint: '현재 학교 소모임에서 활동 중' },
+              { value: 'external', label: AFFILIATION_LABELS.external, hint: '졸업생 · 타 학교 · 외부 협업' },
+            ] as const
+          ).map((option) => (
+            <button
+              key={option.value}
+              type='button'
+              aria-pressed={value.affiliation === option.value}
+              onClick={() =>
+                onChange({
+                  ...value,
+                  affiliation: option.value,
+                  ...(option.value === 'club' ? { is_hongik: true } : {}),
+                })
+              }
+              className={classNames(
+                'flex flex-col items-start gap-0.5 rounded-lg px-3 text-left transition-colors',
+                large ? 'py-3' : 'py-2',
+                value.affiliation === option.value
+                  ? 'bg-ink text-white'
+                  : classNames(large ? 'bg-tile' : 'bg-field', 'text-ink hover:bg-ink/10'),
+              )}
+            >
+              <span className='text-sm'>{option.label}</span>
+              <span
+                className={classNames(
+                  'text-[11px]',
+                  value.affiliation === option.value ? 'text-white/60' : 'text-mute',
+                )}
+              >
+                {option.hint}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
+      {/* 학교 소모임 멤버는 홍익대 학생이므로 묻지 않는다 */}
+      {value.affiliation === 'external' && (
+        <div className='flex flex-col gap-1.5'>
+          <FieldLabel text='홍익대학교 학생(졸업생 포함)인가요?' />
+          <Segmented
+            large={large}
+            value={value.is_hongik}
+            onChange={(next) => set('is_hongik', next)}
+            options={[
+              { value: true, label: '네' },
+              { value: false, label: '아니요' },
+            ]}
+          />
+        </div>
+      )}
       <label className='flex flex-col gap-1.5'>
-        {label('학번', true)}
-        <input
+        <FieldLabel text='학번' optional />
+        <Input
           inputMode='numeric'
           placeholder={value.is_hongik ? '예: B812345' : '학번이 있다면 입력해 주세요'}
           value={value.student_id}
@@ -108,9 +184,9 @@ export function AccountFields({
         />
       </label>
       <div className='flex flex-col gap-1.5'>
-        {label('오픈소스랩 가입 시기')}
+        <FieldLabel text='오픈소스랩 가입 시기' />
         <div className='grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-2'>
-          <select
+          <Select
             aria-label='가입 연도'
             value={value.joined_year ?? ''}
             onChange={(event) => set('joined_year', Number(event.target.value))}
@@ -121,7 +197,7 @@ export function AccountFields({
                 {year}년
               </option>
             ))}
-          </select>
+          </Select>
           <Segmented
             large={large}
             value={value.joined_half ?? 'H1'}
@@ -133,6 +209,16 @@ export function AccountFields({
           />
         </div>
       </div>
+    </div>
+  )
+}
+
+/** 내 계정 화면: 본인 정보 + 소속 */
+export function AccountFields(props: FieldsProps) {
+  return (
+    <div className='flex flex-col gap-3'>
+      <IdentityFields {...props} />
+      <AffiliationFields {...props} />
     </div>
   )
 }

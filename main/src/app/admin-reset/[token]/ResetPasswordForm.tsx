@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { AuthScreen } from '@/app/admin/AdminAuth'
 import { resetPasswordAction } from '@/app/admin/actions'
 import { Arrow } from '@/components/Typography'
+import { Input, buttonClass } from '@/components/admin/ui'
 
 export function ResetPasswordForm({ token, account }: { token: string; account: { name: string; username: string } | null }) {
   const [password, setPassword] = useState('')
@@ -20,7 +21,7 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
           만료되었거나 이미 사용된 링크입니다. 재설정 링크는 한 번만 쓸 수 있고 24시간 동안만 유효해요. 관리자에게 새 링크를
           요청해 주세요.
         </p>
-        <Link href='/admin' className='btn btn-secondary self-start'>
+        <Link href='/admin' className={buttonClass('secondary', 'md', 'self-start')}>
           로그인 화면으로
         </Link>
       </AuthScreen>
@@ -33,7 +34,7 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
         <p className='break-keep text-base leading-relaxed'>
           비밀번호를 바꿨어요. 이 링크는 이제 사용할 수 없고, 다른 기기의 로그인은 모두 해제되었습니다.
         </p>
-        <Link href='/admin' className='btn btn-primary self-start'>
+        <Link href='/admin' className={buttonClass('primary', 'md', 'self-start')}>
           어드민으로 이동
         </Link>
       </AuthScreen>
@@ -60,7 +61,7 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
         }}
         className='flex flex-col gap-2'
       >
-        <input
+        <Input
           type='password'
           required
           minLength={8}
@@ -73,9 +74,9 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
             setPassword(event.target.value)
             setError('')
           }}
-          className='bg-tile! py-3.5! text-base!'
+          className='bg-tile py-3.5 text-base'
         />
-        <input
+        <Input
           type='password'
           required
           autoComplete='new-password'
@@ -86,10 +87,10 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
             setConfirm(event.target.value)
             setError('')
           }}
-          className='bg-tile! py-3.5! text-base!'
+          className='bg-tile py-3.5 text-base'
         />
         {error && <p className='text-sm text-danger'>{error}</p>}
-        <button type='submit' disabled={isPending} className='btn btn-primary min-h-12! justify-between! px-5! text-base!'>
+        <button type='submit' disabled={isPending} className={buttonClass('primary', 'lg', 'justify-between')}>
           {isPending ? '처리 중…' : '비밀번호 변경'}
           <Arrow direction='right' className='size-5' />
         </button>

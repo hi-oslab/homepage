@@ -1,7 +1,10 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { getCurrentUser, isApproved } from '@/lib/admin-auth'
 import { getAdminMembers, getAdminUsers, getAdminWorks, getMember } from '@/lib/cms'
 import { PageHeader, Panel } from '@/components/admin/ui'
+// 서버 컴포넌트: 클라이언트 모듈(ui) 대신 styles에서 직접 가져온다
+import { buttonClass } from '@/components/admin/styles'
 import { Arrow } from '@/components/Typography'
 import { createWorkAction } from './works/actions'
 import { DashboardActions, RelativeTime } from './DashboardActions'
@@ -14,6 +17,8 @@ export default async function AdminDashboardPage() {
   // 대시보드에서는 리다이렉트하지 않는다 (승인 대기 안내는 레이아웃이 보여주므로 여기서 /admin 으로 보내면 무한 루프)
   const user = await getCurrentUser().catch(() => null)
   if (!isApproved(user)) return null
+  // 첫 로그인: 멤버 프로필 연결부터 (기존 프로필 선택 / 새로 만들기 / 나중에)
+  if (!user.member_id && !user.onboarded_at) redirect('/admin/profile?welcome=1')
   const isMaster = user.is_master
   const [works, members, users, profile, posts] = await Promise.all([
     getAdminWorks('updated_at', isMaster ? undefined : user.id),
@@ -53,7 +58,7 @@ export default async function AdminDashboardPage() {
         description={isMaster ? '오픈소스랩 웹사이트의 작품과 멤버를 관리합니다.' : '내 프로필과 작품을 관리합니다.'}
         actions={
           <form action={createWorkAction}>
-            <button className='btn btn-primary'>+ 새 작품</button>
+            <button className={buttonClass('primary')}>+ 새 작품</button>
           </form>
         }
       />
@@ -130,6 +135,12 @@ export default async function AdminDashboardPage() {
 
           {/* 확인이 필요한 항목 */}
           <Panel title='확인이 필요해요'>
+            {!user.affiliation && (
+              <Link href='/admin/account' className='-mx-2 flex justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-field'>
+                <span>내 소속 (학교 소모임 / 외부 활동)</span>
+                <span className='text-xs text-danger'>선택 안 함</span>
+              </Link>
+            )}
             {!profile && (
               <Link href='/admin/profile' className='-mx-2 flex justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-field'>
                 <span>내 멤버 프로필</span>

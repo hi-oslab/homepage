@@ -2,17 +2,18 @@
 
 import classNames from 'classnames'
 import { useState, useTransition } from 'react'
-import { GoCopy, GoKey, GoTrash } from 'react-icons/go'
-import { PageHeader, Switch, useToast } from '@/components/admin/ui'
+import { GoChevronDown, GoCopy, GoKey, GoTrash } from 'react-icons/go'
+import { Input, PageHeader, Select, Switch, buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import { RelativeTime } from '../DashboardActions'
-import { formatJoined } from '../AccountFields'
-import type { AdminUser, AdminUserStatus, HelpRequest, Member } from '@/types/cms'
+import { AFFILIATION_LABELS, Segmented, formatJoined } from '../AccountFields'
+import type { AdminUser, AdminUserStatus, HelpRequest, Member, MemberAffiliation } from '@/types/cms'
 import {
   approveAsMasterAction,
   createResetLinkAction,
   deleteUserAction,
   linkUserMemberAction,
   resolveHelpRequestAction,
+  setUserAffiliationAction,
   setUserMasterAction,
   setUserStatusAction,
 } from './actions'
@@ -22,6 +23,16 @@ type MemberOption = Pick<Member, 'id' | 'name' | 'cover_image_url'>
 type ActionResult = { ok: true; user?: AdminUser } | { ok: false; message: string }
 
 const TABS: Record<Tab, string> = { pending: '승인 대기', approved: '승인됨', rejected: '거절됨', requests: '문의' }
+
+type AffiliationFilter = 'all' | MemberAffiliation | 'none'
+const AFFILIATION_FILTERS: Record<AffiliationFilter, string> = {
+  all: '전체',
+  club: AFFILIATION_LABELS.club,
+  external: AFFILIATION_LABELS.external,
+  none: '미지정',
+}
+const matchesAffiliation = (user: AdminUser, filter: AffiliationFilter) =>
+  filter === 'all' || (filter === 'none' ? !user.affiliation : user.affiliation === filter)
 
 const digits = (value: string) => value.replace(/[^\d]/g, '')
 
@@ -36,8 +47,9 @@ export function UsersManager({
   members: MemberOption[]
   currentUserId: string
 }) {
-  const [users, setUsers] = useState(initialUsers)
-  const [requests, setRequests] = useState(initialRequests)
+  const [users, setUsers] = useServerState(initialUsers)
+  const [requests, setRequests] = useServerState(initialRequests)
+  useRefreshOnFocus()
   const [tab, setTab] = useState<Tab>(() =>
     initialUsers.some((user) => user.status === 'pending')
       ? 'pending'
@@ -45,6 +57,7 @@ export function UsersManager({
         ? 'requests'
         : 'approved',
   )
+  const [affiliation, setAffiliation] = useState<AffiliationFilter>('all')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [resetLink, setResetLink] = useState<{ userId: string; url: string; expiresAt: string } | null>(null)
   const [, startTransition] = useTransition()
@@ -94,31 +107,56 @@ export function UsersManager({
       <PageHeader
         title='회원 관리'
         count={users.length}
-        description='가입 승인, 관리자 권한, 프로필 연결, 비밀번호 재설정 문의를 관리합니다.'
+        description='가입 승인, 소속, 관리자 권한, 프로필 연결, 비밀번호 재설정 문의를 관리합니다.'
       />
 
-      <div className='flex self-start overflow-x-auto rounded-lg bg-tile p-0.5'>
-        {(Object.keys(TABS) as Tab[]).map((value) => (
-          <button
-            key={value}
-            type='button'
-            onClick={() => setTab(value)}
-            className={classNames(
-              'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-              tab === value ? 'bg-surface text-ink' : 'text-mute hover:text-ink',
-            )}
-          >
-            {TABS[value]}
-            <span
+      <div className='flex flex-wrap items-center gap-2'>
+        <div className='flex self-start overflow-x-auto rounded-lg bg-tile p-0.5'>
+          {(Object.keys(TABS) as Tab[]).map((value) => (
+            <button
+              key={value}
+              type='button'
+              onClick={() => setTab(value)}
               className={classNames(
-                'text-xs',
-                (value === 'pending' || value === 'requests') && counts[value] > 0 ? 'text-danger' : 'text-mute',
+                'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+                tab === value ? 'bg-surface text-ink' : 'text-mute hover:text-ink',
               )}
             >
-              {counts[value]}
-            </span>
-          </button>
-        ))}
+              {TABS[value]}
+              <span
+                className={classNames(
+                  'text-xs',
+                  (value === 'pending' || value === 'requests') && counts[value] > 0 ? 'text-danger' : 'text-mute',
+                )}
+              >
+                {counts[value]}
+              </span>
+            </button>
+          ))}
+        </div>
+        {/* 소속별 보기: 학교 소모임 / 외부 활동 */}
+        {tab !== 'requests' && (
+          <div className='flex overflow-x-auto rounded-lg bg-tile p-0.5'>
+            {(Object.keys(AFFILIATION_FILTERS) as AffiliationFilter[]).map((value) => {
+              const count = users.filter((user) => user.status === tab && matchesAffiliation(user, value)).length
+              if (value === 'none' && count === 0) return null
+              return (
+                <button
+                  key={value}
+                  type='button'
+                  onClick={() => setAffiliation(value)}
+                  className={classNames(
+                    'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+                    affiliation === value ? 'bg-surface text-ink' : 'text-mute hover:text-ink',
+                  )}
+                >
+                  {AFFILIATION_FILTERS[value]}
+                  <span className='text-xs text-mute'>{count}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* 방금 만든 재설정 링크 */}
@@ -133,11 +171,11 @@ export function UsersManager({
             </button>
           </div>
           <div className='flex flex-col gap-2 sm:flex-row'>
-            <input
+            <Input
               readOnly
               value={resetLink.url}
               onFocus={(event) => event.target.select()}
-              className='bg-white/10! text-white! text-sm!'
+              className='bg-white/10 text-white text-sm'
             />
             <button
               type='button'
@@ -145,7 +183,7 @@ export function UsersManager({
                 await navigator.clipboard.writeText(resetLink.url)
                 toast.show('링크를 복사했습니다')
               }}
-              className='btn shrink-0 bg-white text-ink hover:opacity-85'
+              className={buttonClass('plain', 'md', 'shrink-0 bg-white text-ink hover:opacity-85')}
             >
               <GoCopy size={14} />
               복사
@@ -163,7 +201,7 @@ export function UsersManager({
       ) : (
         <ul className='flex flex-col gap-1'>
           {users
-            .filter((user) => user.status === tab)
+            .filter((user) => user.status === tab && matchesAffiliation(user, affiliation))
             .map((user) => (
               <UserRow
                 key={user.id}
@@ -177,7 +215,7 @@ export function UsersManager({
                 onRemoved={() => setUsers((current) => current.filter((item) => item.id !== user.id))}
               />
             ))}
-          {counts[tab] === 0 && (
+          {users.filter((user) => user.status === tab && matchesAffiliation(user, affiliation)).length === 0 && (
             <li className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>
               {tab === 'pending' ? '승인을 기다리는 가입 신청이 없습니다.' : '해당하는 계정이 없습니다.'}
             </li>
@@ -249,7 +287,9 @@ function UserRow({
         <button
           type='button'
           onClick={() => setOpen((value) => !value)}
-          className='flex min-w-0 flex-1 items-center gap-3 text-left'
+          aria-expanded={open}
+          title={open ? '가입 정보 접기' : '가입 정보 · 소속 설정 보기'}
+          className='group -m-2 flex min-w-0 flex-1 items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-field'
         >
           <span className='flex size-10 shrink-0 items-center justify-center rounded-full bg-field text-sm'>
             {user.name.slice(0, 1) || '?'}
@@ -261,6 +301,14 @@ function UserRow({
               {user.master_requested && !user.is_master && (
                 <span className='rounded bg-danger-soft px-1.5 py-0.5 text-[10px] text-danger'>관리자 신청</span>
               )}
+              <span
+                className={classNames(
+                  'rounded px-1.5 py-0.5 text-[10px]',
+                  user.affiliation ? 'bg-field text-ink/70' : 'bg-danger-soft text-danger',
+                )}
+              >
+                {user.affiliation ? AFFILIATION_LABELS[user.affiliation] : '소속 미지정'}
+              </span>
               {isMe && <span className='text-xs text-mute'>(나)</span>}
             </span>
             <span className='truncate text-xs text-mute'>
@@ -268,12 +316,17 @@ function UserRow({
               가입 · 신청 <RelativeTime iso={user.created_at} />
             </span>
           </span>
+          {/* 펼칠 수 있다는 표시 */}
+          <span className='ml-auto flex shrink-0 items-center gap-1 text-xs text-mute group-hover:text-ink'>
+            <span className='hidden sm:inline'>{open ? '접기' : '상세'}</span>
+            <GoChevronDown size={14} className={classNames('transition-transform', open && 'rotate-180')} />
+          </span>
         </button>
 
         {/* 승인된 계정: 프로필 연결 + 관리자 권한 */}
         {user.status === 'approved' && (
           <div className='flex flex-wrap items-center gap-3'>
-            <select
+            <Select
               aria-label='연결된 멤버 프로필'
               value={user.member_id ?? ''}
               disabled={busy}
@@ -284,7 +337,7 @@ function UserRow({
                   '프로필 연결을 변경했습니다',
                 )
               }
-              className='w-48! text-sm!'
+              className='w-48 text-sm'
             >
               <option value=''>프로필 연결 안 함</option>
               {members.map((member) => {
@@ -296,7 +349,7 @@ function UserRow({
                   </option>
                 )
               })}
-            </select>
+            </Select>
             <Switch
               checked={user.is_master}
               disabled={busy}
@@ -321,7 +374,7 @@ function UserRow({
         <div className='flex shrink-0 items-center gap-1'>
           {/* 관리자 권한을 신청한 가입자: 관리자로 승인 / 멤버로 승인 */}
           {user.status !== 'approved' && user.master_requested && (
-            <button type='button' disabled={busy} onClick={approveAsMaster} className='btn btn-primary btn-sm'>
+            <button type='button' disabled={busy} onClick={approveAsMaster} className={buttonClass('primary', 'sm')}>
               관리자로 승인
             </button>
           )}
@@ -330,9 +383,9 @@ function UserRow({
               type='button'
               disabled={busy}
               onClick={() => setStatus('approved')}
-              className={classNames('btn btn-sm', user.master_requested ? 'btn-secondary' : 'btn-primary')}
+              className={buttonClass(user.master_requested ? 'secondary' : 'primary', 'sm')}
             >
-              {user.master_requested ? '멤버로 승인' : '승인'}
+              {user.master_requested ? '관리자로 승인' : '승인'}
             </button>
           )}
           {user.status === 'pending' && (
@@ -340,7 +393,7 @@ function UserRow({
               type='button'
               disabled={busy}
               onClick={() => setStatus('rejected')}
-              className='btn btn-secondary btn-sm'
+              className={buttonClass('secondary', 'sm')}
             >
               거절
             </button>
@@ -350,10 +403,10 @@ function UserRow({
               type='button'
               disabled={busy}
               onClick={onIssueReset}
-              className='icon-btn'
+              className={buttonClass('secondary', 'sm', 'w-fit')}
               title='비밀번호 재설정 링크 만들기'
             >
-              <GoKey size={14} />
+              비밀번호 재설정 링크
             </button>
           )}
           {!isMe && (
@@ -361,10 +414,10 @@ function UserRow({
               type='button'
               disabled={busy}
               onClick={remove}
-              className='icon-btn hover:bg-danger-soft! hover:text-danger!'
+              className={buttonClass('secondary', 'sm', 'not-disabled:hover:bg-danger-soft text-danger w-fit')}
               title='계정 삭제'
             >
-              <GoTrash size={14} />
+              계정 삭제
             </button>
           )}
         </div>
@@ -381,12 +434,30 @@ function UserRow({
               </div>
             ))}
           </dl>
+          <div className='flex flex-col gap-1.5 sm:ml-auto'>
+            <span className='text-xs text-mute'>소속</span>
+            <Segmented<MemberAffiliation | ''>
+              value={user.affiliation ?? ''}
+              onChange={(next) =>
+                next &&
+                onRun(
+                  user.id,
+                  () => setUserAffiliationAction(user.id, next),
+                  `${user.name}님의 소속을 ${AFFILIATION_LABELS[next]}(으)로 바꿨습니다`,
+                )
+              }
+              options={[
+                { value: 'club', label: AFFILIATION_LABELS.club },
+                { value: 'external', label: AFFILIATION_LABELS.external },
+              ]}
+            />
+          </div>
           {user.status === 'approved' && !isMe && (
             <button
               type='button'
               disabled={busy}
               onClick={() => setStatus('pending')}
-              className='btn btn-ghost btn-sm self-start'
+              className={buttonClass('ghost', 'sm', 'self-start')}
             >
               승인 취소
             </button>
@@ -445,7 +516,7 @@ function RequestList({
                   {request.phone} · <RelativeTime iso={request.created_at} />
                 </span>
               </span>
-              <button type='button' onClick={() => onResolve(request)} className='btn btn-secondary btn-sm'>
+              <button type='button' onClick={() => onResolve(request)} className={buttonClass('secondary', 'sm')}>
                 처리 완료
               </button>
             </div>
@@ -488,7 +559,7 @@ function RequestList({
                       <button
                         type='button'
                         onClick={() => onIssue(user)}
-                        className={classNames('btn btn-sm shrink-0', verified ? 'btn-primary' : 'btn-secondary')}
+                        className={buttonClass(verified ? 'primary' : 'secondary', 'sm', 'shrink-0')}
                         title={verified ? undefined : '일부 정보가 일치하지 않습니다. 본인 확인 후 발급하세요.'}
                       >
                         <GoKey size={13} />

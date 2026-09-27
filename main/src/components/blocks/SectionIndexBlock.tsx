@@ -66,7 +66,7 @@ export function SectionIndexNavigation({ sections }: { sections: SectionIndexBlo
           : 'pointer-events-none translate-y-[calc(100%+1rem)] opacity-0 md:pointer-events-auto'
       }`}
     >
-      <div ref={indexListRef} className='no-scroll-bar flex overflow-x-auto md:flex-col md:overflow-visible'>
+      <div ref={indexListRef} className='[scrollbar-width:none] flex overflow-x-auto md:flex-col md:overflow-visible'>
         {sections.map((section) => {
           const active = activeId === section.id
 

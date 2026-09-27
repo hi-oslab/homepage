@@ -12,7 +12,7 @@ const COOKIE_NAME = 'osl_session'
 const SESSION_DAYS = 14
 const RESET_HOURS = 24
 export const USER_COLUMNS =
-  'id,username,name,status,is_master,master_requested,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 type Result = { ok: true } | { ok: false; message: string }
 
@@ -116,7 +116,7 @@ export const hasMaster = cache(async (): Promise<boolean> => {
   // 최신 마이그레이션에서 생긴 컬럼(username, session_version)까지 조회해 실행 여부를 함께 확인
   const { data, error } = await createAdminSupabaseClient()
     .from('admin_users')
-    .select('id,username,session_version,master_requested')
+    .select('id,username,session_version,master_requested,affiliation,onboarded_at')
     .eq('is_master', true)
     .limit(1)
   assertSchema(error)
@@ -134,6 +134,8 @@ export function normalizeProfile(
   const year = Number(input.joined_year)
   const thisYear = new Date().getFullYear()
   if (!name) return { ok: false, message: '실명을 입력해 주세요.' }
+  if (input.affiliation !== 'club' && input.affiliation !== 'external')
+    return { ok: false, message: '소속(학교 소모임 / 외부 활동)을 선택해 주세요.' }
   if (phone.length < 9 || phone.length > 11) return { ok: false, message: '전화번호를 확인해 주세요.' }
   if (!Number.isInteger(year) || year < 2018 || year > thisYear) {
     return { ok: false, message: `가입 연도는 2018년부터 ${thisYear}년 사이로 선택해 주세요.` }
@@ -144,9 +146,11 @@ export function normalizeProfile(
     ok: true,
     value: {
       name,
+      affiliation: input.affiliation,
       phone: phone.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'),
       student_id: input.student_id.trim(),
-      is_hongik: Boolean(input.is_hongik),
+      // 학교 소모임 멤버는 홍익대 학생
+      is_hongik: input.affiliation === 'club' || Boolean(input.is_hongik),
       joined_year: year,
       joined_half: input.joined_half,
     },
@@ -353,7 +357,13 @@ export async function requireMaster(): Promise<AdminUser> {
   return user
 }
 
-export function canEditWork(user: AdminUser, work: Pick<Work, 'author_id'>) {
+/** 수정: 승인된 멤버는 모든 작품을 볼 수 있고 수정할 수 있다 */
+export function canEditWork(user: AdminUser, _work?: Pick<Work, 'author_id'>) {
+  return isApproved(user)
+}
+
+/** 삭제: 마스터이거나 본인이 쓴 작품만 */
+export function canDeleteWork(user: AdminUser, work: Pick<Work, 'author_id'>) {
   return user.is_master || (Boolean(work.author_id) && work.author_id === user.id)
 }
 

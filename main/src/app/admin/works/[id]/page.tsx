@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { canEditWork, requirePageUser } from '@/lib/admin-auth'
+import { canDeleteWork, canEditWork, requirePageUser } from '@/lib/admin-auth'
 import { getAdminWork, getAdminWorks } from '@/lib/cms'
 import { WorkEditor } from './WorkEditor'
 
@@ -15,5 +15,5 @@ export default async function AdminWorkPage({ params }: { params: Promise<{ id: 
   const categories = Array.from(new Set(works.map((item) => item.category).filter(Boolean)))
   const tags = Array.from(new Set(works.flatMap((item) => item.tags)))
 
-  return <WorkEditor initialWork={work} categories={categories} tags={tags} />
+  return <WorkEditor initialWork={work} categories={categories} tags={tags} canDelete={canDeleteWork(user, work)} />
 }

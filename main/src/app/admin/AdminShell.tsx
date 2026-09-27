@@ -26,7 +26,7 @@ export type ShellUser = { name: string; username: string; isMaster: boolean; has
 // master: 마스터 전용 메뉴
 const NAV = [
   { label: '대시보드', href: '/admin', icon: GoHome, exact: true },
-  { label: '작품', memberLabel: '내 작품', href: '/admin/works', icon: GoStack },
+  { label: '작품', href: '/admin/works', icon: GoStack },
   { label: '내 프로필', href: '/admin/profile', icon: GoPerson },
   { label: '내 계정', href: '/admin/account', icon: GoGear },
   { label: '멤버', href: '/admin/members', icon: GoPeople, master: true },
@@ -56,7 +56,7 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
   }
 
   return (
-    <div className='admin flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col md:flex-row'>
+    <div className='flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col md:flex-row'>
       {/* 사이드바 (모바일에서는 상단 가로 탭) */}
       <aside className='z-30 flex shrink-0 flex-col gap-6 bg-paper px-4 pt-4 pb-2 md:sticky md:top-header md:h-[calc(100dvh-var(--spacing-header))] md:w-56 md:px-5 md:pt-8 md:pb-6'>
         <Link href='/admin' className='hidden flex-col gap-0.5 md:flex'>
@@ -66,7 +66,7 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
 
         <nav className='-mx-1 flex gap-1 overflow-x-auto md:mx-0 md:flex-col md:overflow-visible'>
           {NAV.filter((item) => !item.master || user.isMaster).map(
-            ({ label, memberLabel, href, icon: Icon, exact, badge }) => (
+            ({ label, href, icon: Icon, exact, badge }) => (
               <Link
                 key={href}
                 href={href}
@@ -76,7 +76,7 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
                 )}
               >
                 <Icon size={15} />
-                {!user.isMaster && memberLabel ? memberLabel : label}
+                {label}
                 {badge && user.pendingCount > 0 && (
                   <span className='ml-auto flex size-5 items-center justify-center rounded-full bg-danger text-[11px] text-white'>
                     {user.pendingCount}

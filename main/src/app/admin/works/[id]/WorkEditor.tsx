@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { GoArrowLeft, GoEye, GoLinkExternal } from 'react-icons/go'
 import { BlockEditor } from '@/components/admin/BlockEditor'
-import { Field, ImageDrop, Panel, Switch, TagInput, useSaveShortcut, useToast, useUnsavedWarning } from '@/components/admin/ui'
+import { Field, ImageDrop, Input, Panel, Switch, TagInput, Textarea, buttonClass, useSaveShortcut, useToast, useUnsavedWarning } from '@/components/admin/ui'
 import { PreviewModal } from '@/components/admin/PreviewModal'
 import { WorkDetailLayout } from '@/components/WorkDetailLayout'
 import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
@@ -38,7 +38,18 @@ const slugify = (text: string) =>
     .trim()
     .replace(/[\s-]+/g, '-')
 
-export function WorkEditor({ initialWork, categories, tags }: { initialWork: Work; categories: string[]; tags: string[] }) {
+export function WorkEditor({
+  initialWork,
+  categories,
+  tags,
+  canDelete,
+}: {
+  initialWork: Work
+  categories: string[]
+  tags: string[]
+  /** 마스터이거나 본인이 쓴 작품일 때만 */
+  canDelete: boolean
+}) {
   const router = useRouter()
   const toast = useToast()
   const [workId] = useState(initialWork.id)
@@ -129,7 +140,7 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
         </Link>
         <div className='flex items-center gap-2'>
           <SaveState dirty={dirty} saving={isSaving} />
-          <button type='button' onClick={() => setPreviewOpen(true)} className='btn btn-secondary'>
+          <button type='button' onClick={() => setPreviewOpen(true)} className={buttonClass('secondary')}>
             <GoEye size={14} />
             미리보기
           </button>
@@ -138,13 +149,13 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
               href={`/work/${savedSlug}`}
               target='_blank'
               rel='noopener noreferrer'
-              className='btn btn-ghost hidden sm:inline-flex'
+              className={buttonClass('ghost', 'md', 'hidden sm:inline-flex')}
             >
               <GoLinkExternal size={13} />
               페이지 보기
             </a>
           )}
-          <button type='button' onClick={save} disabled={isSaving || !dirty} className='btn btn-primary'>
+          <button type='button' onClick={save} disabled={isSaving || !dirty} className={buttonClass('primary')}>
             저장
             <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
           </button>
@@ -155,19 +166,19 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
         {/* 본문 */}
         <div className='flex min-w-0 flex-col gap-6'>
           <div className='flex flex-col gap-2'>
-            <textarea
+            <Textarea
               value={draft.title}
               onChange={(event) => patch('title', event.target.value.replace(/\n/g, ''))}
               placeholder='제목'
               rows={1}
-              className='field-sizing-content resize-none bg-transparent! p-0! text-4xl! leading-tight! font-medium tracking-[-0.04em] md:text-5xl!'
+              className='field-sizing-content resize-none bg-transparent p-0 text-4xl leading-tight font-medium tracking-[-0.04em] md:text-5xl'
             />
-            <textarea
+            <Textarea
               value={draft.subtitle}
               onChange={(event) => patch('subtitle', event.target.value.replace(/\n/g, ''))}
               placeholder='부제 — 한 줄로 작품을 소개해 주세요'
               rows={1}
-              className='field-sizing-content resize-none bg-transparent! p-0! text-lg! text-mute md:text-xl!'
+              className='field-sizing-content resize-none bg-transparent p-0 text-lg text-mute md:text-xl'
             />
           </div>
 
@@ -181,7 +192,7 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
         </div>
 
         {/* 설정 */}
-        <aside className='flex flex-col gap-3 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto no-scroll-bar'>
+        <aside className='flex flex-col gap-3 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto [scrollbar-width:none]'>
           <Panel>
             <div className='flex items-center justify-between'>
               <span className='text-sm'>공개 상태</span>
@@ -215,10 +226,10 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
               }
             >
               <div className='flex gap-1.5'>
-                <input value={draft.slug} onChange={(event) => patch('slug', event.target.value.toLowerCase().replace(/\s+/g, '-'))} />
+                <Input value={draft.slug} onChange={(event) => patch('slug', event.target.value.toLowerCase().replace(/\s+/g, '-'))} />
                 <button
                   type='button'
-                  className='btn btn-secondary shrink-0'
+                  className={buttonClass('secondary', 'md', 'shrink-0')}
                   title='제목의 영문/숫자로 slug 만들기'
                   onClick={() => {
                     const next = slugify(draft.title)
@@ -231,7 +242,7 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
               </div>
             </Field>
             <Field label='카테고리'>
-              <input list='work-categories' value={draft.category} onChange={(event) => patch('category', event.target.value)} placeholder='예: 오픈소스랩 기획전시' />
+              <Input list='work-categories' value={draft.category} onChange={(event) => patch('category', event.target.value)} placeholder='예: 오픈소스랩 기획전시' />
               <datalist id='work-categories'>
                 {categories.map((item) => (
                   <option key={item} value={item} />
@@ -240,23 +251,25 @@ export function WorkEditor({ initialWork, categories, tags }: { initialWork: Wor
             </Field>
             <div className='grid grid-cols-2 gap-2'>
               <Field label='연도'>
-                <input type='number' value={draft.year} onChange={(event) => patch('year', Number(event.target.value))} />
+                <Input type='number' value={draft.year} onChange={(event) => patch('year', Number(event.target.value))} />
               </Field>
               <Field label='날짜 (선택)'>
-                <input type='date' value={draft.project_date ?? ''} onChange={(event) => patch('project_date', event.target.value || null)} />
+                <Input type='date' value={draft.project_date ?? ''} onChange={(event) => patch('project_date', event.target.value || null)} />
               </Field>
             </div>
             <Field label='키워드'>
               <TagInput value={draft.tags} onChange={(value) => patch('tags', value)} suggestions={tags} />
             </Field>
             <Field label='설명' hint='상세 페이지 정보란과 검색 결과 설명에 사용됩니다.'>
-              <textarea rows={4} value={draft.description} onChange={(event) => patch('description', event.target.value)} />
+              <Textarea rows={4} value={draft.description} onChange={(event) => patch('description', event.target.value)} />
             </Field>
           </Panel>
 
-          <button type='button' onClick={remove} className='btn btn-danger self-start'>
-            이 작품 삭제
-          </button>
+          {canDelete && (
+            <button type='button' onClick={remove} className={buttonClass('danger', 'md', 'self-start')}>
+              이 작품 삭제
+            </button>
+          )}
         </aside>
       </div>
       <PreviewModal

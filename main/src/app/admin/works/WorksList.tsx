@@ -7,7 +7,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type D
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GoGrabber, GoLinkExternal, GoSearch, GoTrash } from 'react-icons/go'
-import { PageHeader, Switch, useToast } from '@/components/admin/ui'
+import { Input, PageHeader, Select, Switch, buttonClass, iconButtonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import { RelativeTime } from '../DashboardActions'
 import type { Work } from '@/types/cms'
 import { createWorkAction, deleteWorkAction, reorderWorksAction, setWorkPublishedAction } from './actions'
@@ -20,17 +20,21 @@ export function WorksList({
   initialWorks,
   initialStatus,
   isMaster,
+  currentUserId,
   authors,
 }: {
   initialWorks: Work[]
   initialStatus: Status
   isMaster: boolean
+  currentUserId: string
   authors: Record<string, string>
 }) {
-  const [works, setWorks] = useState(initialWorks)
+  const [works, setWorks] = useServerState(initialWorks)
+  useRefreshOnFocus()
   const [status, setStatus] = useState<Status>(initialStatus)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
+  const [mineOnly, setMineOnly] = useState(false)
   const [, startTransition] = useTransition()
   const toast = useToast()
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
@@ -41,11 +45,12 @@ export function WorksList({
     if (status === 'published' && !work.published) return false
     if (status === 'draft' && work.published) return false
     if (category && work.category !== category) return false
+    if (mineOnly && work.author_id !== currentUserId) return false
     const q = query.trim().toLowerCase()
     return !q || [work.title, work.slug, work.subtitle, ...work.tags].some((text) => text?.toLowerCase().includes(q))
   })
   // 필터가 걸려 있으면 순서가 헷갈리므로 드래그 정렬은 전체 목록에서만
-  const canReorder = isMaster && status === 'all' && !category && !query.trim()
+  const canReorder = isMaster && status === 'all' && !category && !mineOnly && !query.trim()
 
   const counts = {
     all: works.length,
@@ -100,16 +105,16 @@ export function WorksList({
   return (
     <div className='flex flex-col gap-4'>
       <PageHeader
-        title={isMaster ? '작품' : '내 작품'}
+        title='작품'
         count={works.length}
         description={
           isMaster
             ? '드래그해서 사이트에 보이는 순서를 바꿀 수 있어요.'
-            : '내가 작성한 작품을 관리합니다. 노출 순서는 관리자가 정해요.'
+            : '모든 작품을 보고 수정할 수 있어요. 삭제는 내가 쓴 작품만, 노출 순서는 관리자가 정해요.'
         }
         actions={
           <form action={createWorkAction}>
-            <button className='btn btn-primary'>+ 새 작품</button>
+            <button className={buttonClass('primary')}>+ 새 작품</button>
           </form>
         }
       />
@@ -132,22 +137,31 @@ export function WorksList({
             </button>
           ))}
         </div>
-        <select value={category} onChange={(event) => setCategory(event.target.value)} className='w-auto! bg-tile!'>
+        <Select value={category} onChange={(event) => setCategory(event.target.value)} className='w-auto bg-tile'>
           <option value=''>모든 카테고리</option>
           {categories.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
           ))}
-        </select>
+        </Select>
+        <label className='flex cursor-pointer items-center gap-1.5 rounded-lg bg-tile px-3 py-1.5 text-sm'>
+          <input
+            type='checkbox'
+            checked={mineOnly}
+            onChange={(event) => setMineOnly(event.target.checked)}
+            className='w-auto!'
+          />
+          내 작품만
+        </label>
         <div className='relative ml-auto w-full sm:w-64'>
           <GoSearch className='pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-mute' size={14} />
-          <input
+          <Input
             type='search'
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder='제목, 태그 검색'
-            className='bg-tile! pl-9!'
+            className='bg-tile pl-9'
           />
         </div>
       </div>
@@ -162,10 +176,15 @@ export function WorksList({
                 work={work}
                 draggable={canReorder}
                 author={
-                  isMaster ? (work.author_id ? (authors[work.author_id] ?? '알 수 없음') : '작성자 없음') : undefined
+                  work.author_id === currentUserId
+                    ? '나'
+                    : work.author_id
+                      ? (authors[work.author_id] ?? '알 수 없음')
+                      : '작성자 없음'
                 }
                 onTogglePublished={(published) => togglePublished(work, published)}
-                onRemove={() => remove(work)}
+                // 삭제는 마스터이거나 본인이 쓴 작품만
+                onRemove={isMaster || work.author_id === currentUserId ? () => remove(work) : undefined}
               />
             ))}
           </ul>
@@ -196,7 +215,7 @@ function WorkRow({
   draggable: boolean
   author?: string
   onTogglePublished: (published: boolean) => void
-  onRemove: () => void
+  onRemove?: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: work.id,
@@ -257,21 +276,28 @@ function WorkRow({
               href={`/work/${work.slug}`}
               target='_blank'
               rel='noopener noreferrer'
-              className='icon-btn'
+              className={iconButtonClass()}
               title='사이트에서 보기'
             >
               <GoLinkExternal size={14} />
             </a>
           </span>
         )}
-        <button
-          type='button'
-          onClick={onRemove}
-          className='icon-btn hover:bg-danger-soft! hover:text-danger!'
-          title='삭제'
-        >
-          <GoTrash size={14} />
-        </button>
+        {onRemove ? (
+          <button
+            type='button'
+            onClick={onRemove}
+            className={iconButtonClass({ danger: true })}
+            title='삭제'
+          >
+            <GoTrash size={14} />
+          </button>
+        ) : (
+          // 자리만 차지해 줄 맞춤
+          <span className={iconButtonClass({}, 'invisible')} aria-hidden>
+            <GoTrash size={14} />
+          </span>
+        )}
       </div>
     </li>
   )

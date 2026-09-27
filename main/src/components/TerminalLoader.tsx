@@ -221,7 +221,7 @@ export function TerminalPanel({
         {complete ? (
           <p className='mt-3 text-[#7ee08a]'>✓ done</p>
         ) : (
-          <span className='cursor-blink mt-3 inline-block text-white'>▍</span>
+          <span className='animate-cursor-blink mt-3 inline-block text-white'>▍</span>
         )}
       </div>
     </div>

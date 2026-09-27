@@ -33,227 +33,14 @@
   --color-danger-soft: #fbe9e4;
   --color-success: #2f7d32;
 
+  /* 애니메이션: animate-cursor-blink */
+  --animate-cursor-blink: cursor-blink 0.8s step-end infinite;
+
   --font-sawarabi-mincho: var(--font-sawarabi-mincho), serif;
   --font-sans: var(--font-pretendard-local), sans-serif;
   --font-mono: var(--font-monoplex-local), monospace;
   --font-monoplex: var(--font-monoplex-local), monospace;
   --font-pretendard: var(--font-pretendard-local), sans-serif;
-}
-
-/* OSL CMS (admin) — 선/그림자 없이 면과 농도로 구분 */
-@layer components {
-  .btn {
-    display: inline-flex;
-    min-height: 36px;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 0 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.15s, color 0.15s, opacity 0.15s;
-  }
-
-  .btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
-  }
-
-  .btn-sm {
-    min-height: 30px;
-    padding: 0 10px;
-    font-size: 12px;
-  }
-
-  .btn-primary {
-    background: var(--color-ink);
-    color: white;
-  }
-
-  .btn-primary:not(:disabled):hover {
-    opacity: 0.85;
-  }
-
-  .btn-secondary {
-    background: var(--color-tile);
-    color: var(--color-ink);
-  }
-
-  .btn-secondary:not(:disabled):hover {
-    background: #e0e0dc;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--color-mute);
-  }
-
-  .btn-ghost:not(:disabled):hover {
-    background: var(--color-tile);
-    color: var(--color-ink);
-  }
-
-  .btn-danger {
-    background: transparent;
-    color: var(--color-danger);
-  }
-
-  .btn-danger:not(:disabled):hover {
-    background: var(--color-danger-soft);
-  }
-
-  .icon-btn {
-    display: inline-flex;
-    width: 28px;
-    height: 28px;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    border-radius: 6px;
-    color: var(--color-mute);
-    transition: background-color 0.15s, color 0.15s;
-  }
-
-  .icon-btn:hover {
-    background: var(--color-tile);
-    color: var(--color-ink);
-  }
-
-  /* 어드민 폼 요소 기본값 (:where로 낮은 우선순위 → 유틸리티로 덮어쓰기 쉬움) */
-  .admin :where(input:not([type='checkbox']):not([type='file']):not([type='radio']), textarea, select) {
-    width: 100%;
-    border-radius: 8px;
-    padding: 9px 12px;
-    background: var(--color-field);
-    color: var(--color-ink);
-    font-size: 14px;
-    line-height: 1.5;
-    outline: none;
-    transition: background-color 0.15s;
-  }
-
-  .admin :where(input, textarea, select)::placeholder {
-    color: rgb(17 17 17 / 0.3);
-  }
-
-  .admin :where(input:not([type='checkbox']):not([type='file']), textarea, select):focus {
-    background: #e7e7e3;
-  }
-
-  .admin :where(select) {
-    padding-right: 32px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8a86' stroke-width='1.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 14px;
-  }
-
-  .block-editor {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .block-item {
-    position: relative;
-    border-radius: 12px;
-    padding: 12px 16px 14px 40px;
-    background: var(--color-surface);
-  }
-
-  .block-item-toolbar {
-    display: flex;
-    height: 24px;
-    align-items: center;
-    gap: 2px;
-    margin-bottom: 6px;
-  }
-
-  .block-item-toolbar .icon-btn {
-    width: 24px;
-    height: 24px;
-    opacity: 0;
-  }
-
-  .block-item:hover .block-item-toolbar .icon-btn,
-  .block-item:focus-within .block-item-toolbar .icon-btn {
-    opacity: 1;
-  }
-
-  .block-drag-handle {
-    position: absolute;
-    inset: 0 auto 0 0;
-    display: flex;
-    width: 32px;
-    touch-action: none;
-    cursor: grab;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px 0 0 12px;
-    color: rgb(17 17 17 / 0.2);
-    transition: color 0.15s, background-color 0.15s;
-  }
-
-  .block-drag-handle:hover {
-    background: var(--color-field);
-    color: var(--color-ink);
-  }
-
-  .block-type-label {
-    flex: 1;
-    font-size: 12px;
-    color: var(--color-mute);
-  }
-
-  .block-item-body :where(textarea, input[type='text'], input[type='url']) {
-    margin-bottom: 6px;
-  }
-
-  .block-item-body :where(select) {
-    width: auto;
-    display: inline-block;
-    margin-right: 6px;
-    margin-bottom: 6px;
-  }
-
-  .block-item-body hr {
-    border: 0;
-    height: 1px;
-    background: var(--color-border);
-    margin: 8px 0;
-  }
-
-  .add-block-menu {
-    position: relative;
-    display: flex;
-  }
-
-  .add-block-menu-list {
-    position: absolute;
-    top: calc(100% + 4px);
-    z-index: 40;
-    min-width: 260px;
-    list-style: none;
-    border-radius: 10px;
-    padding: 6px;
-    background: var(--color-ink);
-    color: white;
-  }
-
-  .add-block-menu-list li button {
-    width: 100%;
-    border-radius: 6px;
-    padding: 7px 10px;
-    text-align: left;
-    font-size: 13px;
-    color: rgb(255 255 255 / 0.75);
-  }
-
-  .add-block-menu-list li button:hover {
-    background: rgb(255 255 255 / 0.1);
-    color: white;
-  }
 }
 
 /* icons: SawarabiMincho (특정 유니코드만) */
@@ -303,10 +90,6 @@
   }
 }
 
-.cursor-blink {
-  animation: cursor-blink 0.8s step-end infinite;
-}
-
 @layer base {
   * {
     box-sizing: border-box;
@@ -352,6 +135,13 @@
     display: none;
   }
 
+  button {
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0;
+    cursor: pointer;
+  }
+
   #__next,
   html,
   body {
@@ -370,60 +160,9 @@
     display: none;
   }
 
-  .no-scroll-bar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .no-scroll-bar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .checking {
-    /*  border border-red-500 border-dashed */
-    border: 1px solid red;
-    border-style: dashed;
-  }
-
   .transition {
     /* transition-all duration-500 ease-in-out */
     transition: all 0.5s ease-in-out;
   }
 
-  .snap-none {
-    scroll-snap-type: none !important;
-  }
-
-  .show-scrollbar {
-    /* 파이어폭스 */
-    scrollbar-width: thin;
-    scrollbar-color: #888 #f1f1f1;
-
-    /* IE */
-    -ms-overflow-style: scrollbar;
-  }
-
-  /* 웹킷 기반 브라우저 (크롬, 사파리, 오페라, 엣지) */
-  .show-scrollbar::-webkit-scrollbar {
-    display: block;
-    width: 8px;
-    /* 스크롤바 너비 */
-  }
-
-  .show-scrollbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    /* 스크롤바 트랙 색상 */
-  }
-
-  .show-scrollbar::-webkit-scrollbar-thumb {
-    background: #888;
-    /* 스크롤바 색상 */
-    border-radius: 4px;
-    /* 스크롤바 모서리 둥글게 */
-  }
-
-  .show-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-    /* 스크롤바 호버 색상 */
-  }
 }

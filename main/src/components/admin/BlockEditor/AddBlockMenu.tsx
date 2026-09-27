@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { cn } from '@/lib/cn'
 import { BLOCK_TYPE_LABELS, INSERTABLE_BLOCK_TYPES, type BlockType } from '@/types/blocks'
+import { buttonClass } from '@/components/admin/ui'
 
 const BLOCK_TYPE_ICONS: Record<string, string> = {
   'section-index': '§',
@@ -39,7 +41,7 @@ export const AddBlockMenu = ({ onInsert, variant = 'default', label = '블록 �
   }, [open])
 
   return (
-    <div className='add-block-menu' ref={ref}>
+    <div className='relative flex' ref={ref}>
       {variant === 'inline' ? (
         <div className='group/add flex h-7 w-full items-center justify-center gap-3'>
           <div className='h-px flex-1 bg-transparent transition-colors group-hover/add:bg-border' />
@@ -57,18 +59,17 @@ export const AddBlockMenu = ({ onInsert, variant = 'default', label = '블록 �
           <div className='h-px flex-1 bg-transparent transition-colors group-hover/add:bg-border' />
         </div>
       ) : (
-        <button type='button' onClick={() => setOpen((v) => !v)} className='btn btn-primary'>
+        <button type='button' onClick={() => setOpen((v) => !v)} className={buttonClass('primary')}>
           + {label}
         </button>
       )}
 
       {open && (
         <ul
-          className={
-            variant === 'inline'
-              ? 'add-block-menu-list left-1/2 grid -translate-x-1/2 grid-cols-2 gap-0.5'
-              : 'add-block-menu-list grid grid-cols-2 gap-0.5'
-          }
+          className={cn(
+            'absolute top-[calc(100%+4px)] z-40 grid min-w-[260px] list-none grid-cols-2 gap-0.5 rounded-[10px] bg-ink p-1.5 text-white',
+            variant === 'inline' && 'left-1/2 -translate-x-1/2',
+          )}
         >
           {INSERTABLE_BLOCK_TYPES.map((type) => (
             <li key={type}>
@@ -78,7 +79,7 @@ export const AddBlockMenu = ({ onInsert, variant = 'default', label = '블록 �
                   onInsert(type)
                   setOpen(false)
                 }}
-                className='flex w-full items-center gap-2'
+                className='flex w-full items-center gap-2 rounded-md px-2.5 py-[7px] text-left text-[13px] text-white/75 hover:bg-white/10 hover:text-white'
               >
                 <span className='flex w-5 justify-center text-white/40'>{BLOCK_TYPE_ICONS[type]}</span>
                 {BLOCK_TYPE_LABELS[type]}

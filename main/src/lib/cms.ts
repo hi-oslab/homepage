@@ -151,7 +151,7 @@ export async function removeMember(id: string): Promise<void> {
 /* ─── 어드민 계정 ─────────────────────────────────────────────────────── */
 
 const ADMIN_USER_COLUMNS =
-  'id,username,name,status,is_master,master_requested,member_id,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   const { data, error } = await createAdminSupabaseClient()
@@ -164,7 +164,10 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function updateAdminUser(
   id: string,
-  input: Partial<Pick<AdminUser, 'status' | 'is_master' | 'master_requested' | 'member_id' | 'approved_at'> & AccountProfileInput>,
+  input: Partial<
+    Pick<AdminUser, 'status' | 'is_master' | 'master_requested' | 'member_id' | 'approved_at' | 'onboarded_at'> &
+      AccountProfileInput
+  >,
 ): Promise<AdminUser> {
   const { data, error } = await createAdminSupabaseClient()
     .from('admin_users')
@@ -179,6 +182,17 @@ export async function updateAdminUser(
 export async function removeAdminUser(id: string): Promise<void> {
   const { error } = await createAdminSupabaseClient().from('admin_users').delete().eq('id', id)
   if (error) throw error
+}
+
+/** 아직 어떤 계정에도 연결되지 않은 멤버 프로필 (첫 로그인 때 "이게 나예요" 후보) */
+export async function getUnassignedMembers(): Promise<Member[]> {
+  const [members, { data, error }] = await Promise.all([
+    getAdminMembers(),
+    createAdminSupabaseClient().from('admin_users').select('member_id').not('member_id', 'is', null),
+  ])
+  if (error) throw error
+  const linked = new Set((data ?? []).map((row) => row.member_id as string))
+  return members.filter((member) => !linked.has(member.id))
 }
 
 export async function getMember(id: string): Promise<Member | null> {

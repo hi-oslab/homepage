@@ -6,6 +6,7 @@ import { uploadImage } from '@/lib/storage'
 import { extractVimeoId, extractYoutubeId } from '@/lib/blocks'
 import { GoTrash } from 'react-icons/go'
 import { VimeoPlayer, YoutubePlayer } from '@/components/EmbedVideoPlayer'
+import { Input, buttonClass, iconButtonClass } from '@/components/admin/ui'
 
 function useImageUpload(projectId: string) {
   const [uploading, setUploading] = useState(false)
@@ -62,14 +63,14 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
         <button
           type='button'
           onClick={() => onChange({ ...block, mediaType: 'image' })}
-          className={block.mediaType === 'image' ? 'btn btn-secondary btn-sm' : 'btn btn-ghost btn-sm'}
+          className={buttonClass(block.mediaType === 'image' ? 'secondary' : 'ghost', 'sm')}
         >
           이미지
         </button>
         <button
           type='button'
           onClick={() => onChange({ ...block, mediaType: 'video' })}
-          className={block.mediaType === 'video' ? 'btn btn-secondary btn-sm' : 'btn btn-ghost btn-sm'}
+          className={buttonClass(block.mediaType === 'video' ? 'secondary' : 'ghost', 'sm')}
         >
           영상 (Vimeo · YouTube)
         </button>
@@ -86,7 +87,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
                   <button
                     type='button'
                     onClick={() => clearImage(index)}
-                    className='icon-btn absolute right-2 top-2 bg-surface/90 hover:bg-danger-soft! hover:text-danger!'
+                    className={iconButtonClass({ danger: true }, 'absolute right-2 top-2 bg-surface/90')}
                     title='서버에서 삭제'
                   >
                     <GoTrash size={13} />
@@ -119,12 +120,12 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
             type='button'
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className='btn btn-secondary btn-sm w-fit'
+            className={buttonClass('secondary', 'sm', 'w-fit')}
           >
             {uploading ? '업로드 중...' : imageUrls.length > 0 ? '+ 이미지 추가' : '파일 업로드'}
           </button>
 
-          <input
+          <Input
             type='url'
             value={imageUrls[0] ?? ''}
             placeholder='또는 이미지 URL 직접 입력'
@@ -133,7 +134,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
               onChange(withImageUrls(block, url ? [url, ...imageUrls.slice(1)] : imageUrls.slice(1)))
             }}
           />
-          <input
+          <Input
             type='text'
             value={block.caption ?? ''}
             placeholder='캡션 (선택)'
@@ -142,7 +143,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
         </>
       ) : (
         <>
-          <input
+          <Input
             type='url'
             value={block.url}
             placeholder='Vimeo 또는 YouTube 링크 (예: https://youtu.be/…, https://vimeo.com/123456789)'
@@ -157,7 +158,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
           )}
           {block.youtubeId && <YoutubePlayer source={block.url || block.youtubeId} title={block.caption || 'YouTube video'} />}
           {block.vimeoId && <VimeoPlayer source={block.url || block.vimeoId} title={block.caption || 'Vimeo video'} />}
-          <input
+          <Input
             type='text'
             value={block.caption ?? ''}
             placeholder='캡션 (선택)'
@@ -206,13 +207,13 @@ export const GalleryBlockField = ({ block, onChange, projectId, onDeleteImage }:
                 <button
                   type='button'
                   onClick={() => removeItem(i)}
-                  className='icon-btn absolute right-1 top-1 bg-surface/90 hover:bg-danger-soft! hover:text-danger!'
+                  className={iconButtonClass({ danger: true }, 'absolute right-1 top-1 bg-surface/90')}
                   title='서버에서 삭제'
                 >
                   <GoTrash size={12} />
                 </button>
               </div>
-              <input
+              <Input
                 type='text'
                 value={item.caption ?? ''}
                 placeholder='캡션 (선택)'
@@ -243,7 +244,7 @@ export const GalleryBlockField = ({ block, onChange, projectId, onDeleteImage }:
         type='button'
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className='btn btn-secondary btn-sm w-fit'
+        className={buttonClass('secondary', 'sm', 'w-fit')}
       >
         {uploading ? '업로드 중...' : '+ 이미지 추가'}
       </button>

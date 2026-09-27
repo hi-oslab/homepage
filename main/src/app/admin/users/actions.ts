@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createResetToken, requireMaster } from '@/lib/admin-auth'
 import { getAdminUsers, removeAdminUser, resolveHelpRequest, updateAdminUser } from '@/lib/cms'
-import type { AdminUser, AdminUserStatus } from '@/types/cms'
+import type { AdminUser, AdminUserStatus, MemberAffiliation } from '@/types/cms'
 
 type Result = { ok: true; user?: AdminUser } | { ok: false; message: string }
 
@@ -60,6 +60,15 @@ export async function setUserMasterAction(id: string, isMaster: boolean) {
         ? { is_master: true, master_requested: false, status: 'approved', approved_at: new Date().toISOString() }
         : { is_master: false, master_requested: false },
     )
+    return { ok: true, user }
+  })
+}
+
+/** 소속 변경 (학교 소모임 ↔ 외부 활동) */
+export async function setUserAffiliationAction(id: string, affiliation: MemberAffiliation) {
+  return run(async () => {
+    if (affiliation !== 'club' && affiliation !== 'external') return { ok: false, message: '올바른 소속이 아닙니다.' }
+    const user = await updateAdminUser(id, { affiliation, ...(affiliation === 'club' ? { is_hongik: true } : {}) })
     return { ok: true, user }
   })
 }

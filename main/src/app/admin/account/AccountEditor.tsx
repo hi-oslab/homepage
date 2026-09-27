@@ -2,13 +2,14 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { Field, PageHeader, Panel, useToast } from '@/components/admin/ui'
+import { Field, Input, PageHeader, Panel, buttonClass, useToast } from '@/components/admin/ui'
 import type { AccountProfileInput, AdminUser } from '@/types/cms'
 import { AccountFields } from '../AccountFields'
 import { changePasswordAction, updateMyAccountAction, withdrawAction } from '../actions'
 
 const pickProfile = (user: AdminUser): AccountProfileInput => ({
   name: user.name,
+  affiliation: user.affiliation,
   student_id: user.student_id,
   is_hongik: user.is_hongik,
   phone: user.phone,
@@ -62,14 +63,14 @@ export function AccountEditor({ user }: { user: AdminUser }) {
 
       <Panel title='계정 정보'>
         <Field label='아이디' hint='아이디는 바꿀 수 없어요.'>
-          <input value={user.username} disabled className='opacity-60' />
+          <Input value={user.username} disabled className='opacity-60' />
         </Field>
         <AccountFields value={profile} onChange={setProfile} />
         <button
           type='button'
           onClick={saveProfile}
           disabled={!dirty || isPending}
-          className='btn btn-primary self-start'
+          className={buttonClass('primary', 'md', 'self-start')}
         >
           저장
         </button>
@@ -77,7 +78,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
 
       <Panel title='비밀번호 변경'>
         <form onSubmit={changePassword} className='flex flex-col gap-2'>
-          <input
+          <Input
             type='password'
             required
             autoComplete='current-password'
@@ -86,7 +87,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
             onChange={(event) => setPasswords((current) => ({ ...current, current: event.target.value }))}
           />
           <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-            <input
+            <Input
               type='password'
               required
               minLength={8}
@@ -95,7 +96,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
               value={passwords.next}
               onChange={(event) => setPasswords((current) => ({ ...current, next: event.target.value }))}
             />
-            <input
+            <Input
               type='password'
               required
               autoComplete='new-password'
@@ -104,7 +105,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
               onChange={(event) => setPasswords((current) => ({ ...current, confirm: event.target.value }))}
             />
           </div>
-          <button type='submit' disabled={isPending} className='btn btn-secondary self-start'>
+          <button type='submit' disabled={isPending} className={buttonClass('secondary', 'md', 'self-start')}>
             비밀번호 변경
           </button>
         </form>
@@ -118,7 +119,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
           {user.is_master && <li>마지막 관리자 계정은 탈퇴할 수 없어요. 먼저 다른 사람에게 관리자 권한을 넘겨주세요.</li>}
         </ul>
         <form onSubmit={withdraw} className='flex flex-col gap-2 sm:flex-row'>
-          <input
+          <Input
             type='password'
             required
             autoComplete='current-password'
@@ -127,7 +128,7 @@ export function AccountEditor({ user }: { user: AdminUser }) {
             onChange={(event) => setWithdrawPassword(event.target.value)}
             className='sm:max-w-64'
           />
-          <button type='submit' disabled={isPending} className='btn btn-danger'>
+          <button type='submit' disabled={isPending} className={buttonClass('danger')}>
             탈퇴하기
           </button>
         </form>

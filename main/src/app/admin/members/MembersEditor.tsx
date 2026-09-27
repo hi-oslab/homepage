@@ -6,7 +6,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type D
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GoGrabber } from 'react-icons/go'
-import { PageHeader, useSaveShortcut, useToast, useUnsavedWarning } from '@/components/admin/ui'
+import { PageHeader, buttonClass, useRefreshOnFocus, useSaveShortcut, useServerState, useToast, useUnsavedWarning } from '@/components/admin/ui'
 import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
 import type { Member } from '@/types/cms'
 import { MemberCard } from '@/app/members/components/MemberCard'
@@ -14,7 +14,8 @@ import { MemberForm, toMemberDraft, type MemberDraft } from './MemberForm'
 import { createMemberAction, deleteMemberAction, reorderMembersAction, updateMemberAction } from './actions'
 
 export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) {
-  const [members, setMembers] = useState(initialMembers)
+  const [members, setMembers] = useServerState(initialMembers)
+  useRefreshOnFocus()
   const [selectedId, setSelectedId] = useState<string | null>(initialMembers[0]?.id ?? null)
   const [draft, setDraft] = useState<MemberDraft | null>(() => (initialMembers[0] ? toMemberDraft(initialMembers[0]) : null))
   const [isPending, startTransition] = useTransition()
@@ -113,7 +114,7 @@ export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) 
         count={members.length}
         description='드래그해서 사이트에 보이는 순서를 바꿀 수 있어요.'
         actions={
-          <button type='button' onClick={add} disabled={isPending} className='btn btn-primary'>
+          <button type='button' onClick={add} disabled={isPending} className={buttonClass('primary')}>
             + 새 멤버
           </button>
         }
@@ -123,7 +124,7 @@ export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) 
         {/* 목록 */}
         <DndContext id='admin-members' sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={members.map((member) => member.id)} strategy={verticalListSortingStrategy}>
-            <ul className='flex flex-col gap-1 lg:sticky lg:top-12 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto no-scroll-bar'>
+            <ul className='flex flex-col gap-1 lg:sticky lg:top-12 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto [scrollbar-width:none]'>
               {members.map((member) => (
                 <MemberRow
                   key={member.id}
@@ -145,7 +146,7 @@ export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) 
               <span className='truncate text-2xl font-medium tracking-[-0.03em]'>{draft.name || '이름 없음'}</span>
               <div className='flex shrink-0 items-center gap-2'>
                 {dirty && <span className='hidden text-xs text-mute sm:inline'>저장 안 된 변경</span>}
-                <button type='button' onClick={save} disabled={!dirty || isPending} className='btn btn-primary'>
+                <button type='button' onClick={save} disabled={!dirty || isPending} className={buttonClass('primary')}>
                   {isPending ? '저장 중…' : '저장'}
                   <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
                 </button>
@@ -156,7 +157,7 @@ export function MembersEditor({ initialMembers }: { initialMembers: Member[] }) 
               <div className='flex flex-col gap-3'>
                 <MemberForm draft={draft} patch={patch} onUpload={uploadPhoto} roles={roles} fieldSuggestions={fieldSuggestions} />
 
-                <button type='button' onClick={remove} disabled={isPending} className='btn btn-danger self-start'>
+                <button type='button' onClick={remove} disabled={isPending} className={buttonClass('danger', 'md', 'self-start')}>
                   이 멤버 삭제
                 </button>
               </div>

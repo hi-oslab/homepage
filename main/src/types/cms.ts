@@ -53,6 +53,9 @@ export type WorkInput = Pick<
 
 export type AdminUserStatus = 'pending' | 'approved' | 'rejected'
 
+/** club: 현재 학교 소모임 소속 / external: 외부 활동 멤버 */
+export type MemberAffiliation = 'club' | 'external'
+
 export type AdminUser = {
   id: string
   /** 로그인 아이디 */
@@ -63,6 +66,10 @@ export type AdminUser = {
   /** 가입 시 관리자 권한을 신청했는지 (처리되면 false) */
   master_requested: boolean
   member_id: string | null
+  /** 소속 (마이그레이션 이전 계정은 null) */
+  affiliation: MemberAffiliation | null
+  /** 첫 로그인 프로필 연결 안내를 마친 시각 */
+  onboarded_at: string | null
   /** 학번 (선택) */
   student_id: string
   is_hongik: boolean
@@ -90,7 +97,10 @@ export type HelpRequest = {
 }
 
 /** 가입/내 정보 수정 시 받는 프로필 정보 */
-export type AccountProfileInput = Pick<AdminUser, 'name' | 'student_id' | 'is_hongik' | 'phone' | 'joined_year' | 'joined_half'>
+export type AccountProfileInput = Pick<
+  AdminUser,
+  'name' | 'affiliation' | 'student_id' | 'is_hongik' | 'phone' | 'joined_year' | 'joined_half'
+>
 
 /** About 페이지 연혁(CV) 항목 */
 export type HistoryItem = {

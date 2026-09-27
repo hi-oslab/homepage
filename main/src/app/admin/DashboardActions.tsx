@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { relativeTime, useToast } from '@/components/admin/ui'
+import { buttonClass, relativeTime, useToast } from '@/components/admin/ui'
 import { logout, revalidateAll } from './actions'
 
 export function DashboardActions() {
@@ -25,11 +25,11 @@ export function DashboardActions() {
               toast.show(ok ? '사이트를 최신 내용으로 갱신했습니다' : '갱신하지 못했습니다', ok ? 'success' : 'error')
             })
           }
-          className='btn btn-secondary'
+          className={buttonClass('secondary')}
         >
           {isPending ? '갱신 중…' : '사이트 갱신'}
         </button>
-        <a href='/' target='_blank' rel='noopener noreferrer' className='btn btn-ghost'>
+        <a href='/' target='_blank' rel='noopener noreferrer' className={buttonClass('ghost')}>
           사이트 보기 ↗
         </a>
         <button
@@ -38,7 +38,7 @@ export function DashboardActions() {
             await logout()
             router.refresh()
           }}
-          className='btn btn-ghost md:hidden'
+          className={buttonClass('ghost', 'md', 'md:hidden')}
         >
           로그아웃
         </button>
