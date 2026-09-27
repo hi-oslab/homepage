@@ -3,7 +3,16 @@
 import classNames from 'classnames'
 import { useState, useTransition } from 'react'
 import { GoChevronDown, GoCopy, GoKey, GoTrash } from 'react-icons/go'
-import { Input, PageHeader, Select, Switch, buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
+import {
+  Input,
+  PageHeader,
+  Select,
+  Switch,
+  buttonClass,
+  useRefreshOnFocus,
+  useServerState,
+  useToast,
+} from '@/components/admin/ui'
 import { RelativeTime } from '../DashboardActions'
 import { AFFILIATION_LABELS, Segmented, formatJoined } from '../AccountFields'
 import type { AdminUser, AdminUserStatus, HelpRequest, Member, MemberAffiliation } from '@/types/cms'
@@ -385,7 +394,7 @@ function UserRow({
               onClick={() => setStatus('approved')}
               className={buttonClass(user.master_requested ? 'secondary' : 'primary', 'sm')}
             >
-              {user.master_requested ? '관리자로 승인' : '승인'}
+              {user.master_requested ? '멤버로 승인' : '승인'}
             </button>
           )}
           {user.status === 'pending' && (
