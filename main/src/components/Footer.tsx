@@ -24,7 +24,7 @@ const COLUMNS = [
   {
     title: 'Members only',
     links: [
-      { label: 'Member Space', href: '/admin' },
+      { label: 'Member Space', href: '/space' },
       { label: 'Login / Join', href: '/login' },
     ],
   },

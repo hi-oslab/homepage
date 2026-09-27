@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { AdminNotice, LoginForm } from '@/app/admin/AdminAuth'
+import { AdminNotice, LoginForm } from '@/app/space/AdminAuth'
 import { getAuthPageState } from './authState'
 
 export const dynamic = 'force-dynamic'

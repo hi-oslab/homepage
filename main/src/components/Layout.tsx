@@ -31,15 +31,15 @@ interface LayoutProps {
 export const Layout = (props: LayoutProps) => {
   const { children } = props
   const pathname = usePathname()
-  // 어드민은 자체 사이드바를 쓰므로 푸터를 숨긴다
-  const isAdmin = pathname.startsWith('/admin')
+  // 멤버 스페이스는 자체 사이드바를 쓰므로 푸터를 숨긴다
+  const isMemberSpace = pathname.startsWith('/space')
 
   return (
     <div className={classNames('w-screen h-fit')}>
       <ScrollReset />
       <Header />
       <div className='w-full min-h-dvh h-fit bg-paper pt-header'>{children}</div>
-      {!isAdmin && <Footer />}
+      {!isMemberSpace && <Footer />}
     </div>
   )
 }

@@ -53,7 +53,7 @@ async function checkSupabase(): Promise<ServiceStatus> {
   const base: ServiceStatus = {
     id: 'supabase',
     name: 'Supabase',
-    role: '데이터베이스 (작품, 멤버, 계정, 커뮤니티)',
+    role: '데이터베이스 (작품, 프로필, 멤버, 커뮤니티)',
     health: 'ok',
     summary: '',
     metrics: [],
@@ -94,8 +94,8 @@ async function checkSupabase(): Promise<ServiceStatus> {
       latencyMs: ms,
       metrics: [
         { label: '작품', value: `${works}`, hint: `공개 ${publishedWorks}` },
-        { label: '멤버 프로필', value: `${members}` },
-        { label: '계정', value: `${users}`, hint: pending ? `승인 대기 ${pending}` : undefined },
+        { label: '프로필', value: `${members}` },
+        { label: '멤버', value: `${users}`, hint: pending ? `승인 대기 ${pending}` : undefined },
         { label: '커뮤니티 글', value: `${posts}` },
         { label: '연혁', value: `${history}` },
       ],
@@ -335,7 +335,7 @@ const ENV_VARS: { name: string; required: boolean; purpose: string }[] = [
   { name: 'R2_SECRET_ACCESS_KEY', required: true, purpose: 'R2 비밀 키' },
   { name: 'R2_BUCKET_NAME', required: true, purpose: 'R2 버킷' },
   { name: 'RESEND_API_KEY', required: true, purpose: 'Contact 메일 발송' },
-  { name: 'ADMIN_PASSWORD', required: true, purpose: '첫 관리자 계정 생성' },
+  { name: 'ADMIN_PASSWORD', required: true, purpose: '첫 운영자 계정 생성' },
   { name: 'NEXT_PUBLIC_SITE_URL', required: false, purpose: '사이트 주소 (없으면 hioslab.com)' },
   { name: 'R2_ACCOUNT_ID', required: false, purpose: 'Cloudflare 대시보드 바로가기' },
   { name: 'NEXT_PUBLIC_R2_PUBLIC_URL', required: false, purpose: '옛 r2.dev 주소 인식 (전환용)' },

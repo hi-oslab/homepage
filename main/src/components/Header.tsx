@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { logout } from '@/app/admin/actions'
+import { logout } from '@/app/space/actions'
 import { Location } from './Location'
+import { OperatorBadge } from './OperatorBadge'
 
 /*
  * 사이트 헤더 (상단 상태바 + 하단 노치 메뉴를 하나로 합친 것)
@@ -24,12 +25,15 @@ const NAV = [
   { label: 'Contact', href: '/contact' },
 ]
 
+// 로그인하면 공개 메뉴 옆에 따로 붙는 멤버 공간
+const SPACE = { label: 'Member Space', href: '/space' }
+
 // 메뉴에 없는 화면의 이름 (모바일 헤더에 표시)
 const OTHER_PAGES: Record<string, string> = {
-  admin: 'Admin',
+  space: 'Member Space',
   login: 'Login',
   join: 'Join',
-  'admin-reset': 'Reset',
+  'reset-password': 'Reset',
   showroom: 'Showroom',
 }
 
@@ -112,8 +116,7 @@ export const Header = () => {
 
   const accountLinks = session
     ? [
-        { label: '어드민', href: '/admin' },
-        ...(session.status === 'approved' ? [{ label: '내 계정', href: '/admin/account' }] : []),
+        ...(session.status === 'approved' ? [{ label: '내 계정', href: '/space/account' }] : []),
       ]
     : []
 
@@ -169,6 +172,12 @@ export const Header = () => {
                 </Link>
               )
             })}
+            {session && (
+              <>
+                <span aria-hidden className='mx-1.5 h-4 w-px bg-ink/15' />
+                <SpaceLink session={session} pathname={pathname} />
+              </>
+            )}
           </nav>
 
           {/* 데스크탑 상태 영역 */}
@@ -190,7 +199,7 @@ export const Header = () => {
                   )}
                 >
                   <StatusDot approved={session.status === 'approved'} />@{session.username}
-                  {session.isMaster && <span className='rounded-sm bg-ink px-1 text-[9px] text-white'>ADMIN</span>}
+                  {session.isMaster && <OperatorBadge className='font-sans text-[9px]' />}
                   <span
                     aria-hidden
                     className={classNames('text-ink/50 transition-transform', accountOpen && 'rotate-180')}
@@ -300,6 +309,21 @@ export const Header = () => {
 
               <div className='flex flex-col gap-4 font-mono text-[11px] text-mute'>
                 {session && (
+                  <Link
+                    href={SPACE.href}
+                    aria-current={isActive(SPACE.href, pathname) ? 'page' : undefined}
+                    className='flex items-center justify-between rounded-xl bg-ink px-4 py-3.5 font-sans text-xl font-medium tracking-[-0.03em] text-white'
+                  >
+                    <span className='flex items-center gap-2.5'>
+                      <StatusDot approved={session.status === 'approved'} />
+                      {SPACE.label}
+                    </span>
+                    <span aria-hidden className='text-white/50'>
+                      →
+                    </span>
+                  </Link>
+                )}
+                {session && (
                   <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
                     <span className='flex items-center gap-1.5 text-ink'>
                       <StatusDot approved={session.status === 'approved'} />@{session.username}
@@ -360,5 +384,35 @@ const Clock = ({ className }: { className?: string }) => {
       <span className='hidden xl:inline'>{parts ? `${parts.weekday} ${parts.month} ${parts.day} ` : ''}</span>
       {parts ? `${parts.hour}:${parts.minute}:${parts.second} ${parts.dayPeriod}` : '--:--:--'}
     </time>
+  )
+}
+
+/** 데스크탑 Member Space 탭: 평소엔 회색 면 + 로그인 상태 점, 안에 있으면 다른 메뉴처럼 검은 알약 */
+function SpaceLink({ session, pathname }: { session: SessionUser; pathname: string }) {
+  const active = isActive(SPACE.href, pathname)
+  const sub = active ? subLabel(SPACE.href, pathname) : null
+  return (
+    <Link
+      href={SPACE.href}
+      aria-current={active ? 'page' : undefined}
+      className={classNames(
+        'relative flex h-8 items-center rounded-lg px-3 text-sm transition-colors',
+        active ? 'text-white' : 'bg-tile text-ink hover:bg-ink/10',
+      )}
+    >
+      {active && (
+        <motion.span layoutId='header-pill' transition={islandSpring} className='absolute inset-0 rounded-lg bg-ink' />
+      )}
+      <span className='relative flex items-center gap-1.5 whitespace-nowrap'>
+        <StatusDot approved={session.status === 'approved'} />
+        {SPACE.label}
+        {sub && (
+          <>
+            <span className='text-white/35'>/</span>
+            <span className='max-w-40 truncate text-white/60'>{sub}</span>
+          </>
+        )}
+      </span>
+    </Link>
   )
 }

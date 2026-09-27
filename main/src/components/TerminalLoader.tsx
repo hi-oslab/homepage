@@ -51,34 +51,34 @@ const SCRIPTS: Record<string, LoadingScript> = {
     lines: ['establishing secure session', 'ready'],
   },
   admin: {
-    title: 'Admin',
-    command: 'osl admin --session',
+    title: 'Member Space',
+    command: 'osl space --session',
     lines: ['verifying session', 'loading workspace', 'ready'],
   },
   adminWorks: {
-    title: 'Admin / Works',
-    command: 'osl admin works',
+    title: 'Member Space / Works',
+    command: 'osl space works',
     lines: ['verifying session', 'fetching works', 'checking permissions', 'ready'],
   },
   adminEdit: {
-    title: 'Admin / Editor',
-    command: 'osl admin works edit',
+    title: 'Member Space / Editor',
+    command: 'osl space works edit',
     lines: ['verifying session', 'loading content blocks', 'preparing editor', 'ready'],
   },
   adminMembers: {
-    title: 'Admin / Members',
-    command: 'osl admin members',
-    lines: ['verifying session', 'fetching member profiles', 'ready'],
+    title: 'Member Space / Profile',
+    command: 'osl space profile',
+    lines: ['verifying session', 'loading my profile', 'ready'],
   },
   adminUsers: {
-    title: 'Admin / Users',
-    command: 'osl admin users',
-    lines: ['verifying master session', 'fetching accounts', 'checking help requests', 'ready'],
+    title: 'Member Space / Members',
+    command: 'osl space members',
+    lines: ['verifying operator session', 'fetching members', 'checking help requests', 'ready'],
   },
   adminMedia: {
-    title: 'Admin / Media',
-    command: 'osl admin media --scan',
-    lines: ['verifying master session', 'scanning storage bucket', 'resolving references', 'ready'],
+    title: 'Member Space / Media',
+    command: 'osl space media --scan',
+    lines: ['verifying operator session', 'scanning storage bucket', 'resolving references', 'ready'],
   },
   fallback: {
     title: 'Loading',
@@ -95,14 +95,14 @@ export function getLoadingScript(pathname: string): LoadingScript {
   if (first === 'work') {
     return second ? { ...SCRIPTS.work, command: `${SCRIPTS.work.command} ${decodeURIComponent(second)}` } : SCRIPTS.works
   }
-  if (first === 'admin') {
+  if (first === 'space') {
     if (second === 'works') return third ? SCRIPTS.adminEdit : SCRIPTS.adminWorks
-    if (second === 'members' || second === 'profile') return SCRIPTS.adminMembers
+    if (second === 'profile') return SCRIPTS.adminMembers
     if (second === 'users') return SCRIPTS.adminUsers
     if (second === 'media') return SCRIPTS.adminMedia
     return SCRIPTS.admin
   }
-  if (first === 'login' || first === 'join' || first === 'admin-reset') return SCRIPTS.auth
+  if (first === 'login' || first === 'join' || first === 'reset-password') return SCRIPTS.auth
   if (first === 'lab-space') return SCRIPTS.lab
   return SCRIPTS[first] ?? SCRIPTS.fallback
 }

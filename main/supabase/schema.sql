@@ -75,3 +75,9 @@ on public.members (display_order, created_at);
 -- 어드민 계정: supabase/migrations/20260926_admin_accounts.sql 참고
 
 -- 회원 소속 / 첫 로그인 안내: supabase/migrations/20261002_member_affiliation.sql 참고
+
+-- 연결되지 않은 프로필 정리: supabase/migrations/20261003_remove_unlinked_profiles.sql 참고
+
+-- 프로필 역할 목록: supabase/migrations/20261004_member_roles.sql 참고
+
+-- 멤버 전공: supabase/migrations/20261005_member_major.sql 참고

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Member } from '@/types/cms'
 import { MemberModal } from './MemberModal'
+import { ProfileImage } from '@/components/ProfileImage'
 
 /*
  * 평면 보로노이 멤버 맵
@@ -190,18 +191,17 @@ export function MemberVoronoi({ members }: { members: Member[] }) {
                   >
                     {member.name}
                   </span>
+                  {/* 투명 PNG 아이콘 모양 그대로 + 모양을 따라 그림자 */}
                   <span
-                    className='block overflow-hidden rounded-full bg-tile transition-transform duration-300'
+                    className='block transition-transform duration-300'
                     style={{ width: photo, height: photo, transform: active ? 'scale(1.08)' : undefined }}
                   >
-                    {member.cover_image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={member.cover_image_url} alt='' draggable={false} className='size-full object-cover' />
-                    ) : (
-                      <span className='flex size-full items-center justify-center text-xl font-medium text-ink/25'>
-                        {member.name.slice(0, 1)}
-                      </span>
-                    )}
+                    <ProfileImage
+                      src={member.cover_image_url}
+                      name={member.name}
+                      className='size-full text-xl'
+                      imageClassName='pointer-events-none'
+                    />
                   </span>
                   {/* 마우스를 올리면 역할·한 줄 소개와 "소개 보기" */}
                   <span

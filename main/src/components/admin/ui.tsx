@@ -32,6 +32,25 @@ export const IconButton = ({ danger, size, type = 'button', className, ...props 
   <button type={type} className={iconButtonClass({ danger, size }, className)} {...props} />
 )
 
+/**
+ * 체크박스. globals.css 기본 초기화가 모든 input에 appearance: none을 걸어 체크박스가 사라지므로
+ * appearance-auto로 브라우저 기본 모양을 되살린다. indeterminate: 일부만 선택됨(−)
+ */
+export const Checkbox = ({
+  className,
+  indeterminate,
+  ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> & { indeterminate?: boolean }) => (
+  <input
+    type='checkbox'
+    ref={(element) => {
+      if (element) element.indeterminate = Boolean(indeterminate)
+    }}
+    className={cn('size-3.5 shrink-0 cursor-pointer appearance-auto accent-ink', className)}
+    {...props}
+  />
+)
+
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => <input ref={ref} className={fieldClass(className)} {...props} />,
 )
@@ -53,21 +72,16 @@ Select.displayName = 'Select'
 
 export const PageHeader = ({
   title,
-  count,
   description,
   actions,
 }: {
   title: string
-  count?: number
   description?: string
   actions?: React.ReactNode
 }) => (
   <header className='flex flex-wrap items-end justify-between gap-4 pb-8'>
     <div className='flex flex-col gap-2'>
-      <h1 className='flex items-start gap-2 text-4xl font-medium tracking-[-0.04em]'>
-        {title}
-        {count !== undefined && <sup className='mt-1 text-sm font-normal tracking-normal text-mute'>{count}</sup>}
-      </h1>
+      <h1 className='text-4xl font-medium tracking-[-0.04em]'>{title}</h1>
       {description && <p className='text-sm text-mute'>{description}</p>}
     </div>
     {actions && <div className='flex flex-wrap items-center gap-2'>{actions}</div>}
@@ -263,12 +277,18 @@ export const ImageDrop = ({
   onRemove,
   aspect = 'aspect-square',
   label = '이미지를 끌어다 놓거나 클릭해서 업로드',
+  imageClassName,
+  onEdit,
 }: {
   url: string | null
   onUpload: (file: File) => Promise<void>
   onRemove?: () => void
+  /** 지금 이미지를 다시 편집 (예: 프로필 모양 바꾸기) */
+  onEdit?: () => void
   aspect?: string
   label?: string
+  /** 미리보기 이미지 스타일 (기본은 꽉 채우기) */
+  imageClassName?: string
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
@@ -304,7 +324,7 @@ export const ImageDrop = ({
     >
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt='' className='size-full object-cover' />
+        <img src={url} alt='' className={cn('size-full object-cover', imageClassName)} />
       ) : (
         <button
           type='button'
@@ -318,6 +338,15 @@ export const ImageDrop = ({
 
       {url && (
         <div className='absolute inset-x-2 bottom-2 flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
+          {onEdit && (
+            <button
+              type='button'
+              onClick={onEdit}
+              className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-ink')}
+            >
+              모양 바꾸기
+            </button>
+          )}
           <button
             type='button'
             onClick={() => inputRef.current?.click()}
@@ -374,7 +403,7 @@ export function useToast() {
   useEffect(() => () => clearTimeout(timer.current), [])
 
   const node = (
-    <div className='pointer-events-none fixed inset-x-0 bottom-6 z-[60] flex justify-center px-4'>
+    <div className='pointer-events-none fixed inset-x-0 bottom-6 z-[80] flex justify-center px-4'>
       <AnimatePresence>
         {toast && (
           <motion.div

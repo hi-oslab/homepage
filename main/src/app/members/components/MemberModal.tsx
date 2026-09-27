@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { GoX } from 'react-icons/go'
 import { Arrow } from '@/components/Typography'
 import type { Member } from '@/types/cms'
+import { ProfileImage } from '@/components/ProfileImage'
 
 /** 프로필을 누르면 뜨는 상세 카드 */
 export function MemberModal({ member, onClose }: { member: Member | null; onClose: () => void }) {
@@ -64,12 +65,7 @@ function MemberDetail({ member }: { member: Member }) {
   return (
     <div className='flex flex-col gap-4'>
       <div className='aspect-square w-full overflow-hidden bg-tile'>
-        {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt={name} className='size-full object-cover' />
-        ) : (
-          <span className='flex size-full items-center justify-center text-7xl font-medium text-ink/15'>{name.slice(0, 1)}</span>
-        )}
+        <ProfileImage src={photo} name={name} className='size-full p-[8%]' />
       </div>
       <div className='flex flex-col gap-1'>
         <div className='flex items-baseline justify-between gap-3'>

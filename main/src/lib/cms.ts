@@ -7,6 +7,7 @@ import type {
   HistoryInput,
   HistoryItem,
   Member,
+  MemberRole,
   Work,
   WorkInput,
 } from '@/types/cms'
@@ -37,14 +38,28 @@ export const getPublishedWorkBySlug = cache(async (slug: string): Promise<Work |
   return data as Work | null
 })
 
-export const getPublishedMembers = cache(async (): Promise<Member[]> => {
-  const { data, error } = await createPublicSupabaseClient()
-    .from('members')
-    .select('*')
-    .eq('published', true)
-    .order('display_order')
+/**
+ * 프로필은 순서를 따로 정하지 않고, 연결된 멤버의 오픈소스랩 가입 시기(연도 · 반기) 최신순으로 보여준다.
+ * 가입 시기가 같으면 프로필을 늦게 만든 순서.
+ */
+async function sortByJoined(members: Member[]): Promise<Member[]> {
+  const { data, error } = await createAdminSupabaseClient()
+    .from('admin_users')
+    .select('member_id,joined_year,joined_half')
+    .not('member_id', 'is', null)
   if (error) throw error
-  return (data ?? []) as Member[]
+  const joined = new Map(
+    (data ?? []).map((row) => [row.member_id as string, (row.joined_year ?? 0) * 2 + (row.joined_half === 'H2' ? 1 : 0)]),
+  )
+  return members
+    .slice()
+    .sort((a, b) => (joined.get(b.id) ?? 0) - (joined.get(a.id) ?? 0) || b.created_at.localeCompare(a.created_at))
+}
+
+export const getPublishedMembers = cache(async (): Promise<Member[]> => {
+  const { data, error } = await createPublicSupabaseClient().from('members').select('*').eq('published', true)
+  if (error) throw error
+  return sortByJoined((data ?? []) as Member[])
 })
 
 export async function getAdminWorks(
@@ -61,22 +76,14 @@ export async function getAdminWorks(
   return (data ?? []) as Work[]
 }
 
-/** ids 순서대로 display_order를 0부터 다시 매긴다 */
-async function reorder(table: 'works' | 'members', ids: string[]): Promise<void> {
+/** ids 순서대로 작품의 display_order를 0부터 다시 매긴다 */
+export async function reorderWorks(ids: string[]): Promise<void> {
   const supabase = createAdminSupabaseClient()
   const results = await Promise.all(
-    ids.map((id, index) => supabase.from(table).update({ display_order: index }).eq('id', id)),
+    ids.map((id, index) => supabase.from('works').update({ display_order: index }).eq('id', id)),
   )
   const failed = results.find((result) => result.error)
   if (failed?.error) throw failed.error
-}
-
-export async function reorderWorks(ids: string[]): Promise<void> {
-  await reorder('works', ids)
-}
-
-export async function reorderMembers(ids: string[]): Promise<void> {
-  await reorder('members', ids)
 }
 
 export async function getAdminWork(id: string): Promise<Work | null> {
@@ -119,18 +126,16 @@ export async function removeWork(id: string): Promise<void> {
 }
 
 export async function getAdminMembers(): Promise<Member[]> {
-  const { data, error } = await createAdminSupabaseClient().from('members').select('*').order('display_order').order('created_at')
+  const { data, error } = await createAdminSupabaseClient().from('members').select('*')
   if (error) throw error
-  return (data ?? []) as Member[]
+  return sortByJoined((data ?? []) as Member[])
 }
 
 export async function createMember(defaults: Partial<Pick<Member, 'name' | 'email' | 'published'>> = {}): Promise<Member> {
-  const supabase = createAdminSupabaseClient()
-  // 새 멤버는 목록 맨 뒤에 추가
-  const { count } = await supabase.from('members').select('*', { count: 'exact', head: true })
-  const { data, error } = await supabase
+  // 순서는 따로 두지 않는다 (가입 시기 최신순으로 정렬해서 보여준다)
+  const { data, error } = await createAdminSupabaseClient()
     .from('members')
-    .insert({ name: '이름 없음', ...defaults, display_order: count ?? 0 })
+    .insert({ name: '이름 없음', ...defaults })
     .select('*')
     .single()
   if (error) throw error
@@ -148,10 +153,63 @@ export async function removeMember(id: string): Promise<void> {
   if (error) throw error
 }
 
+/* ─── 프로필 역할 목록 ─────────────────────────────────────────────────── */
+// 프로필에는 역할 이름(members.role)을 글자로 저장하므로, 이름을 바꾸거나 지우면 프로필도 함께 고친다
+
+/** 만든 순서대로. 표가 아직 없으면(마이그레이션 전) 빈 목록 */
+export async function getRoles(): Promise<MemberRole[]> {
+  const { data, error } = await createAdminSupabaseClient()
+    .from('member_roles')
+    .select('id,name,created_at')
+    .order('created_at')
+    .order('name')
+  if (error) {
+    console.error('member_roles', error.message)
+    return []
+  }
+  return (data ?? []) as MemberRole[]
+}
+
+export async function createRole(name: string): Promise<MemberRole> {
+  const { data, error } = await createAdminSupabaseClient()
+    .from('member_roles')
+    .insert({ name })
+    .select('id,name,created_at')
+    .single()
+  if (error) throw error
+  return data as MemberRole
+}
+
+export async function renameRole(id: string, name: string): Promise<MemberRole> {
+  const supabase = createAdminSupabaseClient()
+  const { data: previous, error: findError } = await supabase.from('member_roles').select('name').eq('id', id).single()
+  if (findError) throw findError
+  const { data, error } = await supabase
+    .from('member_roles')
+    .update({ name })
+    .eq('id', id)
+    .select('id,name,created_at')
+    .single()
+  if (error) throw error
+  const { error: cascadeError } = await supabase.from('members').update({ role: name }).eq('role', previous.name)
+  if (cascadeError) throw cascadeError
+  return data as MemberRole
+}
+
+export async function removeRole(id: string): Promise<void> {
+  const supabase = createAdminSupabaseClient()
+  const { data: role, error: findError } = await supabase.from('member_roles').select('name').eq('id', id).single()
+  if (findError) throw findError
+  const { error } = await supabase.from('member_roles').delete().eq('id', id)
+  if (error) throw error
+  const { error: cascadeError } = await supabase.from('members').update({ role: '' }).eq('role', role.name)
+  if (cascadeError) throw cascadeError
+}
+
 /* ─── 어드민 계정 ─────────────────────────────────────────────────────── */
 
 const ADMIN_USER_COLUMNS =
-  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,major,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   const { data, error } = await createAdminSupabaseClient()
@@ -179,20 +237,13 @@ export async function updateAdminUser(
   return data as AdminUser
 }
 
+/** 계정 삭제. 프로필은 반드시 멤버와 연결돼 있어야 하므로 연결된 프로필도 함께 지운다 */
 export async function removeAdminUser(id: string): Promise<void> {
-  const { error } = await createAdminSupabaseClient().from('admin_users').delete().eq('id', id)
+  const supabase = createAdminSupabaseClient()
+  const { data: account } = await supabase.from('admin_users').select('member_id').eq('id', id).maybeSingle()
+  const { error } = await supabase.from('admin_users').delete().eq('id', id)
   if (error) throw error
-}
-
-/** 아직 어떤 계정에도 연결되지 않은 멤버 프로필 (첫 로그인 때 "이게 나예요" 후보) */
-export async function getUnassignedMembers(): Promise<Member[]> {
-  const [members, { data, error }] = await Promise.all([
-    getAdminMembers(),
-    createAdminSupabaseClient().from('admin_users').select('member_id').not('member_id', 'is', null),
-  ])
-  if (error) throw error
-  const linked = new Set((data ?? []).map((row) => row.member_id as string))
-  return members.filter((member) => !linked.has(member.id))
+  if (account?.member_id) await removeMember(account.member_id)
 }
 
 export async function getMember(id: string): Promise<Member | null> {

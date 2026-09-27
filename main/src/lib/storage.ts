@@ -3,8 +3,18 @@
 import imageCompression from 'browser-image-compression'
 import { mediaKeyFromUrl } from './media-url'
 
-export async function uploadImage(file: File, _bucket = 'project-media', path = 'projects'): Promise<string> {
-  const shouldConvert = file.type === 'image/png' || file.type === 'image/jpeg'
+/**
+ * 이미지를 R2에 올리고 공개 주소를 돌려준다.
+ * 기본은 WebP로 줄여서 올리고, keepFormat이면 그대로 올린다
+ * (프로필 투명 PNG: 브라우저마다 WebP 변환에서 투명도가 흔들릴 수 있어서)
+ */
+export async function uploadImage(
+  file: File,
+  _bucket = 'project-media',
+  path = 'projects',
+  options: { keepFormat?: boolean } = {},
+): Promise<string> {
+  const shouldConvert = !options.keepFormat && (file.type === 'image/png' || file.type === 'image/jpeg')
   const uploadFile = shouldConvert
     ? await imageCompression(file, {
         maxSizeMB: 1,

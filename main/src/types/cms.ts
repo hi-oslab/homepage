@@ -34,6 +34,13 @@ export type Member = {
   updated_at: string
 }
 
+/** 프로필 역할 (운영자가 목록을 관리한다) */
+export type MemberRole = {
+  id: string
+  name: string
+  created_at: string
+}
+
 export type WorkInput = Pick<
   Work,
   | 'slug'
@@ -72,6 +79,8 @@ export type AdminUser = {
   onboarded_at: string | null
   /** 학번 (선택) */
   student_id: string
+  /** 전공 (선택) */
+  major: string
   is_hongik: boolean
   phone: string
   /** 오픈소스랩 가입 연도와 반기 */
@@ -99,7 +108,7 @@ export type HelpRequest = {
 /** 가입/내 정보 수정 시 받는 프로필 정보 */
 export type AccountProfileInput = Pick<
   AdminUser,
-  'name' | 'affiliation' | 'student_id' | 'is_hongik' | 'phone' | 'joined_year' | 'joined_half'
+  'name' | 'affiliation' | 'student_id' | 'major' | 'is_hongik' | 'phone' | 'joined_year' | 'joined_half'
 >
 
 /** About 페이지 연혁(CV) 항목 */

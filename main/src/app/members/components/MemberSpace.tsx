@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Member } from '@/types/cms'
 import { MemberModal } from './MemberModal'
+import { ProfileImage } from '@/components/ProfileImage'
 
 /*
  * 스크롤 줌인 멤버 공간 (CSS 3D)
@@ -161,21 +162,13 @@ function Tile({
       className='group absolute top-0 left-0 flex flex-col items-start gap-1.5 text-left'
       aria-label={`${member.name} 소개 보기`}
     >
-      <span className='block aspect-square w-full overflow-hidden bg-tile'>
-        {member.cover_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={member.cover_image_url}
-            alt=''
-            draggable={false}
-            className='size-full object-cover transition-transform duration-500 group-hover:scale-105'
-          />
-        ) : (
-          <span className='flex size-full items-center justify-center text-3xl font-medium text-ink/25'>
-            {member.name.slice(0, 1)}
-          </span>
-        )}
-      </span>
+      {/* 투명 PNG 아이콘 모양 그대로 + 모양을 따라 그림자 */}
+      <ProfileImage
+        src={member.cover_image_url}
+        name={member.name}
+        className='aspect-square w-full p-[6%] text-3xl'
+        imageClassName='pointer-events-none transition-transform duration-500 group-hover:scale-105'
+      />
       <span className='flex w-full items-baseline justify-between gap-2 text-[11px] leading-tight md:text-xs'>
         <span className='truncate font-medium text-ink'>{member.name}</span>
         {member.role && <span className='shrink-0 truncate text-mute'>{member.role}</span>}

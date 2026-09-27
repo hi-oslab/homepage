@@ -13,6 +13,6 @@ export async function getAuthPageState(): Promise<{ hasMaster: boolean } | 'migr
     if (error instanceof AuthSetupError) return 'migration'
     throw error
   }
-  if (user) redirect('/admin')
+  if (user) redirect('/space')
   return { hasMaster: masterExists }
 }

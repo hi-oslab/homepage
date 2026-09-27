@@ -1,5 +1,6 @@
 import type { Member } from '@/types/cms'
 import { Arrow } from '@/components'
+import { ProfileImage } from '@/components/ProfileImage'
 
 interface MemberCardProps {
   member: Member
@@ -13,19 +14,13 @@ export const MemberCard = ({ member }: MemberCardProps) => {
     <article className='group flex flex-col gap-4'>
       {/* 사진: hover 시 소개 문구 */}
       <div className='relative aspect-[5/5] w-full overflow-hidden bg-tile'>
-        {coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={coverImage}
-            alt={name}
-            loading='lazy'
-            className='size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]'
-          />
-        ) : (
-          <span className='absolute inset-0 flex items-center justify-center text-7xl font-medium tracking-tight text-ink/15'>
-            {name?.[0] ?? '?'}
-          </span>
-        )}
+        {/* 투명 PNG 아이콘 · 오린 사진: 자르지 않고 모양을 따라 그림자 */}
+        <ProfileImage
+          src={coverImage}
+          name={name ?? ''}
+          className='absolute inset-0 p-[8%]'
+          imageClassName='transition-transform duration-700 ease-out group-hover:scale-[1.03]'
+        />
         {description && (
           <div className='absolute inset-0 hidden items-end bg-ink/85 p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex'>
             <p className='break-keep text-sm leading-relaxed text-white'>{description}</p>

@@ -12,7 +12,7 @@ const COOKIE_NAME = 'osl_session'
 const SESSION_DAYS = 14
 const RESET_HOURS = 24
 export const USER_COLUMNS =
-  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
+  'id,username,name,status,is_master,master_requested,member_id,affiliation,onboarded_at,student_id,major,is_hongik,phone,joined_year,joined_half,approved_at,last_login_at,created_at,updated_at'
 
 type Result = { ok: true } | { ok: false; message: string }
 
@@ -116,7 +116,7 @@ export const hasMaster = cache(async (): Promise<boolean> => {
   // 최신 마이그레이션에서 생긴 컬럼(username, session_version)까지 조회해 실행 여부를 함께 확인
   const { data, error } = await createAdminSupabaseClient()
     .from('admin_users')
-    .select('id,username,session_version,master_requested,affiliation,onboarded_at')
+    .select('id,username,session_version,master_requested,affiliation,onboarded_at,major')
     .eq('is_master', true)
     .limit(1)
   assertSchema(error)
@@ -149,6 +149,7 @@ export function normalizeProfile(
       affiliation: input.affiliation,
       phone: phone.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3'),
       student_id: input.student_id.trim(),
+      major: (input.major ?? '').trim().replace(/\s+/g, ' ').slice(0, 50),
       // 학교 소모임 멤버는 홍익대 학생
       is_hongik: input.affiliation === 'club' || Boolean(input.is_hongik),
       joined_year: year,
@@ -255,7 +256,7 @@ export async function changeOwnPassword(
 /**
  * 탈퇴: 계정을 삭제한다.
  * - 작성한 작품은 남고 작성자만 비워진다 (이후 마스터만 편집 가능)
- * - 연결된 멤버 프로필은 삭제하지 않고 비공개로 돌린다 (마스터가 정리)
+ * - 연결된 프로필도 함께 삭제한다 (프로필은 항상 멤버와 연결돼 있어야 한다)
  */
 export async function withdrawAccount(user: AdminUser, password: string): Promise<Result> {
   if (!(await checkOwnPassword(user.id, password))) return { ok: false, message: '비밀번호가 올바르지 않습니다.' }
@@ -263,11 +264,12 @@ export async function withdrawAccount(user: AdminUser, password: string): Promis
   if (user.is_master) {
     const { data } = await supabase.from('admin_users').select('id').eq('is_master', true)
     if ((data ?? []).length <= 1)
-      return { ok: false, message: '마지막 관리자 계정은 탈퇴할 수 없습니다. 다른 사람에게 관리자 권한을 넘겨주세요.' }
+      return { ok: false, message: '마지막 운영자 계정은 탈퇴할 수 없습니다. 먼저 다른 사람을 운영자로 지정해 주세요.' }
   }
-  if (user.member_id) await supabase.from('members').update({ published: false }).eq('id', user.member_id)
   const { error } = await supabase.from('admin_users').delete().eq('id', user.id)
   assertSchema(error)
+  // 프로필은 반드시 멤버와 연결돼 있어야 하므로 함께 지운다
+  if (user.member_id) await supabase.from('members').delete().eq('id', user.member_id)
   await clearSession()
   return { ok: true }
 }
@@ -323,7 +325,7 @@ export async function consumeResetToken(token: string, password: string): Promis
   const invalid = passwordError(password)
   if (invalid) return { ok: false, message: invalid }
   const reset = await findValidReset(token)
-  if (!reset) return { ok: false, message: '만료되었거나 이미 사용된 링크입니다. 관리자에게 새 링크를 요청해 주세요.' }
+  if (!reset) return { ok: false, message: '만료되었거나 이미 사용된 링크입니다. 운영자에게 새 링크를 요청해 주세요.' }
 
   // 먼저 링크를 사용 처리해서 같은 링크로 두 번 바꾸지 못하게 한다
   const { data: claimed } = await createAdminSupabaseClient()
@@ -372,6 +374,6 @@ export async function requirePageUser(options: { master?: boolean } = {}): Promi
   const user = await getCurrentUser().catch(() => null)
   if (!user) redirect('/login')
   // 승인 대기/거절 계정과 권한 없는 계정은 대시보드로 (레이아웃이 안내를 보여준다)
-  if (!isApproved(user) || (options.master && !user.is_master)) redirect('/admin')
+  if (!isApproved(user) || (options.master && !user.is_master)) redirect('/space')
   return user
 }

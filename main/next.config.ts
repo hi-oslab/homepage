@@ -21,7 +21,6 @@ const nextConfig = {
   // About 내용은 메인(/)으로 합쳤다. 예전 주소는 페이지를 그리기 전에 영구 이동(308)
   async redirects() {
     return [
-      { source: '/about', destination: '/', permanent: true },
       // 정식 도메인(hioslab.com)으로 옮긴 뒤에도 beta 주소는 살려 두고, 같은 경로로 영구 이동시킨다
       {
         source: '/:path*',
@@ -29,6 +28,10 @@ const nextConfig = {
         destination: 'https://hioslab.com/:path*',
         permanent: true,
       },
+      { source: '/about', destination: '/', permanent: true },
+      // 멤버 공간 주소 변경: /admin → /space
+      { source: '/admin', destination: '/space', permanent: true },
+      { source: '/admin/:path*', destination: '/space/:path*', permanent: true },
     ]
   },
   webpack(config, { isServer }) {
