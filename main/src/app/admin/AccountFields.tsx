@@ -176,7 +176,11 @@ export function AffiliationFields({ value, onChange, large }: FieldsProps) {
       <label className='flex flex-col gap-1.5'>
         <FieldLabel text='학번' optional />
         <Input
-          inputMode='numeric'
+          // 학번에 영문이 섞여 있어(B812345) 숫자 키패드가 아닌 일반 텍스트 입력
+          type='text'
+          autoCapitalize='characters'
+          autoCorrect='off'
+          spellCheck={false}
           placeholder={value.is_hongik ? '예: B812345' : '학번이 있다면 입력해 주세요'}
           value={value.student_id}
           onChange={(event) => set('student_id', event.target.value)}
