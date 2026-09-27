@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import { useState } from 'react'
 import type { AccountProfileInput, MemberAffiliation } from '@/types/cms'
 import { DEFAULT_MAJORS } from '@/lib/majors'
+import { formatPhone } from '@/lib/phone'
 import { GoCheck, GoCheckCircle, GoCheckCircleFill } from 'react-icons/go'
 import { Input, Select } from '@/components/admin/ui'
 import { LARGE_FIELD } from '@/components/admin/styles'
@@ -104,7 +105,9 @@ export function IdentityFields({ value, onChange, large, autoFocus }: FieldsProp
           autoComplete='tel'
           placeholder='010-0000-0000'
           value={value.phone}
-          onChange={(event) => set('phone', event.target.value)}
+          maxLength={13}
+          // 입력하는 동안 010-1234-5678처럼 하이픈을 넣는다
+          onChange={(event) => set('phone', formatPhone(event.target.value))}
           className={inputClass}
         />
       </label>

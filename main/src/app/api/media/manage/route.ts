@@ -9,9 +9,10 @@ import { MEDIA_BASE, mediaKeyFromUrl } from '@/lib/media-url'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type Reference = { kind: 'work' | 'member'; id: string; title: string; source: string }
+type Reference = { kind: 'work' | 'member' | 'post'; id: string; title: string; source: string }
 type WorkRow = { id: string; title: string; slug: string; thumbnail_url: string | null; content: string }
 type MemberRow = { id: string; name: string; cover_image_url: string | null }
+type PostRow = { id: string; title: string; body: string; content: string }
 
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp'])
 // 본문(JSON) 안의 미디어 주소: 절대 주소(옛 r2.dev) 또는 /media 상대 주소
@@ -36,9 +37,11 @@ function mimeFromKey(key: string) {
 
 async function loadReferences() {
   const supabase = createAdminSupabaseClient()
-  const [{ data: works, error: worksError }, { data: members, error: membersError }] = await Promise.all([
+  const [{ data: works, error: worksError }, { data: members, error: membersError }, { data: posts }] = await Promise.all([
     supabase.from('works').select('id,title,slug,thumbnail_url,content'),
     supabase.from('members').select('id,name,cover_image_url'),
+    // 게시판 표가 아직 없거나(마이그레이션 전) content 칼럼이 없으면 빈 목록
+    supabase.from('community_posts').select('id,title,body,content'),
   ])
   if (worksError) throw worksError
   if (membersError) throw membersError
@@ -62,7 +65,18 @@ async function loadReferences() {
   for (const member of (members ?? []) as MemberRow[]) {
     add(member.cover_image_url, { kind: 'member', id: member.id, title: member.name, source: '프로필' })
   }
-  return { references, works: (works ?? []) as WorkRow[], members: (members ?? []) as MemberRow[] }
+  for (const post of (posts ?? []) as PostRow[]) {
+    const title = post.title || post.body.slice(0, 30) || '게시글'
+    for (const match of Array.from((post.content ?? '').matchAll(MEDIA_URL_PATTERN))) {
+      add(match[0], { kind: 'post', id: post.id, title, source: '게시판' })
+    }
+  }
+  return {
+    references,
+    works: (works ?? []) as WorkRow[],
+    members: (members ?? []) as MemberRow[],
+    posts: (posts ?? []) as PostRow[],
+  }
 }
 
 export async function GET() {
@@ -93,7 +107,7 @@ export async function GET() {
 }
 
 /** oldKey를 가리키는 모든 주소(옛 r2.dev 형식 포함)를 newUrl로 바꾼다 */
-async function replaceReferences(oldKey: string, newUrl: string, works: WorkRow[], members: MemberRow[]) {
+async function replaceReferences(oldKey: string, newUrl: string, works: WorkRow[], members: MemberRow[], posts: PostRow[]) {
   const supabase = createAdminSupabaseClient()
   const isOld = (url: string | null) => Boolean(url) && mediaKeyFromUrl(url!) === oldKey
   const replaceInContent = (content: string) =>
@@ -115,6 +129,12 @@ async function replaceReferences(oldKey: string, newUrl: string, works: WorkRow[
     const { error } = await supabase.from('members').update({ cover_image_url: newUrl }).eq('id', member.id)
     if (error) throw error
   }
+  for (const post of posts) {
+    const nextContent = replaceInContent(post.content ?? '')
+    if (nextContent === post.content) continue
+    const { error } = await supabase.from('community_posts').update({ content: nextContent }).eq('id', post.id)
+    if (error) throw error
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -125,7 +145,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: '최적화할 수 없는 파일입니다.' }, { status: 400 })
     }
 
-    const [{ works, members, references }, object] = await Promise.all([loadReferences(), getR2Object(key)])
+    const [{ works, members, posts, references }, object] = await Promise.all([loadReferences(), getR2Object(key)])
     const usage = references.get(key) ?? []
     if (usage.length === 0) {
       return NextResponse.json({ message: '사용 중인 이미지가 아니므로 최적화하지 않았습니다.' }, { status: 409 })
@@ -154,7 +174,7 @@ export async function POST(request: NextRequest) {
     const newUrl = publicR2Url(newKey)
     await putR2Object(newKey, optimized, 'image/webp')
     try {
-      await replaceReferences(key, newUrl, works, members)
+      await replaceReferences(key, newUrl, works, members, posts)
     } catch (error) {
       await deleteR2Object(newKey).catch(() => undefined)
       throw error

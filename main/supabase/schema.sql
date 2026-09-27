@@ -81,3 +81,5 @@ on public.members (display_order, created_at);
 -- 프로필 역할 목록: supabase/migrations/20261004_member_roles.sql 참고
 
 -- 멤버 전공: supabase/migrations/20261005_member_major.sql 참고
+
+-- 게시판 개편 (공지 · 자유 · 협업 · 정보공유, 반응): supabase/migrations/20261006_community_boards.sql 참고

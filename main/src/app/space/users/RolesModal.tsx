@@ -74,7 +74,7 @@ export function RolesModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title='역할 관리' meta='멤버는 내 프로필에서 이 목록 중 하나를 골라요.'>
+    <Modal open={open} onClose={onClose} title='역할 관리' meta='멤버는 프로필카드 설정에서 이 목록 중 하나를 골라요.'>
       <div className='flex flex-col gap-3'>
         <form onSubmit={add} className='flex gap-2'>
           <Input

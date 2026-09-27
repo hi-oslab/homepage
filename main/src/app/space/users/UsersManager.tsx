@@ -7,10 +7,16 @@ import { Checkbox, Input, PageHeader, buttonClass, useRefreshOnFocus, useServerS
 import { AFFILIATION_LABELS, formatJoined } from '../AccountFields'
 import type { AdminUser, HelpRequest, Member, MemberAffiliation, MemberRole } from '@/types/cms'
 import { downloadCsv } from '@/lib/csv'
-import { createResetLinkAction, deleteUsersAction, resolveHelpRequestAction, setUserStatusAction } from './actions'
+import {
+  approveAsMasterAction,
+  createResetLinkAction,
+  deleteUsersAction,
+  resolveHelpRequestAction,
+  setUserStatusAction,
+} from './actions'
 import { deleteMemberAction, setMemberPublishedAction, setMemberRoleAction } from '../members/actions'
 import { MemberDetailModal, ResetLinkPanel, type ActionResult, type ResetLink } from './MemberDetailModal'
-import { DEFAULT_SORT, MembersTable, nextSort, sortUsers, type Sort } from './MembersTable'
+import { DEFAULT_SORT, MembersTable, nextSort, sortUsers, type Decision, type Sort } from './MembersTable'
 import { RequestList } from './RequestList'
 import { RolesModal } from './RolesModal'
 
@@ -138,6 +144,18 @@ export function UsersManager({
   }))
   const visible = groups.flatMap((group) => group.users)
 
+  /** 승인 대기 표에서 바로 처리 */
+  const decide = (user: AdminUser, decision: Decision) => {
+    if (decision === 'approve')
+      return run(user.id, () => setUserStatusAction(user.id, 'approved'), `${user.name}님을 승인했습니다`)
+    if (decision === 'operator') {
+      if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`)) return
+      return run(user.id, () => approveAsMasterAction(user.id), `${user.name}님을 운영자로 승인했습니다`)
+    }
+    if (!confirm(`${user.name}님의 가입 신청을 거절할까요?`)) return
+    run(user.id, () => setUserStatusAction(user.id, 'rejected'), `${user.name}님의 가입을 거절했습니다`)
+  }
+
   /* ─── 선택 · CSV 내보내기 ─── */
 
   const select = (ids: string[], checked: boolean) =>
@@ -169,7 +187,7 @@ export function UsersManager({
     const names = targets.slice(0, 5).map((user) => user.name).join(', ') + (targets.length > 5 ? ` 외 ${targets.length - 5}명` : '')
     if (
       !confirm(
-        `${targets.length}명의 계정을 삭제할까요?\n${names}\n\n작성한 작품은 남고 작성자 정보만 비워지며, Members 페이지의 프로필은 함께 삭제됩니다. 되돌릴 수 없습니다.`,
+        `${targets.length}명의 계정을 삭제할까요?\n${names}\n\n작성한 프로젝트는 남고 작성자 정보만 비워지며, Members 페이지의 프로필은 함께 삭제됩니다. 되돌릴 수 없습니다.`,
       )
     )
       return
@@ -243,7 +261,7 @@ export function UsersManager({
   const removeProfile = (user: AdminUser, member: Member) => {
     if (
       !confirm(
-        `${user.name}님의 프로필을 삭제할까요?\n${user.name}님은 '내 프로필'에서 다시 만들 수 있어요. 삭제하면 되돌릴 수 없습니다.`,
+        `${user.name}님의 프로필을 삭제할까요?\n${user.name}님은 '프로필카드 설정'에서 다시 만들 수 있어요. 삭제하면 되돌릴 수 없습니다.`,
       )
     )
       return
@@ -381,9 +399,7 @@ export function UsersManager({
                   onSelect={select}
                   onSort={(column) => setSorts((current) => ({ ...current, [key]: nextSort(sortOf(key), column) }))}
                   onOpen={(user) => setOpenId(user.id)}
-                  onApprove={(user) =>
-                    run(user.id, () => setUserStatusAction(user.id, 'approved'), `${user.name}님을 승인했습니다`)
-                  }
+                  onDecide={decide}
                 />
               </section>
             )

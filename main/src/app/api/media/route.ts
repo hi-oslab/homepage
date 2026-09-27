@@ -7,10 +7,11 @@ import type { AdminUser } from '@/types/cms'
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
-/** 업로드 폴더(projects/<id>)의 주인인지: 마스터이거나, 본인 작품 / 본인 멤버 프로필 */
+/** 업로드 폴더(projects/<id>)의 주인인지: 운영자이거나, 프로젝트 / 본인 프로필 / 본인 계정(게시판 글 이미지) */
 async function ownsFolder(user: AdminUser, folderId: string) {
   if (user.is_master) return true
   if (user.member_id && folderId === user.member_id) return true
+  if (folderId === user.id) return true
   const work = await getAdminWork(folderId).catch(() => null)
   return Boolean(work && canEditWork(user, work))
 }

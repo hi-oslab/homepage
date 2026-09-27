@@ -116,12 +116,13 @@ export const Header = () => {
 
   const accountLinks = session
     ? [
-        ...(session.status === 'approved' ? [{ label: '내 계정', href: '/space/account' }] : []),
+        ...(session.status === 'approved' ? [{ label: '내 정보 설정', href: '/space/account' }] : []),
       ]
     : []
 
   return (
-    <header ref={headerRef} className='fixed inset-x-0 top-0 z-50 bg-paper'>
+    <header ref={headerRef} className='fixed inset-x-0 top-0 z-50 min-h-header bg-paper'>
+      {/* 바탕을 --spacing-header(본문 여백 · sticky 기준)만큼 채워서, 스크롤한 내용이 헤더 아래 틈으로 비치지 않게 한다 */}
       <motion.div layout transition={islandSpring} className='relative px-1 md:px-2 text-ink'>
         {/* 한 줄 바 */}
         <motion.div

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { GoCheck, GoFileMedia, GoSearch, GoSync } from 'react-icons/go'
 import { Input, PageHeader, buttonClass } from '@/components/admin/ui'
 
-type Reference = { kind: 'work' | 'member'; id: string; title: string; source: string }
+type Reference = { kind: 'work' | 'member' | 'post'; id: string; title: string; source: string }
 type MediaFile = {
   key: string
   url: string

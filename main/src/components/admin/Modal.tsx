@@ -1,5 +1,6 @@
 'use client'
 
+import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
@@ -13,6 +14,8 @@ export function Modal({
   meta,
   children,
   footer,
+  size = 'md',
+  tall,
 }: {
   open: boolean
   onClose: () => void
@@ -22,6 +25,10 @@ export function Modal({
   children: React.ReactNode
   /** 아래에 고정되는 버튼 영역 */
   footer?: React.ReactNode
+  /** md: 설정 · 확인용, lg: 글 읽기 · 쓰기 */
+  size?: 'md' | 'lg'
+  /** 화면 높이에 가깝게 (글쓰기처럼 긴 내용) */
+  tall?: boolean
 }) {
   useEffect(() => {
     if (!open) return
@@ -51,7 +58,11 @@ export function Modal({
           aria-modal='true'
         >
           <motion.div
-            className='flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-paper sm:max-w-2xl sm:rounded-2xl'
+            className={classNames(
+              'flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-paper sm:rounded-2xl',
+              size === 'lg' ? 'sm:max-w-3xl' : 'sm:max-w-2xl',
+              tall && 'h-[92dvh]',
+            )}
             initial={{ y: 24, opacity: 0.6 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 16, opacity: 0 }}
@@ -74,7 +85,12 @@ export function Modal({
               </button>
             </div>
             <div className='min-h-0 flex-1 overflow-y-auto px-5 pb-5'>{children}</div>
-            {footer && <div className='flex shrink-0 flex-wrap items-center gap-2 bg-tile/60 px-5 py-3'>{footer}</div>}
+            {footer && (
+              // 모바일 시트는 아이폰 하단 안전 영역만큼 더 띄운다
+              <div className='flex shrink-0 flex-wrap items-center gap-2 bg-tile/60 px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-3'>
+                {footer}
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

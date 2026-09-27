@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useId, useRef, useState } from 'react'
-import { GoImage, GoTrash } from 'react-icons/go'
+import { GoEye, GoEyeClosed, GoImage, GoTrash } from 'react-icons/go'
 
 import { cn } from '@/lib/cn'
 import {
@@ -56,6 +56,27 @@ export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
 )
 Input.displayName = 'Input'
 
+/** 비밀번호 입력칸 + 오른쪽 보기/숨기기 버튼 */
+export const PasswordInput = ({ className, ...props }: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>) => {
+  const [visible, setVisible] = useState(false)
+  return (
+    <span className='relative block'>
+      <input type={visible ? 'text' : 'password'} className={fieldClass(cn('pr-11', className))} {...props} />
+      <button
+        type='button'
+        onClick={() => setVisible((value) => !value)}
+        aria-label={visible ? '비밀번호 숨기기' : '비밀번호 보기'}
+        aria-pressed={visible}
+        // 입력 중인 칸의 포커스를 빼앗지 않도록
+        onMouseDown={(event) => event.preventDefault()}
+        className='absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-mute transition-colors hover:text-ink'
+      >
+        {visible ? <GoEyeClosed size={16} /> : <GoEye size={16} />}
+      </button>
+    </span>
+  )
+}
+
 export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
   ({ className, ...props }, ref) => <textarea ref={ref} className={fieldClass(className)} {...props} />,
 )
@@ -101,6 +122,57 @@ export const Panel = ({
     {title && <h2 className='text-sm text-mute'>{title}</h2>}
     {children}
   </section>
+)
+
+/** 흰 상자 한 구역 (제목 + 짧은 설명). 프로필 · 계정 설정 · 프로젝트 편집이 같이 쓴다 */
+export const SectionCard = ({
+  title,
+  description,
+  actions,
+  children,
+  className,
+}: {
+  title?: string
+  description?: React.ReactNode
+  /** 제목 오른쪽 버튼 */
+  actions?: React.ReactNode
+  children?: React.ReactNode
+  className?: string
+}) => (
+  <section className={cn('flex flex-col gap-5 rounded-2xl bg-surface p-5 md:p-7', className)}>
+    {(title || actions) && (
+      <div className='flex items-start justify-between gap-3'>
+        <div className='flex flex-col gap-1'>
+          {title && <h2 className='text-base font-medium tracking-[-0.01em]'>{title}</h2>}
+          {description && <p className='text-xs leading-relaxed break-keep text-mute'>{description}</p>}
+        </div>
+        {actions && <div className='flex shrink-0 items-center gap-2'>{actions}</div>}
+      </div>
+    )}
+    {children}
+  </section>
+)
+
+/** 저장 상태 표시: 저장 중 · 저장 안 된 변경 · 저장됨 */
+export function SaveState({ dirty, saving, className }: { dirty: boolean; saving: boolean; className?: string }) {
+  const [label, color] = saving
+    ? ['저장 중…', 'bg-mute animate-pulse']
+    : dirty
+      ? ['저장 안 된 변경', 'bg-[#e0a526]']
+      : ['저장됨', 'bg-success']
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 text-xs text-mute', className)}>
+      <span className={cn('size-1.5 rounded-full', color)} />
+      {label}
+    </span>
+  )
+}
+
+/** 편집 화면 상단에 붙는 막대 (스크롤해도 헤더 아래에 남는다) */
+export const EditorBar = ({ children }: { children: React.ReactNode }) => (
+  <div className='sticky top-header z-20 -mx-4 -mt-4 flex items-center justify-between gap-3 bg-paper px-4 py-3 md:-mx-8 md:-mt-8 md:px-8 md:py-4'>
+    {children}
+  </div>
 )
 
 /* ─── 폼 요소 ─────────────────────────────────────────────────────────── */
@@ -403,7 +475,8 @@ export function useToast() {
   useEffect(() => () => clearTimeout(timer.current), [])
 
   const node = (
-    <div className='pointer-events-none fixed inset-x-0 bottom-6 z-[80] flex justify-center px-4'>
+    // 모바일에서는 멤버 공간 바텀탭 위에
+    <div className='pointer-events-none fixed inset-x-0 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+0.75rem)] z-[80] flex justify-center px-4 md:bottom-6'>
       <AnimatePresence>
         {toast && (
           <motion.div

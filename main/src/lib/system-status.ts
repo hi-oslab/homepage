@@ -53,7 +53,7 @@ async function checkSupabase(): Promise<ServiceStatus> {
   const base: ServiceStatus = {
     id: 'supabase',
     name: 'Supabase',
-    role: '데이터베이스 (작품, 프로필, 멤버, 커뮤니티)',
+    role: '데이터베이스 (프로젝트, 프로필, 멤버, 커뮤니티)',
     health: 'ok',
     summary: '',
     metrics: [],
@@ -93,7 +93,7 @@ async function checkSupabase(): Promise<ServiceStatus> {
       summary: ms > 3000 ? '응답이 느려요' : '정상',
       latencyMs: ms,
       metrics: [
-        { label: '작품', value: `${works}`, hint: `공개 ${publishedWorks}` },
+        { label: '프로젝트', value: `${works}`, hint: `공개 ${publishedWorks}` },
         { label: '프로필', value: `${members}` },
         { label: '멤버', value: `${users}`, hint: pending ? `승인 대기 ${pending}` : undefined },
         { label: '커뮤니티 글', value: `${posts}` },

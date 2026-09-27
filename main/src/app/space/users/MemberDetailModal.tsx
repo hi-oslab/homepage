@@ -123,15 +123,15 @@ export function MemberDetailModal({
               <div className='flex items-center justify-between gap-3'>
                 <div className='flex flex-col gap-0.5'>
                   <span className='text-sm'>{ROLE_LABELS.operator.ko}</span>
-                  <span className='text-xs text-mute'>작품·프로필·멤버를 함께 관리해요.</span>
+                  <span className='text-xs text-mute'>프로젝트·프로필·멤버를 함께 관리해요.</span>
                 </div>
                 <Switch
                   checked={user.is_master}
                   disabled={busy}
                   onChange={(value) => {
                     const message = value
-                      ? `${user.name}님을 운영자로 지정할까요?\n모든 작품·프로필·멤버를 함께 관리할 수 있게 됩니다.`
-                      : `${user.name}님을 운영자에서 해제할까요?\n작품·프로필·멤버 관리 권한이 없어집니다.`
+                      ? `${user.name}님을 운영자로 지정할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`
+                      : `${user.name}님을 운영자에서 해제할까요?\n프로젝트·프로필·멤버 관리 권한이 없어집니다.`
                     if (!confirm(message)) return
                     onRun(
                       user.id,
@@ -188,14 +188,14 @@ function Footer({
     )
 
   const approveAsMaster = () => {
-    if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 작품·프로필·멤버를 함께 관리할 수 있게 됩니다.`)) return
+    if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`)) return
     onRun(user.id, () => approveAsMasterAction(user.id), `${user.name}님을 운영자로 승인했습니다`)
   }
 
   const remove = () => {
     if (
       !confirm(
-        `'${user.name}' 계정을 삭제할까요?\n작성한 작품은 남고 작성자 정보만 비워지며, Members 페이지의 프로필은 함께 삭제됩니다.`,
+        `'${user.name}' 계정을 삭제할까요?\n작성한 프로젝트는 남고 작성자 정보만 비워지며, Members 페이지의 프로필은 함께 삭제됩니다.`,
       )
     )
       return

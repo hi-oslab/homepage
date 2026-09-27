@@ -89,7 +89,7 @@ export function WorksList({
   }
 
   const remove = (work: Work) => {
-    if (!confirm(`'${work.title}' 작품을 삭제할까요?\n삭제하면 되돌릴 수 없습니다.`)) return
+    if (!confirm(`'${work.title}' 프로젝트를 삭제할까요?\n삭제하면 되돌릴 수 없습니다.`)) return
     setWorks((current) => current.filter((item) => item.id !== work.id))
     startTransition(async () => {
       try {
@@ -105,15 +105,15 @@ export function WorksList({
   return (
     <div className='flex flex-col gap-4'>
       <PageHeader
-        title='작품'
+        title='프로젝트'
         description={
           isMaster
             ? '드래그해서 사이트에 보이는 순서를 바꿀 수 있어요.'
-            : '모든 작품을 보고 수정할 수 있어요. 삭제는 내가 쓴 작품만, 노출 순서는 운영자가 정해요.'
+            : '오픈소스랩이 함께 한 프로젝트를 모두 보고 수정할 수 있어요. 삭제는 직접 작성한 프로젝트만, 노출 순서는 운영자가 정해요.'
         }
         actions={
           <form action={createWorkAction}>
-            <button className={buttonClass('primary')}>+ 새 작품</button>
+            <button className={buttonClass('primary')}>+ 새 프로젝트</button>
           </form>
         }
       />
@@ -149,7 +149,7 @@ export function WorksList({
             checked={mineOnly}
             onChange={(event) => setMineOnly(event.target.checked)}
           />
-          내 작품만
+          직접 작성한 것만
         </label>
         <div className='relative ml-auto w-full sm:w-64'>
           <GoSearch className='pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-mute' size={14} />
@@ -174,7 +174,7 @@ export function WorksList({
                 draggable={canReorder}
                 author={
                   work.author_id === currentUserId
-                    ? '나'
+                    ? '직접 작성'
                     : work.author_id
                       ? (authors[work.author_id] ?? '알 수 없음')
                       : '작성자 없음'
@@ -190,7 +190,7 @@ export function WorksList({
 
       {filtered.length === 0 && (
         <div className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>
-          {works.length === 0 ? '아직 작품이 없습니다. 첫 작품을 추가해 보세요.' : '조건에 맞는 작품이 없습니다.'}
+          {works.length === 0 ? '아직 프로젝트가 없습니다. 첫 프로젝트를 추가해 보세요.' : '조건에 맞는 프로젝트가 없습니다.'}
         </div>
       )}
       {isMaster && !canReorder && filtered.length > 0 && (

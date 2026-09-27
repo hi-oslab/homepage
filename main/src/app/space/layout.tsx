@@ -4,6 +4,8 @@ import { AuthSetupError, getCurrentUser, hasMaster, isApproved } from '@/lib/adm
 import { getAdminUsers, getHelpRequests } from '@/lib/cms'
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
+import { NotificationCenter } from './NotificationCenter'
+import { getNotifications } from '@/lib/notifications'
 
 export const metadata: Metadata = {
   title: 'Member Space',
@@ -24,11 +26,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isApproved(user)) return <AdminNotice kind={user.status === 'rejected' ? 'rejected' : 'pending'} name={user.name} />
 
   // 마스터에게는 승인 대기 + 미처리 문의 수를 메뉴 배지로 보여준다
-  const pendingCount = user.is_master
-    ? await Promise.all([getAdminUsers(), getHelpRequests('open')]).then(
-        ([users, requests]) => users.filter((item) => item.status === 'pending').length + requests.length,
-      )
-    : 0
+  const [pendingCount, notifications] = await Promise.all([
+    user.is_master
+      ? Promise.all([getAdminUsers(), getHelpRequests('open')]).then(
+          ([users, requests]) => users.filter((item) => item.status === 'pending').length + requests.length,
+        )
+      : 0,
+    // 오른쪽 아래 알림 (멤버 공간 모든 화면)
+    getNotifications(user),
+  ])
 
   return (
     <AdminShell
@@ -41,6 +47,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }}
     >
       {children}
+      <NotificationCenter items={notifications} userId={user.id} />
     </AdminShell>
   )
 }

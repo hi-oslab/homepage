@@ -5,7 +5,8 @@ import { useState, useTransition } from 'react'
 import { AuthScreen } from '@/app/space/AdminAuth'
 import { resetPasswordAction } from '@/app/space/actions'
 import { Arrow } from '@/components/Typography'
-import { Input, buttonClass } from '@/components/admin/ui'
+import { PasswordInput, buttonClass } from '@/components/admin/ui'
+import { callAction } from '@/lib/call-action'
 
 export function ResetPasswordForm({ token, account }: { token: string; account: { name: string; username: string } | null }) {
   const [password, setPassword] = useState('')
@@ -54,15 +55,14 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
             return
           }
           startTransition(async () => {
-            const result = await resetPasswordAction(token, password)
+            const result = await callAction(() => resetPasswordAction(token, password))
             if ('message' in result) setError(result.message)
             else setDone(true)
           })
         }}
         className='flex flex-col gap-2'
       >
-        <Input
-          type='password'
+        <PasswordInput
           required
           minLength={8}
           autoFocus
@@ -76,8 +76,7 @@ export function ResetPasswordForm({ token, account }: { token: string; account: 
           }}
           className='bg-tile py-3.5 text-base'
         />
-        <Input
-          type='password'
+        <PasswordInput
           required
           autoComplete='new-password'
           placeholder='새 비밀번호 확인'

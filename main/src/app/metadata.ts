@@ -3,7 +3,7 @@ export const METADATA = {
   title: 'Open Source Lab',
   titleTemplate: '%s | Open Source Lab',
   description:
-    'Interactive Media Art Collective, Open Source Lab. 홍익대학교에서 시작된 인터랙티브 미디어 아트 콜렉티브, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 작품을 만들고 공유합니다.',
+    'Interactive Media Art Collective, Open Source Lab. 홍익대학교에서 시작된 인터랙티브 미디어 아트 콜렉티브, 오픈소스랩. 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 프로젝트를 만들고 공유합니다.',
   keywords: [
     'Open Source Lab',
     'OSL',

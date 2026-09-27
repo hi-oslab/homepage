@@ -23,9 +23,11 @@ import {
   signUpAction,
   withdrawAction,
 } from './actions'
-import { Input, Textarea, buttonClass } from '@/components/admin/ui'
+import { Input, PasswordInput, Textarea, buttonClass } from '@/components/admin/ui'
 import { LARGE_FIELD } from '@/components/admin/styles'
 import { ROLE_LABELS } from '@/lib/roles'
+import { callAction } from '@/lib/call-action'
+import { formatPhone } from '@/lib/phone'
 
 const bigInput = LARGE_FIELD
 
@@ -81,13 +83,13 @@ export function LoginForm({ hasMaster }: { hasMaster: boolean }) {
   return (
     <AuthScreen title='Login'>
       <p className='break-keep text-sm leading-relaxed text-mute'>
-        오픈소스랩 멤버 공간입니다. 로그인하면 내 프로필과 작품을 관리할 수 있어요.
+        오픈소스랩 멤버 공간입니다. 로그인하면 프로필카드를 관리하고 함께 한 프로젝트를 기록할 수 있어요.
       </p>
       <form
         onSubmit={(event) => {
           event.preventDefault()
           startTransition(async () => {
-            const result = await signInAction(form.username, form.password)
+            const result = await callAction(() => signInAction(form.username, form.password))
             if ('message' in result) setError(result.message)
             else router.replace('/space')
           })
@@ -107,8 +109,7 @@ export function LoginForm({ hasMaster }: { hasMaster: boolean }) {
           onChange={set('username')}
           className={bigInput}
         />
-        <Input
-          type='password'
+        <PasswordInput
           required
           autoComplete='current-password'
           placeholder='비밀번호'
@@ -193,8 +194,8 @@ export function JoinForm({ setup }: { setup: boolean }) {
     startTransition(async () => {
       const input = { ...profile, username: credentials.username, password: credentials.password, requestMaster }
       const result = setup
-        ? await setupMasterAction({ ...input, setupPassword: credentials.setupPassword })
-        : await signUpAction(input)
+        ? await callAction(() => setupMasterAction({ ...input, setupPassword: credentials.setupPassword }))
+        : await callAction(() => signUpAction(input))
       if (!('message' in result)) return router.replace('/space')
       // 아이디·비밀번호 문제는 첫 단계로 돌려보낸다
       if (/아이디|비밀번호/.test(result.message)) setStepIndex(0)
@@ -240,8 +241,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
         {step === 'account' && (
           <>
             {setup && (
-              <Input
-                type='password'
+              <PasswordInput
                 required
                 placeholder='설정 비밀번호 (ADMIN_PASSWORD)'
                 aria-label='설정 비밀번호'
@@ -264,8 +264,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
               className={bigInput}
             />
             <UsernameCheck username={credentials.username} result={usernameCheck} onResult={setUsernameCheck} />
-            <Input
-              type='password'
+            <PasswordInput
               required
               minLength={8}
               autoComplete='new-password'
@@ -275,8 +274,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
               onChange={set('password')}
               className={bigInput}
             />
-            <Input
-              type='password'
+            <PasswordInput
               required
               autoComplete='new-password'
               placeholder='비밀번호 확인'
@@ -305,8 +303,8 @@ export function JoinForm({ setup }: { setup: boolean }) {
             />
             <p className='break-keep text-[11px] leading-snug text-mute'>
               {requestMaster
-                ? '운영자는 작품·프로필·멤버를 함께 관리해요. 기존 운영자가 확인한 뒤 운영자로 지정해 줍니다.'
-                : '멤버는 내 프로필을 관리하고, 모든 작품을 보고 수정할 수 있어요.'}
+                ? '운영자는 프로젝트·프로필·멤버를 함께 관리해요. 기존 운영자가 확인한 뒤 운영자로 지정해 줍니다.'
+                : '멤버는 프로필카드를 관리하고, 오픈소스랩 프로젝트를 함께 기록하고 수정할 수 있어요.'}
             </p>
             {/* 신청 내용 확인 */}
             <dl className='mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-xl bg-tile p-4 text-sm'>
@@ -369,7 +367,7 @@ export function HelpRequestForm() {
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
     startTransition(async () => {
-      const result = await helpRequestAction({ kind, ...form })
+      const result = await callAction(() => helpRequestAction({ kind, ...form }))
       if ('message' in result) setError(result.message)
       else setSent(true)
     })
@@ -434,8 +432,13 @@ export function HelpRequestForm() {
               required
               placeholder='가입할 때 쓴 전화번호'
               aria-label='전화번호'
+              inputMode='tel'
+              maxLength={13}
               value={form.phone}
-              onChange={set('phone')}
+              onChange={(event) => {
+                setForm((current) => ({ ...current, phone: formatPhone(event.target.value) }))
+                setError('')
+              }}
               className={bigInput}
             />
             <Textarea
@@ -476,7 +479,11 @@ function UsernameCheck({
     setChecking(true)
     let cancelled = false
     const timer = setTimeout(async () => {
-      const next = await checkUsernameAction(username)
+      // 확인에 실패해도 가입 단계는 막지 않는다 (최종 확인은 가입할 때 서버가 한다)
+      const next = await checkUsernameAction(username).catch(() => ({
+        available: true,
+        message: '아이디 중복을 확인하지 못했어요. 가입할 때 다시 확인해요.',
+      }))
       if (cancelled) return
       onResult(next)
       setChecking(false)
@@ -548,7 +555,7 @@ export function AdminNotice({ kind, name }: { kind: 'pending' | 'rejected' | 'mi
               onSubmit={(event) => {
                 event.preventDefault()
                 startTransition(async () => {
-                  const result = await withdrawAction(password)
+                  const result = await callAction(() => withdrawAction(password))
                   if ('message' in result) setError(result.message)
                   else router.replace('/login')
                 })
@@ -556,8 +563,7 @@ export function AdminNotice({ kind, name }: { kind: 'pending' | 'rejected' | 'mi
               className='flex flex-col gap-2 rounded-xl bg-surface p-4'
             >
               <p className='text-sm'>가입 신청을 취소하면 계정 정보가 삭제됩니다.</p>
-              <Input
-                type='password'
+              <PasswordInput
                 required
                 placeholder='비밀번호 확인'
                 aria-label='비밀번호'

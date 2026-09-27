@@ -118,7 +118,7 @@ export type Block =
 
 export type BlockType = Block['type']
 
-// 에디터의 "블록 추가" 메뉴에 노출되는 타입 (legacy-markdown 은 자동 생성 전용이라 제외)
+// 새로 넣을 수 있는 블록 (legacy-markdown은 자동 생성 전용, 목록 · 인용 · 콜아웃은 더 이상 새로 넣지 않는다)
 export const INSERTABLE_BLOCK_TYPES: Exclude<BlockType, 'legacy-markdown'>[] = [
   'section-index',
   'heading',
@@ -129,10 +129,7 @@ export const INSERTABLE_BLOCK_TYPES: Exclude<BlockType, 'legacy-markdown'>[] = [
   'code',
   'html',
   'divider',
-  'quote',
-  'list',
   'embed',
-  'callout',
 ]
 
 export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {

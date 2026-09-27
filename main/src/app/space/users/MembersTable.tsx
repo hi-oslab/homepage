@@ -13,6 +13,8 @@ import { ROLE_LABELS } from '@/lib/roles'
 
 export type SortKey = 'name' | 'role' | 'student_id' | 'major' | 'phone' | 'joined' | 'username' | 'operator'
 export type Sort = { key: SortKey; dir: 'asc' | 'desc' }
+/** 승인 대기 처리 */
+export type Decision = 'approve' | 'operator' | 'reject'
 
 /** 기본: 가입 시기 최신순 (Members 페이지와 같은 순서) */
 export const DEFAULT_SORT: Sort = { key: 'joined', dir: 'desc' }
@@ -126,7 +128,7 @@ export function MembersTable({
   selected,
   onSelect,
   onOpen,
-  onApprove,
+  onDecide,
 }: {
   users: AdminUser[]
   /** member id → 프로필 */
@@ -139,11 +141,12 @@ export function MembersTable({
   selected: Set<string>
   onSelect: (ids: string[], checked: boolean) => void
   onOpen: (user: AdminUser) => void
-  /** 승인 대기 행의 빠른 승인 */
-  onApprove: (user: AdminUser) => void
+  /** 승인 대기 행에서 바로 처리: 승인 · 운영자로 승인 · 거절 */
+  onDecide: (user: AdminUser, decision: Decision) => void
 }) {
   const selectedCount = users.filter((user) => selected.has(user.id)).length
   const allSelected = selectedCount === users.length && users.length > 0
+  const hasPending = users.some((user) => user.status === 'pending')
   const cell = (key: SortKey) => COLUMNS.find((column) => column.key === key)!.className.replace(/w-\[[^\]]+\]/, '')
 
   return (
@@ -172,8 +175,9 @@ export function MembersTable({
                 className={classNames('px-3', column.className)}
               />
             ))}
-            <th className='w-36 px-3'>
-              <span className='sr-only'>더보기</span>
+            {/* 승인 대기 표는 처리 버튼이 들어가도록 넓게 */}
+            <th className={classNames('px-3', hasPending ? 'w-80' : 'w-28')}>
+              <span className='sr-only'>처리 · 더보기</span>
             </th>
           </tr>
         </thead>
@@ -223,15 +227,35 @@ export function MembersTable({
                 </td>
                 <td className='px-3 py-2' onClick={(event) => event.stopPropagation()}>
                   <span className='flex items-center justify-end gap-1'>
-                    {user.status === 'pending' && !user.master_requested && (
-                      <button
-                        type='button'
-                        disabled={busy}
-                        onClick={() => onApprove(user)}
-                        className={buttonClass('primary', 'sm')}
-                      >
-                        승인
-                      </button>
+                    {user.status === 'pending' && (
+                      <>
+                        {user.master_requested && (
+                          <button
+                            type='button'
+                            disabled={busy}
+                            onClick={() => onDecide(user, 'operator')}
+                            className={buttonClass('primary', 'sm')}
+                          >
+                            운영자로 승인
+                          </button>
+                        )}
+                        <button
+                          type='button'
+                          disabled={busy}
+                          onClick={() => onDecide(user, 'approve')}
+                          className={buttonClass(user.master_requested ? 'secondary' : 'primary', 'sm')}
+                        >
+                          {user.master_requested ? '멤버로 승인' : '승인'}
+                        </button>
+                        <button
+                          type='button'
+                          disabled={busy}
+                          onClick={() => onDecide(user, 'reject')}
+                          className={buttonClass('ghost', 'sm')}
+                        >
+                          거절
+                        </button>
+                      </>
                     )}
                     <button type='button' onClick={() => onOpen(user)} className={buttonClass('ghost', 'sm')}>
                       더보기

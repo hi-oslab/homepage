@@ -8,10 +8,10 @@ export const revalidate = 30 // 30초마다 데이터 갱신 (자동 업데이�
 
 export const metadata: Metadata = {
   title: 'Works',
-  description: '오픈소스랩의 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 작품들을 소개합니다.',
+  description: '오픈소스랩의 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 프로젝트들을 소개합니다.',
   openGraph: {
     title: 'Works | Open Source Lab',
-    description: '오픈소스랩의 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 작품들을 소개합니다.',
+    description: '오픈소스랩의 미디어 아트, 크리에이티브 코딩, 피지컬 컴퓨팅 프로젝트들을 소개합니다.',
     url: '/work',
     images: [OG_IMAGE],
   },

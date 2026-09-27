@@ -3,7 +3,18 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { GoEye } from 'react-icons/go'
-import { PageHeader, Panel, buttonClass, useSaveShortcut, useToast, useUnsavedWarning } from '@/components/admin/ui'
+import {
+  EditorBar,
+  ImageDrop,
+  PageHeader,
+  SaveState,
+  SectionCard,
+  Switch,
+  buttonClass,
+  useSaveShortcut,
+  useToast,
+  useUnsavedWarning,
+} from '@/components/admin/ui'
 import { PreviewModal } from '@/components/admin/PreviewModal'
 import { ProfileImageCropper } from '@/components/admin/ProfileImageCropper'
 import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
@@ -95,39 +106,58 @@ export function ProfileEditor({
   }
 
   return (
-    <div className='flex flex-col gap-3'>
-      <PageHeader
-        title='내 프로필'
-        description='Members 페이지에 보이는 내 소개를 관리합니다.'
-        actions={
-          <>
-            {dirty && <span className='text-xs text-mute'>저장 안 된 변경</span>}
-            <button type='button' onClick={() => setPreviewOpen(true)} className={buttonClass('secondary')}>
-              <GoEye size={14} />
-              미리보기
-            </button>
-            <button type='button' onClick={save} disabled={!dirty || isPending} className={buttonClass('primary')}>
-              {isPending ? '저장 중…' : '저장'}
-              <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
-            </button>
-          </>
-        }
-      />
-
-      <div className='grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_280px]'>
-        <div className='flex flex-col gap-3'>
-          <MemberForm
-            draft={draft}
-            patch={patch}
-            onUpload={async (file) => setCropFile(file)}
-            onEditImage={editCurrentImage}
-            roles={roles}
-            fieldSuggestions={fieldSuggestions}
-          />
+    <div className='flex flex-col gap-6'>
+      {/* 상단 바: 저장 상태 · 공개 여부 · 미리보기 · 저장 (프로젝트 편집과 같은 모양) */}
+      <EditorBar>
+        <div className='flex min-w-0 items-baseline gap-3'>
+          <h1 className='truncate text-lg font-medium tracking-[-0.02em]'>프로필카드 설정</h1>
+          <SaveState dirty={dirty} saving={isPending} className='hidden sm:inline-flex' />
         </div>
-        <div className='flex flex-col gap-3 xl:sticky xl:top-12 xl:self-start'>
-          <span className='text-xs text-mute'>사이트 카드</span>
-          <MemberCard member={{ ...saved, ...draft }} />
+        <div className='flex shrink-0 items-center gap-2'>
+          <span
+            title={draft.published ? '저장하면 Members 페이지에 표시됩니다' : '비공개 프로필은 사이트에 표시되지 않습니다'}
+            className='mr-1 flex items-center'
+          >
+            <Switch
+              checked={draft.published}
+              onChange={(value) => patch('published', value)}
+              label={draft.published ? '공개' : '비공개'}
+            />
+          </span>
+          <button type='button' onClick={() => setPreviewOpen(true)} className={buttonClass('secondary')}>
+            <GoEye size={14} />
+            <span className='hidden sm:inline'>미리보기</span>
+          </button>
+          <button type='button' onClick={save} disabled={!dirty || isPending} className={buttonClass('primary')}>
+            저장
+            <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
+          </button>
+        </div>
+      </EditorBar>
+
+      {/* 넓은 화면: 왼쪽에 이미지 · 카드 미리보기 고정, 오른쪽에 정보 상자. 최대 960px */}
+      <div className='mx-auto grid w-full max-w-[960px] grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]'>
+        <aside className='flex flex-col gap-4 lg:sticky lg:top-[calc(var(--spacing-header)+5rem)] lg:self-start'>
+          <SectionCard title='프로필 이미지' description='투명 PNG 아이콘을 추천해요. 배경이 있는 사진은 원 · 사각형 · 별 모양으로 오려서 저장돼요.'>
+            <ImageDrop
+              url={draft.cover_image_url}
+              onUpload={async (file) => setCropFile(file)}
+              onEdit={editCurrentImage}
+              onRemove={() => patch('cover_image_url', null)}
+              aspect='aspect-square'
+              label='이미지를 끌어다 놓거나 눌러서 올리기'
+              // 투명 PNG를 자르지 않고, 모양을 따라 그림자
+              imageClassName='object-contain p-[8%] drop-shadow-[0_8px_18px_rgba(17,17,17,0.18)]'
+            />
+          </SectionCard>
+          <div className='hidden flex-col gap-2 lg:flex'>
+            <span className='px-1 text-xs text-mute'>Members 카드 미리보기</span>
+            <MemberCard member={{ ...saved, ...draft }} />
+          </div>
+        </aside>
+
+        <div className='flex min-w-0 flex-col gap-4'>
+          <MemberForm draft={draft} patch={patch} roles={roles} fieldSuggestions={fieldSuggestions} />
         </div>
       </div>
 
@@ -168,27 +198,28 @@ function ProfileSetup({ welcome, userName, onDone }: { welcome: boolean; userNam
     })
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='mx-auto flex w-full max-w-[640px] flex-col gap-4'>
       <PageHeader
-        title={welcome ? `환영해요, ${userName}님` : '내 프로필'}
+        title={welcome ? `환영해요, ${userName}님` : '프로필카드 설정'}
         description={
-          welcome ? '먼저 Members 페이지에 보일 내 프로필을 만들어 주세요.' : '아직 내 프로필이 없어요.'
+          welcome ? '먼저 Members 페이지에 보일 프로필카드를 만들어 주세요.' : '아직 프로필카드가 없어요.'
         }
       />
-      <Panel title='내 프로필 만들기'>
-        <p className='max-w-md break-keep text-sm leading-relaxed text-mute'>
-          사진, 소개, 분야를 직접 작성할 수 있어요. 처음에는 비공개로 만들어지고, 준비가 되면 공개로 바꾸면 Members
-          페이지에 표시됩니다.
-        </p>
-        <button type='button' disabled={isPending} onClick={create} className={buttonClass('primary', 'md', 'self-start')}>
-          {isPending ? '만드는 중…' : '내 프로필 만들기'}
-        </button>
-      </Panel>
-      {welcome && (
-        <button type='button' disabled={isPending} onClick={skip} className={buttonClass('ghost', 'md', 'self-start')}>
-          나중에 할게요
-        </button>
-      )}
+      <SectionCard
+        title='프로필카드 만들기'
+        description='이미지, 소개, 분야를 직접 작성할 수 있어요. 처음에는 비공개로 만들어지고, 준비가 되면 공개로 바꾸면 Members 페이지에 표시돼요.'
+      >
+        <div className='flex flex-wrap gap-2'>
+          <button type='button' disabled={isPending} onClick={create} className={buttonClass('primary')}>
+            {isPending ? '만드는 중…' : '프로필카드 만들기'}
+          </button>
+          {welcome && (
+            <button type='button' disabled={isPending} onClick={skip} className={buttonClass('ghost')}>
+              나중에 할게요
+            </button>
+          )}
+        </div>
+      </SectionCard>
     </div>
   )
 }

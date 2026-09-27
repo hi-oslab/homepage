@@ -6,7 +6,22 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { GoArrowLeft, GoEye, GoLinkExternal } from 'react-icons/go'
 import { BlockEditor } from '@/components/admin/BlockEditor'
-import { Field, ImageDrop, Input, Panel, Switch, TagInput, Textarea, buttonClass, useSaveShortcut, useToast, useUnsavedWarning } from '@/components/admin/ui'
+import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
+import {
+  EditorBar,
+  Field,
+  ImageDrop,
+  Input,
+  Panel,
+  SaveState,
+  Switch,
+  TagInput,
+  Textarea,
+  buttonClass,
+  useSaveShortcut,
+  useToast,
+  useUnsavedWarning,
+} from '@/components/admin/ui'
 import { PreviewModal } from '@/components/admin/PreviewModal'
 import { WorkDetailLayout } from '@/components/WorkDetailLayout'
 import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
@@ -55,16 +70,23 @@ export function WorkEditor({
   const [workId] = useState(initialWork.id)
   const [draft, setDraft] = useState<Draft>(() => toDraft(initialWork))
   const [blocks, setBlocks] = useState<Block[]>(() => parseBlocks(initialWork.content))
-  const [saved, setSaved] = useState(() => JSON.stringify({ draft: toDraft(initialWork), content: initialWork.content }))
+  const [saved, setSaved] = useState(() =>
+    JSON.stringify({ draft: toDraft(initialWork), content: initialWork.content }),
+  )
   const [savedSlug, setSavedSlug] = useState(initialWork.slug)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [isSaving, startSaving] = useTransition()
 
-  const content = useMemo(() => serializeBlocks(blocks), [blocks])
+  // 비어 있는 문단(엔터로 만든 빈 줄)은 저장하지 않는다
+  const content = useMemo(
+    () => serializeBlocks(blocks.filter((block) => !(block.type === 'paragraph' && !block.text.trim()))),
+    [blocks],
+  )
   const dirty = JSON.stringify({ draft, content }) !== saved
   useUnsavedWarning(dirty)
 
-  const patch = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((current) => ({ ...current, [key]: value }))
+  const patch = <K extends keyof Draft>(key: K, value: Draft[K]) =>
+    setDraft((current) => ({ ...current, [key]: value }))
 
   const save = () => {
     if (isSaving) return
@@ -74,7 +96,12 @@ export function WorkEditor({
     }
     startSaving(async () => {
       try {
-        const result = await updateWorkAction(workId, { ...draft, slug: draft.slug.trim(), year: Number(draft.year), content })
+        const result = await updateWorkAction(workId, {
+          ...draft,
+          slug: draft.slug.trim(),
+          year: Number(draft.year),
+          content,
+        })
         const next = toDraft(result)
         setDraft(next)
         setSaved(JSON.stringify({ draft: next, content: result.content }))
@@ -82,7 +109,7 @@ export function WorkEditor({
         toast.show('저장했습니다')
       } catch (error) {
         console.error(error)
-        toast.show('저장하지 못했습니다. slug가 다른 작품과 겹치지 않는지 확인하세요', 'error')
+        toast.show('저장하지 못했습니다. slug가 다른 프로젝트와 겹치지 않는지 확인하세요', 'error')
       }
     })
   }
@@ -118,7 +145,7 @@ export function WorkEditor({
   }
 
   const remove = async () => {
-    if (!confirm(`'${draft.title}' 작품을 삭제할까요?\n삭제하면 되돌릴 수 없습니다.`)) return
+    if (!confirm(`'${draft.title}' 프로젝트를 삭제할까요?\n삭제하면 되돌릴 수 없습니다.`)) return
     await deleteWorkAction(workId)
     setSaved(JSON.stringify({ draft, content })) // 경고 없이 이동
     router.push('/space/works')
@@ -127,7 +154,7 @@ export function WorkEditor({
   return (
     <div className='flex flex-col gap-6'>
       {/* 상단 바 */}
-      <div className='sticky top-header z-20 -mx-4 -mt-4 flex items-center justify-between gap-3 bg-paper px-4 py-3 md:-mx-8 md:-mt-8 md:px-8 md:py-4'>
+      <EditorBar>
         <Link
           href='/space/works'
           onClick={(event) => {
@@ -136,13 +163,24 @@ export function WorkEditor({
           className='flex items-center gap-1.5 text-sm text-mute transition-colors hover:text-ink'
         >
           <GoArrowLeft size={14} />
-          작품 목록
+          <span className='hidden sm:inline'>프로젝트 목록</span>
         </Link>
         <div className='flex items-center gap-2'>
-          <SaveState dirty={dirty} saving={isSaving} />
+          <SaveState dirty={dirty} saving={isSaving} className='mr-1 hidden sm:inline-flex' />
+          {/* 공개 상태: 바꾼 뒤 저장하면 사이트에 반영된다 */}
+          <span
+            title={draft.published ? '저장하면 사이트에 표시됩니다' : '비공개 프로젝트는 사이트에 표시되지 않습니다'}
+            className='mr-1 flex items-center'
+          >
+            <Switch
+              checked={draft.published}
+              onChange={(value) => patch('published', value)}
+              label={draft.published ? '공개' : '비공개'}
+            />
+          </span>
           <button type='button' onClick={() => setPreviewOpen(true)} className={buttonClass('secondary')}>
             <GoEye size={14} />
-            미리보기
+            <span className='hidden sm:inline'>미리보기</span>
           </button>
           {initialWork.published && (
             <a
@@ -160,52 +198,46 @@ export function WorkEditor({
             <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
           </button>
         </div>
-      </div>
+      </EditorBar>
 
-      <div className='grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]'>
-        {/* 본문 */}
-        <div className='flex min-w-0 flex-col gap-6'>
-          <div className='flex flex-col gap-2'>
-            <Textarea
+      <div className='grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]'>
+        {/* 제목 · 부제 · 본문을 각각 흰 상자로, 세 상자를 합쳐 최대 960px */}
+        <div className='flex w-full max-w-4xl min-w-0 flex-col gap-3 justify-self-center'>
+          <HeadingField label='프로젝트 제목' required empty={!draft.title.trim()}>
+            <AutoTextarea
               value={draft.title}
               onChange={(event) => patch('title', event.target.value.replace(/\n/g, ''))}
-              placeholder='제목'
-              rows={1}
-              className='field-sizing-content resize-none bg-transparent p-0 text-4xl leading-tight font-medium tracking-[-0.04em] md:text-5xl'
+              placeholder='제목을 입력하세요'
+              className='text-3xl leading-tight font-medium tracking-[-0.04em] md:text-4xl'
             />
-            <Textarea
+          </HeadingField>
+          <HeadingField label='부제' hint='한 줄로 프로젝트를 소개해 주세요'>
+            <AutoTextarea
               value={draft.subtitle}
               onChange={(event) => patch('subtitle', event.target.value.replace(/\n/g, ''))}
-              placeholder='부제 — 한 줄로 작품을 소개해 주세요'
-              rows={1}
-              className='field-sizing-content resize-none bg-transparent p-0 text-lg text-mute md:text-xl'
+              placeholder='예: 소리에 반응하는 빛으로 만든 공간 설치'
+              className='text-base md:text-lg'
             />
-          </div>
+          </HeadingField>
 
-          <BlockEditor
-            blocks={blocks}
-            onChange={setBlocks}
-            projectId={workId}
-            onDeleteImage={removeMedia}
-            onPersistContent={persistContent}
-          />
+          {/* 본문 (블록 왼쪽 조작 칸이 상자 안에 들어가도록 왼쪽 여백은 좁게) */}
+          <span className='text-sm text-mute'>본문</span>
+          <section className='flex flex-col gap-1 rounded-2xl bg-surface py-8 pr-4 pl-1 md:py-12 md:pr-8 md:pl-2'>
+            <BlockEditor
+              blocks={blocks}
+              onChange={setBlocks}
+              projectId={workId}
+              onDeleteImage={removeMedia}
+              onPersistContent={persistContent}
+            />
+          </section>
         </div>
 
         {/* 설정 */}
-        <aside className='flex flex-col gap-3 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto [scrollbar-width:none]'>
-          <Panel>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm'>공개 상태</span>
-              <Switch
-                checked={draft.published}
-                onChange={(value) => patch('published', value)}
-                label={draft.published ? '공개' : '비공개'}
-              />
-            </div>
-            <p className='-mt-2 text-xs text-mute'>
-              {draft.published ? '저장하면 사이트에 표시됩니다.' : '비공개 작품은 사이트에 표시되지 않습니다.'}
-            </p>
-          </Panel>
+        {/* 썸네일 · 기본 정보
+            넓은 화면: 왼쪽에 두고 상단 바 아래에 고정 (따로 스크롤하지 않는다)
+            좁은 화면: 본문보다 위에 두고 함께 스크롤 */}
+        <aside className='order-first flex flex-col gap-3 xl:sticky xl:top-[calc(var(--spacing-header)+5rem)] xl:self-start'>
 
           <Panel title='썸네일'>
             <ImageDrop
@@ -226,7 +258,10 @@ export function WorkEditor({
               }
             >
               <div className='flex gap-1.5'>
-                <Input value={draft.slug} onChange={(event) => patch('slug', event.target.value.toLowerCase().replace(/\s+/g, '-'))} />
+                <Input
+                  value={draft.slug}
+                  onChange={(event) => patch('slug', event.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                />
                 <button
                   type='button'
                   className={buttonClass('secondary', 'md', 'shrink-0')}
@@ -242,7 +277,12 @@ export function WorkEditor({
               </div>
             </Field>
             <Field label='카테고리'>
-              <Input list='work-categories' value={draft.category} onChange={(event) => patch('category', event.target.value)} placeholder='예: 오픈소스랩 기획전시' />
+              <Input
+                list='work-categories'
+                value={draft.category}
+                onChange={(event) => patch('category', event.target.value)}
+                placeholder='예: 오픈소스랩 기획전시'
+              />
               <datalist id='work-categories'>
                 {categories.map((item) => (
                   <option key={item} value={item} />
@@ -251,23 +291,35 @@ export function WorkEditor({
             </Field>
             <div className='grid grid-cols-2 gap-2'>
               <Field label='연도'>
-                <Input type='number' value={draft.year} onChange={(event) => patch('year', Number(event.target.value))} />
+                <Input
+                  type='number'
+                  value={draft.year}
+                  onChange={(event) => patch('year', Number(event.target.value))}
+                />
               </Field>
               <Field label='날짜 (선택)'>
-                <Input type='date' value={draft.project_date ?? ''} onChange={(event) => patch('project_date', event.target.value || null)} />
+                <Input
+                  type='date'
+                  value={draft.project_date ?? ''}
+                  onChange={(event) => patch('project_date', event.target.value || null)}
+                />
               </Field>
             </div>
             <Field label='키워드'>
               <TagInput value={draft.tags} onChange={(value) => patch('tags', value)} suggestions={tags} />
             </Field>
             <Field label='설명' hint='상세 페이지 정보란과 검색 결과 설명에 사용됩니다.'>
-              <Textarea rows={4} value={draft.description} onChange={(event) => patch('description', event.target.value)} />
+              <Textarea
+                rows={4}
+                value={draft.description}
+                onChange={(event) => patch('description', event.target.value)}
+              />
             </Field>
           </Panel>
 
           {canDelete && (
             <button type='button' onClick={remove} className={buttonClass('danger', 'md', 'self-start')}>
-              이 작품 삭제
+              이 프로젝트 삭제
             </button>
           )}
         </aside>
@@ -285,16 +337,40 @@ export function WorkEditor({
   )
 }
 
-function SaveState({ dirty, saving }: { dirty: boolean; saving: boolean }) {
-  const [label, color] = saving
-    ? ['저장 중…', 'bg-mute animate-pulse']
-    : dirty
-      ? ['저장 안 된 변경', 'bg-[#e0a526]']
-      : ['저장됨', 'bg-success']
+/** 제목 · 부제 입력 영역: 위에 이름표, 올리면 옅은 면, 입력 중에는 진한 면 */
+/**
+ * 제목 · 부제 상자 여백: 본문 상자의 글 시작 위치에 맞춘다
+ * 본문은 왼쪽 여백(4px · md 8px) + 블록 조작 칸(54px · md 64px) 뒤에서 글이 시작한다.
+ */
+const BOX_PADDING = 'py-5 pr-4 pl-[58px] md:py-6 md:pr-8 md:pl-[72px]'
+
+function HeadingField({
+  label,
+  hint,
+  required,
+  empty,
+  children,
+}: {
+  label: string
+  hint?: string
+  required?: boolean
+  /** 필수인데 비어 있으면 이름표에 표시 */
+  empty?: boolean
+  children: React.ReactNode
+}) {
   return (
-    <span className='mr-1 hidden items-center gap-1.5 text-xs text-mute sm:inline-flex'>
-      <span className={classNames('size-1.5 rounded-full', color)} />
-      {label}
-    </span>
+    <>
+      <div className='flex items-baseline gap-2 text-sm text-mute'>{label}</div>
+      <label
+        className={classNames('group/field flex cursor-text flex-col gap-1.5 rounded-2xl bg-surface', BOX_PADDING)}
+      >
+        {/* 입력 중에는 이름표를 진하게 */}
+        <span className='flex items-baseline gap-2 text-xs text-mute transition-colors group-focus-within/field:text-ink'>
+          {required && empty && <span className='text-danger'>필수</span>}
+          {hint && <span className='text-ink/30'>{hint}</span>}
+        </span>
+        {children}
+      </label>
+    </>
   )
 }
