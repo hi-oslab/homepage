@@ -1,7 +1,7 @@
 // 사이트 주소와 검색 노출 설정 (SEO 공용)
 //
 // 절대 주소(canonical, 사이트맵, robots, JSON-LD)는 모두 NEXT_PUBLIC_SITE_URL 기준으로 만든다.
-// beta.hioslab.com → hioslab.com 으로 옮길 때 이 환경변수만 바꾸면 된다.
+// 정식 도메인은 hioslab.com. beta.hioslab.com 요청은 next.config.ts에서 hioslab.com으로 308 이동한다.
 
 export const PRODUCTION_URL = 'https://hioslab.com'
 

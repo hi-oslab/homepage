@@ -3,7 +3,7 @@
 
 import { createAdminSupabaseClient } from './supabase'
 import { listR2Objects } from './r2'
-import { ALLOW_INDEXING, SITE_URL } from './site'
+import { ALLOW_INDEXING, PRODUCTION_URL, SITE_URL } from './site'
 import { CONTACT_FROM } from './contact'
 
 export type Health = 'ok' | 'warn' | 'error'
@@ -221,12 +221,14 @@ async function checkResend(): Promise<ServiceStatus> {
 function checkDeployment(): ServiceStatus {
   const env = process.env.VERCEL_ENV
   const commit = process.env.VERCEL_GIT_COMMIT_SHA
+  // NEXT_PUBLIC_ 값은 빌드할 때 박히므로, 환경변수를 고친 뒤에는 다시 배포해야 반영된다
+  const wrongSite = env === 'production' && new URL(SITE_URL).hostname !== new URL(PRODUCTION_URL).hostname
   return {
     id: 'vercel',
     name: 'Vercel',
     role: '호스팅 / 배포',
-    health: 'ok',
-    summary: env ? `${env} 배포` : '로컬 개발 환경',
+    health: wrongSite ? 'warn' : 'ok',
+    summary: wrongSite ? '사이트 주소가 정식 도메인이 아니에요' : env ? `${env} 배포` : '로컬 개발 환경',
     metrics: [
       { label: '사이트 주소', value: SITE_URL.replace(/^https?:\/\//, '') },
       { label: '검색 노출', value: ALLOW_INDEXING ? '허용' : '차단 (noindex)' },
@@ -236,10 +238,88 @@ function checkDeployment(): ServiceStatus {
         : []),
       ...(process.env.VERCEL_REGION ? [{ label: '리전', value: process.env.VERCEL_REGION }] : []),
     ],
-    notes: ['Hobby 플랜: 대역폭 100GB/월, 비상업적 용도만. 사용량은 대시보드 Usage 탭에서 볼 수 있어요.'],
+    notes: [
+      ...(wrongSite
+        ? [`Environment Variables에서 NEXT_PUBLIC_SITE_URL을 ${PRODUCTION_URL}로 바꾸거나 지운 뒤 다시 배포해 주세요. 검색 노출도 함께 켜져요.`]
+        : []),
+      'Hobby 플랜: 대역폭 100GB/월, 비상업적 용도만. 사용량은 대시보드 Usage 탭에서 볼 수 있어요.',
+    ],
     links: [
       { label: '대시보드', href: 'https://vercel.com/dashboard' },
       { label: '장애 현황', href: 'https://www.vercel-status.com' },
+    ],
+  }
+}
+
+/* ─── 도메인 ──────────────────────────────────────────────────────────── */
+
+// 정식 도메인으로 옮긴 뒤에도 살려 둔 옛 주소 — 정식 도메인으로 영구 이동(308)돼야 한다 (next.config.ts)
+const LEGACY_HOSTS = ['beta.hioslab.com']
+
+type DomainResult = { host: string; ok: boolean; value: string; hint?: string }
+
+async function checkMainDomain(): Promise<DomainResult> {
+  const host = new URL(PRODUCTION_URL).hostname
+  try {
+    const { value: response, ms } = await timed(() => fetch(PRODUCTION_URL, { redirect: 'manual', cache: 'no-store' }))
+    if (response.ok) return { host, ok: true, value: '정상', hint: `${response.status} · ${ms}ms` }
+    // 예: Vercel에서 www가 대표 도메인이면 hioslab.com → www.hioslab.com 으로 이동해 canonical과 어긋난다
+    const location = response.headers.get('location')
+    return location
+      ? { host, ok: false, value: `→ ${new URL(location, PRODUCTION_URL).hostname}`, hint: `${response.status} · canonical 주소가 다른 곳으로 이동돼요` }
+      : { host, ok: false, value: `${response.status}`, hint: '정상 응답이 아니에요' }
+  } catch (error) {
+    return { host, ok: false, value: '접속 실패', hint: message(error) }
+  }
+}
+
+async function checkLegacyDomain(host: string): Promise<DomainResult> {
+  try {
+    const { value: response } = await timed(() => fetch(`https://${host}/`, { redirect: 'manual', cache: 'no-store' }))
+    const location = response.headers.get('location') ?? ''
+    const target = location ? new URL(location, `https://${host}`).hostname : ''
+    const permanent = response.status === 301 || response.status === 308
+    if (permanent && target === new URL(PRODUCTION_URL).hostname) {
+      return { host, ok: true, value: '이동 중', hint: `${response.status} → ${target}` }
+    }
+    return {
+      host,
+      ok: false,
+      value: location ? `${response.status} → ${target}` : `${response.status}`,
+      hint: '정식 도메인으로 영구 이동되지 않아요',
+    }
+  } catch (error) {
+    return { host, ok: false, value: '접속 실패', hint: message(error) }
+  }
+}
+
+async function checkDomains(): Promise<ServiceStatus> {
+  const productionHost = new URL(PRODUCTION_URL).hostname
+  const siteHost = new URL(SITE_URL).hostname
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const [main, ...legacy] = await Promise.all([checkMainDomain(), ...LEGACY_HOSTS.map(checkLegacyDomain)])
+
+  const problems: string[] = []
+  if (!main.ok) problems.push(main.value.startsWith('→') ? `${productionHost}가 ${main.value.slice(2)}로 이동돼요 — Vercel에서 대표 도메인을 ${productionHost}로 바꿔 주세요` : `${productionHost}에 접속할 수 없어요`)
+  legacy.filter((item) => !item.ok).forEach((item) => problems.push(`${item.host}가 정식 도메인으로 이동되지 않아요`))
+  if (isProduction && siteHost !== productionHost) problems.push(`사이트 주소가 ${siteHost}로 설정돼 있어요`)
+  if (isProduction && !ALLOW_INDEXING) problems.push('정식 배포인데 검색 노출이 막혀 있어요')
+
+  return {
+    id: 'domains',
+    name: '도메인',
+    role: `정식 주소 ${productionHost} · 옛 주소는 영구 이동`,
+    health: !main.ok && !main.value.startsWith('→') ? 'error' : problems.length ? 'warn' : 'ok',
+    summary: problems[0] ?? '정상',
+    metrics: [main, ...legacy].map((item) => ({ label: item.host, value: item.value, hint: item.hint })),
+    notes: [
+      ...problems.slice(1),
+      `canonical, 사이트맵, robots 주소는 NEXT_PUBLIC_SITE_URL(없으면 ${productionHost}) 기준으로 만들어져요.`,
+      '옛 주소는 연결을 끊지 말고 이동만 시켜 두세요. 예전 링크와 검색 결과가 새 주소로 넘어와요.',
+    ],
+    links: [
+      { label: 'Vercel 도메인', href: 'https://vercel.com/dashboard' },
+      { label: 'Search Console', href: 'https://search.google.com/search-console' },
     ],
   }
 }
@@ -273,6 +353,6 @@ export function checkEnv(): EnvStatus[] {
 /* ─── 전체 ────────────────────────────────────────────────────────────── */
 
 export async function getSystemStatus() {
-  const [supabase, r2, resend] = await Promise.all([checkSupabase(), checkR2(), checkResend()])
-  return { services: [supabase, r2, resend, checkDeployment()], env: checkEnv(), checkedAt: new Date().toISOString() }
+  const [supabase, r2, resend, domains] = await Promise.all([checkSupabase(), checkR2(), checkResend(), checkDomains()])
+  return { services: [supabase, r2, resend, checkDeployment(), domains], env: checkEnv(), checkedAt: new Date().toISOString() }
 }
