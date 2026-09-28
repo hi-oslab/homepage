@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
 import { Modal } from '@/components/admin/Modal'
+import { MentionInputScope } from '@/components/mentions/MentionProvider'
 import { buttonClass } from '@/components/admin/ui'
 import { parseBlocks, serializeBlocks } from '@/lib/blocks'
 import { callAction } from '@/lib/call-action'
@@ -47,7 +48,13 @@ export function PostComposer({
     if (!open) return
     setKind(post?.kind ?? (initialKind && (initialKind !== 'notice' || viewer.isMaster) ? initialKind : 'talk'))
     setTitle(post?.title ?? '')
-    setBlocks(post?.content ? parseBlocks(post.content) : post?.body ? [{ id: 'legacy', type: 'paragraph', text: post.body }] : [])
+    setBlocks(
+      post?.content
+        ? parseBlocks(post.content)
+        : post?.body
+          ? [{ id: 'legacy', type: 'paragraph', text: post.body }]
+          : [],
+    )
   }, [open, post, initialKind, viewer.isMaster])
 
   const empty = !title.trim() && !blocks.some((block) => block.type !== 'paragraph' || block.text.trim())
@@ -63,7 +70,9 @@ export function PostComposer({
     startTransition(async () => {
       const result = await callAction(() => (post ? updatePostAction(post.id, draft) : createPostAction(draft)))
       if ('message' in result) return onMessage(result.message, 'error')
-      onSaved(post ? '글을 고쳤어요' : kind === 'notice' ? '공지를 올렸어요. 일주일 동안 맨 위에 고정돼요' : '글을 올렸어요')
+      onSaved(
+        post ? '글을 고쳤어요' : kind === 'notice' ? '공지를 올렸어요. 일주일 동안 맨 위에 고정돼요' : '글을 올렸어요',
+      )
     })
   }
 
@@ -79,7 +88,12 @@ export function PostComposer({
           <button type='button' onClick={close} className={buttonClass('ghost', 'sm')}>
             취소
           </button>
-          <button type='button' disabled={empty || isPending} onClick={submit} className={buttonClass('primary', 'sm', 'ml-auto')}>
+          <button
+            type='button'
+            disabled={empty || isPending}
+            onClick={submit}
+            className={buttonClass('primary', 'sm', 'ml-auto')}
+          >
             {isPending ? '올리는 중…' : post ? '고친 내용 저장' : '올리기'}
           </button>
         </>
@@ -123,22 +137,25 @@ export function PostComposer({
 
         {/* 본문 */}
         <div className='rounded-block flex flex-col gap-1 bg-surface py-4 pr-4 pl-1 md:pr-6 md:pl-2'>
-          <span className='pl-[54px] text-xs text-mute md:pl-16'>본문</span>
-          <BlockEditor
-            blocks={blocks}
-            onChange={setBlocks}
-            // 게시판 글 이미지는 본인 계정 폴더에
-            projectId={viewer.id}
-            onDeleteImage={async (url) => {
-              if (!isOwnStorageUrl(url)) return true
-              return deleteImage(url).then(
-                () => true,
-                () => false,
-              )
-            }}
-            // 아직 저장 전인 글이라 바로 저장할 곳이 없다 (올리기를 누르면 함께 저장)
-            onPersistContent={async () => undefined}
-          />
+          <span className='pl-[54px] text-xs text-mute md:pl-16'>본문 · @로 멤버 언급</span>
+          {/* 문단에서 '@'로 멤버를 고를 수 있게 (프로젝트 편집에는 없음) */}
+          <MentionInputScope>
+            <BlockEditor
+              blocks={blocks}
+              onChange={setBlocks}
+              // 게시판 글 이미지는 본인 계정 폴더에
+              projectId={viewer.id}
+              onDeleteImage={async (url) => {
+                if (!isOwnStorageUrl(url)) return true
+                return deleteImage(url).then(
+                  () => true,
+                  () => false,
+                )
+              }}
+              // 아직 저장 전인 글이라 바로 저장할 곳이 없다 (올리기를 누르면 함께 저장)
+              onPersistContent={async () => undefined}
+            />
+          </MentionInputScope>
         </div>
       </div>
     </Modal>

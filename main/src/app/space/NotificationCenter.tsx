@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { GoBell, GoComment, GoMegaphone, GoPersonAdd, GoX } from 'react-icons/go'
+import { GoBell, GoComment, GoMegaphone, GoMention, GoPersonAdd, GoX } from 'react-icons/go'
 import { Modal } from '@/components/admin/Modal'
 import { buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import { callAction } from '@/lib/call-action'
@@ -19,6 +19,7 @@ const ICONS: Record<NotificationKind, React.ComponentType<{ size?: number }>> = 
   notice: GoMegaphone,
   post: GoComment,
   comment: GoComment,
+  mention: GoMention,
 }
 
 /** 로그인 브리핑에 보여줄 최대 개수 (나머지는 '외 N개') */

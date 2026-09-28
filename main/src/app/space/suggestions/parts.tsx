@@ -5,8 +5,8 @@
 import classNames from 'classnames'
 import { useState } from 'react'
 import { GoCheck, GoChevronDown, GoPlus, GoX } from 'react-icons/go'
-import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
 import { buttonClass } from '@/components/admin/ui'
+import { MentionTextarea } from '@/components/mentions/MentionTextarea'
 import {
   SUGGESTION_MAX,
   SUGGESTION_STATUSES,
@@ -42,10 +42,10 @@ export function Composer({
       )}
     >
       {compact && <GoPlus size={15} className='shrink-0 text-accent' />}
-      <AutoTextarea
+      <MentionTextarea
         value={draft}
         maxLength={SUGGESTION_MAX}
-        placeholder={compact ? '건의사항 적기' : '건의사항 적기 (Enter로 등록, Shift+Enter 줄바꿈)'}
+        placeholder={compact ? '건의사항 적기' : "건의사항 적기 ('@'로 멤버 언급 · Enter로 등록)"}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {

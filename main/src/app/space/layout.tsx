@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AuthSetupError, getCurrentUser, hasMaster, isApproved } from '@/lib/admin-auth'
-import { getAdminUsers, getHelpRequests } from '@/lib/cms'
+import { MentionProvider, type MentionMember } from '@/components/mentions/MentionProvider'
+import { getAdminMembers, getAdminUsers, getHelpRequests } from '@/lib/cms'
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
 import { NAV_COLLAPSED_COOKIE, SPACE_THEMES, THEME_COOKIE, type SpaceTheme } from './nav'
@@ -25,19 +26,35 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // 로그인 안 했으면 로그인 대문으로 (마스터가 아직 없으면 첫 마스터 만들기)
   if (!user) redirect(masterExists ? '/login' : '/join')
-  if (!isApproved(user)) return <AdminNotice kind={user.status === 'rejected' ? 'rejected' : 'pending'} name={user.name} />
+  if (!isApproved(user))
+    return <AdminNotice kind={user.status === 'rejected' ? 'rejected' : 'pending'} name={user.name} />
 
-  // 마스터에게는 승인 대기 + 미처리 문의 수를 메뉴 배지로 보여준다
-  const [pendingCount, notifications, cookieStore] = await Promise.all([
-    user.is_master
-      ? Promise.all([getAdminUsers(), getHelpRequests('open')]).then(
-          ([users, requests]) => users.filter((item) => item.status === 'pending').length + requests.length,
-        )
-      : 0,
+  const [accounts, profiles, openRequests, notifications, cookieStore] = await Promise.all([
+    getAdminUsers(),
+    getAdminMembers(),
+    user.is_master ? getHelpRequests('open') : [],
     // 오른쪽 아래 알림 (멤버 공간 모든 화면)
     getNotifications(user),
     cookies(),
   ])
+  // 마스터에게는 승인 대기 + 미처리 문의 수를 메뉴 배지로 보여준다
+  const pendingCount = user.is_master
+    ? accounts.filter((item) => item.status === 'pending').length + openRequests.length
+    : 0
+  // '@' 멘션 후보: 승인된 멤버. 전화번호 같은 개인정보는 빼고 이름 · 아이디 · 사진 · 프로필카드만 넘긴다
+  const profileById = new Map(profiles.map((item) => [item.id, item]))
+  const mentionMembers: MentionMember[] = accounts
+    .filter((account) => account.status === 'approved')
+    .map((account) => {
+      const profile = (account.member_id && profileById.get(account.member_id)) || null
+      return {
+        id: account.id,
+        name: account.name,
+        username: account.username,
+        image: profile?.cover_image_url ?? null,
+        profile,
+      }
+    })
 
   const savedTheme = cookieStore.get(THEME_COOKIE)?.value as SpaceTheme | undefined
   const theme: SpaceTheme = savedTheme && SPACE_THEMES.includes(savedTheme) ? savedTheme : 'light'
@@ -55,11 +72,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     >
       {/* 첫 화면에서 헤더(멤버 공간 바깥)까지 바로 같은 테마로: 하이드레이션 전에 <html>에 붙인다.
           화면 이동 뒤에는 AdminShell의 useSpaceTheme가 붙이고 뗀다 */}
-      <script
-        dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme=${JSON.stringify(theme)}` }}
-      />
-      {children}
-      <NotificationCenter items={notifications} userId={user.id} />
+      <script dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme=${JSON.stringify(theme)}` }} />
+      <MentionProvider members={mentionMembers}>
+        {children}
+        <NotificationCenter items={notifications} userId={user.id} />
+      </MentionProvider>
     </AdminShell>
   )
 }

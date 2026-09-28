@@ -3,16 +3,25 @@
 import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { GoComment, GoPin, GoPlus } from 'react-icons/go'
 import { buttonClass, useServerState, useToast } from '@/components/admin/ui'
 import { INSET_HOVER } from '@/components/admin/styles'
 import { ProfileImage } from '@/components/ProfileImage'
+import { MentionText } from '@/components/mentions/MentionText'
 import { parseBlocks } from '@/lib/blocks'
-import { BOARDS, BOARD_ORDER, isPinned, type CommunityKind, type CommunityPost } from '@/lib/community-types'
+import {
+  BOARDS,
+  BOARD_ORDER,
+  byPinOrder,
+  isPinned,
+  type CommunityKind,
+  type CommunityPost,
+} from '@/lib/community-types'
 import { RelativeTime } from '../DashboardActions'
 import { BoardChip, type Viewer } from './shared'
 import { PostComposer } from './PostComposer'
+import { PinOrderModal } from './PinOrderModal'
 import { PostModal } from './PostModal'
 
 type Tab = 'all' | CommunityKind
@@ -28,30 +37,6 @@ function firstImage(post: CommunityPost) {
 }
 
 /**
- * 읽은 글 기록 (이 브라우저에만 저장). since 이후에 올라온 남의 글 중 안 읽은 글을 '새 글'로 강조한다.
- * 처음 쓰는 브라우저에서는 최근 일주일 치만 새 글로 본다.
- */
-type ReadState = { since: string; ids: string[] }
-const FRESH_DAYS = 7
-const readKey = (userId: string) => `osl-board-read:${userId}`
-const loadRead = (userId: string): ReadState => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(readKey(userId)) ?? 'null')
-    if (saved?.since && Array.isArray(saved.ids)) return saved
-  } catch {
-    // 막혀 있거나 깨져 있으면 새로 시작
-  }
-  return { since: new Date(Date.now() - FRESH_DAYS * 24 * 60 * 60 * 1000).toISOString(), ids: [] }
-}
-const saveRead = (userId: string, state: ReadState) => {
-  try {
-    localStorage.setItem(readKey(userId), JSON.stringify(state))
-  } catch {
-    // 저장이 막혀 있어도 이번 화면에서는 꺼진다
-  }
-}
-
-/**
  * 게시판: 공지 · 자유 · 협업 · 정보공유를 탭으로 나누고, 기본은 모두 모아 최신순.
  * 고정된 공지(기본 일주일)는 맨 위 줄에 따로 두고, 나머지 글은 벽돌처럼 쌓는다.
  * 카드를 누르면 모달로 본문 · 반응 · 댓글.
@@ -64,26 +49,36 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
   const [tab, setTab] = useState<Tab>('all')
   const [openId, setOpenId] = useState<string | null>(null)
   const [composer, setComposer] = useState<{ post: CommunityPost | null; kind?: CommunityKind } | null>(null)
-  // 처음 그릴 때는 서버와 같게(강조 없음) 두고, 브라우저에서 읽어 온다
-  const [read, setRead] = useState<ReadState | null>(null)
 
-  useEffect(() => setRead(loadRead(viewer.id)), [viewer.id])
+  const open = (post: CommunityPost) => setOpenId(post.id)
 
-  const isFresh = (post: CommunityPost) =>
-    read !== null && post.author_id !== viewer.id && post.created_at > read.since && !read.ids.includes(post.id)
+  const [ordering, setOrdering] = useState(false)
 
-  // 글을 열면 읽음 처리 (기준 시각보다 오래된 · 지워진 글의 기록은 정리)
-  const open = (post: CommunityPost) => {
-    setOpenId(post.id)
-    if (!read || !isFresh(post)) return
-    const live = new Set(posts.filter((item) => item.created_at > read.since).map((item) => item.id))
-    const next = { since: read.since, ids: [...read.ids.filter((id) => live.has(id)), post.id] }
-    saveRead(viewer.id, next)
-    setRead(next)
+  /*
+   * 탭을 바꾸면 글 목록 길이가 달라져 페이지 높이가 바뀌고, 브라우저가 스크롤을 끌어올려 화면이 튄다.
+   * 탭 줄을 기준으로 자리를 지킨다: 보이던 자리 그대로 두고, 목록을 내려가 탭 줄이 헤더 위로
+   * 지나가 있었다면 새 카테고리를 처음부터 보도록 탭 줄을 헤더 바로 아래로 가져온다.
+   */
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const tabsTop = useRef<number | null>(null)
+  const changeTab = (value: Tab) => {
+    if (value === tab) return
+    tabsTop.current = tabsRef.current?.getBoundingClientRect().top ?? null
+    setTab(value)
   }
+  useLayoutEffect(() => {
+    const element = tabsRef.current
+    const before = tabsTop.current
+    tabsTop.current = null
+    if (!element || before === null) return
+    const headerOffset = parseFloat(getComputedStyle(element).scrollMarginTop) || 0
+    if (before < headerOffset) element.scrollIntoView({ block: 'start' })
+    else window.scrollBy(0, element.getBoundingClientRect().top - before)
+  }, [tab])
 
   const inTab = posts.filter((post) => tab === 'all' || post.kind === tab)
-  const pinned = inTab.filter(isPinned)
+  // 고정 공지는 운영자가 정한 순서로 (새로 고정된 건 맨 앞)
+  const pinned = inTab.filter(isPinned).sort(byPinOrder)
   const rest = inTab.filter((post) => !isPinned(post))
   const openPost = posts.find((post) => post.id === openId) ?? null
 
@@ -102,13 +97,17 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
   return (
     <section className='flex flex-col gap-4'>
       {/* 탭 + 글쓰기 */}
-      <div className='flex flex-wrap items-center justify-between gap-3'>
+      {/* scroll-mt: 탭을 바꿀 때 헤더 바로 아래로 가져오는 위치 */}
+      <div
+        ref={tabsRef}
+        className='flex scroll-mt-[calc(var(--spacing-header)+0.75rem)] flex-wrap items-center justify-between gap-3'
+      >
         <div className='flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-paper/80 p-1 [scrollbar-width:none]'>
           {(['all', ...BOARD_ORDER] as Tab[]).map((value) => (
             <button
               key={value}
               type='button'
-              onClick={() => setTab(value)}
+              onClick={() => changeTab(value)}
               className={classNames(
                 'relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors',
                 tab === value ? 'text-ink' : 'text-mute hover:text-ink',
@@ -139,13 +138,25 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
 
       {/* 고정된 공지 */}
       {pinned.length > 0 && (
-        <div className='columns-2 gap-2 sm:gap-3 xl:columns-3 3xl:columns-4 4xl:columns-5'>
-          {/* 아래 글 목록과 같이: 카드가 열 사이에서 쪼개지지 않게, 세로 간격도 같게 */}
-          {pinned.map((post, index) => (
-            <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
-              <PostCard post={post} index={index} pinned fresh={isFresh(post)} onOpen={() => open(post)} />
+        <div className='flex flex-col gap-2'>
+          {/* 운영자: 순서 바꾸기 (공지가 둘 이상일 때) */}
+          {viewer.isMaster && pinned.length > 1 && (
+            <div className='flex items-center justify-between px-1'>
+              <span className='flex items-center gap-1 text-xs text-mute'>
+                <GoPin size={11} />
+                고정 공지 {pinned.length}개
+              </span>
+              <button type='button' onClick={() => setOrdering(true)} className={buttonClass('ghost', 'sm')}>
+                순서 바꾸기
+              </button>
             </div>
-          ))}
+          )}
+          {/* 순서가 왼쪽 → 오른쪽, 위 → 아래로 읽히도록 벽돌(columns) 대신 격자 */}
+          <div className='grid grid-cols-2 items-start gap-2 sm:gap-3 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'>
+            {pinned.map((post, index) => (
+              <PostCard key={post.id} post={post} index={index} pinned onOpen={() => open(post)} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -162,7 +173,7 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
         >
           {rest.map((post, index) => (
             <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
-              <PostCard post={post} index={index} fresh={isFresh(post)} onOpen={() => open(post)} />
+              <PostCard post={post} index={index} onOpen={() => open(post)} />
             </div>
           ))}
         </motion.div>
@@ -186,6 +197,19 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
         </div>
       )}
 
+      <PinOrderModal
+        open={ordering}
+        posts={pinned}
+        onClose={() => setOrdering(false)}
+        onSaved={(ids) => {
+          const rank = new Map(ids.map((id, index) => [id, index]))
+          setPosts((current) =>
+            (current ?? []).map((item) => (rank.has(item.id) ? { ...item, pin_order: rank.get(item.id)! } : item)),
+          )
+          setOrdering(false)
+        }}
+        onMessage={toast.show}
+      />
       <PostModal
         post={openPost}
         viewer={viewer}
@@ -225,14 +249,11 @@ function PostCard({
   post,
   index,
   pinned,
-  fresh,
   onOpen,
 }: {
   post: CommunityPost
   index: number
   pinned?: boolean
-  /** 안 읽은 새 글: 테두리를 따라 빛이 돈다 (열면 꺼짐) */
-  fresh?: boolean
   onOpen: () => void
 }) {
   const image = firstImage(post)
@@ -253,35 +274,20 @@ function PostCard({
         // 모바일(2열)에서는 여백 · 글자를 줄인 가벼운 카드
         'relative flex w-full flex-col gap-2 p-3 text-left sm:gap-3 sm:p-4',
         // 흰 라운지 블록 안: 회색 면 · 올리면 진하게 / 고정 글은 강조 면(inverse, 다크모드에서도 어두운 면)
-        pinned ? 'rounded-inner bg-inverse text-on-inverse transition-opacity hover:opacity-90' : INSET_HOVER,
+        INSET_HOVER,
       )}
     >
-      <AnimatePresence>
-        {fresh && (
-          <motion.span
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className='fresh-ring'
-          />
-        )}
-      </AnimatePresence>
       <span className='flex items-center justify-between gap-2'>
         <span className='flex items-center gap-1.5'>
-          {fresh && <span className='sr-only'>새 글</span>}
-          <BoardChip kind={post.kind} className={pinned ? 'bg-on-inverse/15 text-on-inverse' : undefined} />
+          <BoardChip kind={post.kind} className={undefined} />
           {pinned && (
-            <span className='flex items-center gap-1 text-[11px] text-on-inverse/60'>
+            <span className='flex items-center gap-1 text-[11px] text-mute'>
               <GoPin size={11} />
               고정
             </span>
           )}
         </span>
-        <span
-          className={classNames('truncate text-[10px] sm:text-[11px]', pinned ? 'text-on-inverse/50' : 'text-mute')}
-        >
+        <span className={classNames('truncate text-[10px] sm:text-[11px]', 'text-mute')}>
           <RelativeTime iso={post.created_at} />
         </span>
       </span>
@@ -295,10 +301,10 @@ function PostCard({
         <span
           className={classNames(
             'line-clamp-3 text-[13px] leading-relaxed break-keep whitespace-pre-line sm:line-clamp-5 sm:text-sm',
-            pinned ? 'text-on-inverse/70' : 'text-ink/70',
+            'text-ink/70',
           )}
         >
-          {post.body}
+          <MentionText text={post.body} />
         </span>
       )}
       {image && (
@@ -315,18 +321,9 @@ function PostCard({
             className='size-5 shrink-0 text-[9px] sm:size-6 sm:text-[10px]'
           />
           {/* 모바일에서는 아이콘만 */}
-          <span
-            className={classNames('hidden truncate text-xs sm:inline', pinned ? 'text-on-inverse/70' : 'text-ink/70')}
-          >
-            {post.author_name}
-          </span>
+          <span className={classNames('hidden truncate text-xs sm:inline', 'text-ink/70')}>{post.author_name}</span>
         </span>
-        <span
-          className={classNames(
-            'flex shrink-0 items-center gap-1.5 text-[11px] sm:gap-2 sm:text-xs',
-            pinned ? 'text-on-inverse/60' : 'text-mute',
-          )}
-        >
+        <span className={classNames('flex shrink-0 items-center gap-1.5 text-[11px] sm:gap-2 sm:text-xs', 'text-mute')}>
           {topReactions.length > 0 && (
             <span className='flex items-center gap-0.5'>
               {/* 모바일에서는 가장 많은 반응 하나만 */}

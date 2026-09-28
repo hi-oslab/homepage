@@ -3,6 +3,8 @@
 import classNames from 'classnames'
 import { useCallback, useRef } from 'react'
 import type { CalloutBlock, HeadingBlock, ListBlock, ParagraphBlock, QuoteBlock, SectionIndexBlock } from '@/types/blocks'
+import { useMentionInput } from '@/components/mentions/MentionProvider'
+import { MentionTextarea } from '@/components/mentions/MentionTextarea'
 import { AutoTextarea } from './AutoTextarea'
 import { placeCaret, useEditor, useFocusRegistration, type FocusPosition } from './context'
 
@@ -22,8 +24,10 @@ function useSingleField<T extends { id: string }>(block: T) {
 export function ParagraphEditable({ block, active }: { block: ParagraphBlock; active: boolean }) {
   const { onTextKeyDown, onTextChange } = useEditor()
   const ref = useSingleField(block)
+  // 게시판 글쓰기(MentionInputScope 안)에서는 '@'로 멤버를 고를 수 있다
+  const Field = useMentionInput() ? MentionTextarea : AutoTextarea
   return (
-    <AutoTextarea
+    <Field
       ref={ref}
       value={block.text}
       // 포커스한 빈 문단에만 안내를 보여준다

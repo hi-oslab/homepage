@@ -23,7 +23,8 @@ export default async function SpaceHomePage() {
   const user = await getCurrentUser().catch(() => null)
   if (!isApproved(user)) return null
   // 첫 로그인: 프로필카드부터
-  if (!user.member_id && !user.onboarded_at) redirect('/space/profile?welcome=1')
+  // (운영자가 미리 프로필을 연결해 둔 멤버도 한 번은 설정 화면을 보게 한다)
+  if (!user.onboarded_at) redirect('/space/profile?welcome=1')
 
   return (
     <div className='relative isolate flex w-full flex-col gap-2'>

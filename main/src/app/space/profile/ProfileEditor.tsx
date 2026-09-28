@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { GoEye } from 'react-icons/go'
 import {
   EditorBar,
@@ -23,7 +23,7 @@ import { MemberCard } from '@/app/members/components/MemberCard'
 import { MemberForm, toMemberDraft, type MemberDraft } from '../members/MemberForm'
 import {
   createMyProfileAction,
-  skipProfileSetupAction,
+  markOnboardedAction,
   updateMyProfileAction,
 } from '../members/actions'
 
@@ -135,6 +135,13 @@ export function ProfileEditor({
         </div>
       </EditorBar>
 
+      {/* 첫 방문(홈에서 넘어옴)일 때만 */}
+      {welcome && (
+        <div className='mx-auto w-full max-w-[960px]'>
+          <WelcomeBanner userName={userName} />
+        </div>
+      )}
+
       {/* 넓은 화면: 왼쪽에 이미지 · 카드 미리보기 고정, 오른쪽에 정보 상자. 최대 960px */}
       <div className='mx-auto grid w-full max-w-[960px] grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]'>
         <aside className='flex flex-col gap-4 lg:sticky lg:top-[calc(var(--spacing-header)+5rem)] lg:self-start'>
@@ -180,46 +187,56 @@ export function ProfileEditor({
   )
 }
 
-/** 연결된 프로필이 없을 때: 새로 만들기 / 나중에 (첫 로그인 안내 겸용) */
+/**
+ * 첫 방문 안내 (편집 화면 위, 건너뛰기 없음). 운영자가 미리 연결한 프로필이면 여기서 첫 방문을 기록해
+ * 다음부터는 홈에서 바로 시작한다.
+ */
+function WelcomeBanner({ userName }: { userName: string }) {
+  useEffect(() => {
+    markOnboardedAction().catch(() => undefined)
+  }, [])
+  return (
+    <div className='flex flex-col gap-0.5 rounded-block bg-accent-soft px-4 py-3.5 md:px-5'>
+      <span className='text-base font-medium tracking-[-0.01em]'>환영해요, {userName}님</span>
+      <span className='text-sm text-ink/70'>
+        Members 페이지에 보일 프로필카드를 채워 주세요. 처음에는 비공개라, 준비가 되면 공개로 바꾸면 돼요.
+      </span>
+    </div>
+  )
+}
+
+/**
+ * 연결된 프로필카드가 없을 때: 버튼 없이 바로 비공개 프로필카드를 만들고 편집 화면으로
+ * (모든 멤버가 프로필카드를 갖는다. 운영자가 지운 경우에도 여기 오면 다시 만들어진다)
+ */
 function ProfileSetup({ welcome, userName, onDone }: { welcome: boolean; userName: string; onDone: () => void }) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [failed, setFailed] = useState(false)
+  const started = useRef(false)
 
-  const create = () =>
-    startTransition(async () => {
-      await createMyProfileAction()
-      onDone()
-    })
-
-  const skip = () =>
-    startTransition(async () => {
-      await skipProfileSetupAction()
-      router.replace('/space')
-    })
+  const create = () => {
+    setFailed(false)
+    createMyProfileAction().then(onDone, () => setFailed(true))
+  }
+  useEffect(() => {
+    if (started.current) return
+    started.current = true
+    create()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className='mx-auto flex w-full max-w-[640px] flex-col gap-4'>
       <PageHeader
         title={welcome ? `환영해요, ${userName}님` : '프로필카드 설정'}
-        description={
-          welcome ? '먼저 Members 페이지에 보일 프로필카드를 만들어 주세요.' : '아직 프로필카드가 없어요.'
+        description={failed ? '프로필카드를 만들지 못했어요.' : '프로필카드를 준비하고 있어요…'}
+        actions={
+          failed && (
+            <button type='button' onClick={create} className={buttonClass('primary', 'sm')}>
+              다시 시도
+            </button>
+          )
         }
       />
-      <SectionCard
-        title='프로필카드 만들기'
-        description='이미지, 소개, 분야를 직접 작성할 수 있어요. 처음에는 비공개로 만들어지고, 준비가 되면 공개로 바꾸면 Members 페이지에 표시돼요.'
-      >
-        <div className='flex flex-wrap gap-2'>
-          <button type='button' disabled={isPending} onClick={create} className={buttonClass('primary')}>
-            {isPending ? '만드는 중…' : '프로필카드 만들기'}
-          </button>
-          {welcome && (
-            <button type='button' disabled={isPending} onClick={skip} className={buttonClass('ghost')}>
-              나중에 할게요
-            </button>
-          )}
-        </div>
-      </SectionCard>
     </div>
   )
 }

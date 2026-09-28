@@ -19,9 +19,14 @@ export async function authors(ids: (string | null)[]) {
   const { data: members } = memberIds.length
     ? await supabase.from('members').select('id,cover_image_url').in('id', memberIds)
     : { data: [] }
-  const images = new Map(((members ?? []) as { id: string; cover_image_url: string | null }[]).map((row) => [row.id, row.cover_image_url]))
+  const images = new Map(
+    ((members ?? []) as { id: string; cover_image_url: string | null }[]).map((row) => [row.id, row.cover_image_url]),
+  )
   for (const account of (accounts ?? []) as AccountRow[]) {
-    result.set(account.id, { name: account.name, image: account.member_id ? (images.get(account.member_id) ?? null) : null })
+    result.set(account.id, {
+      name: account.name,
+      image: account.member_id ? (images.get(account.member_id) ?? null) : null,
+    })
   }
   return result
 }
@@ -45,11 +50,27 @@ function summarize(rows: { emoji: string; user_id: string }[], viewerId: string,
  */
 export async function getCommunityFeed(viewerId: string, limit = 80): Promise<CommunityPost[] | null> {
   const supabase = createAdminSupabaseClient()
-  const { data: posts, error } = await supabase
-    .from('community_posts')
-    .select(POST_COLUMNS)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+  type PostRow = {
+    id: string
+    author_id: string | null
+    kind: string
+    title: string | null
+    body: string
+    content: string | null
+    pinned_until: string | null
+    pin_order?: number | null
+    created_at: string
+  }
+  const feed = (columns: string) =>
+    supabase
+      .from('community_posts')
+      .select(columns)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+      .returns<PostRow[]>()
+  let { data: posts, error } = await feed(`${POST_COLUMNS},pin_order`)
+  // 고정 순서 칸이 아직 없으면(20261008 마이그레이션 전) 순서 없이
+  if (error?.code === '42703') ({ data: posts, error } = await feed(POST_COLUMNS))
   if (error) {
     console.error('community_posts', error.message)
     return null
@@ -58,7 +79,11 @@ export async function getCommunityFeed(viewerId: string, limit = 80): Promise<Co
   const ids = (posts ?? []).map((post) => post.id)
   const [{ data: comments }, { data: reactions }] = ids.length
     ? await Promise.all([
-        supabase.from('community_comments').select('id,post_id,author_id,body,created_at').in('post_id', ids).order('created_at'),
+        supabase
+          .from('community_comments')
+          .select('id,post_id,author_id,body,created_at')
+          .in('post_id', ids)
+          .order('created_at'),
         supabase.from('community_reactions').select('post_id,user_id,emoji').in('post_id', ids).order('created_at'),
       ])
     : [{ data: [] }, { data: [] }]
@@ -72,6 +97,7 @@ export async function getCommunityFeed(viewerId: string, limit = 80): Promise<Co
 
   return (posts ?? []).map((post) => ({
     ...post,
+    pin_order: post.pin_order ?? null,
     kind: post.kind as CommunityKind,
     title: post.title ?? '',
     content: post.content ?? '',
@@ -108,7 +134,13 @@ export function excerptFromBlocks(blocks: Block[], max = 2000) {
   return text.slice(0, max)
 }
 
-export type PostInput = { kind: CommunityKind; title: string; body: string; content: string; pinned_until: string | null }
+export type PostInput = {
+  kind: CommunityKind
+  title: string
+  body: string
+  content: string
+  pinned_until: string | null
+}
 
 export async function insertPost(authorId: string, input: PostInput) {
   const { data, error } = await createAdminSupabaseClient()
@@ -129,6 +161,15 @@ export async function updatePost(id: string, input: Partial<PostInput>) {
     .single()
   if (error) throw error
   return data
+}
+
+/** 고정 공지 순서 저장 (ids 순서대로 0, 1, 2 …) */
+export async function setPinOrder(ids: string[]) {
+  const supabase = createAdminSupabaseClient()
+  for (let index = 0; index < ids.length; index += 1) {
+    const { error } = await supabase.from('community_posts').update({ pin_order: index }).eq('id', ids[index])
+    if (error) throw error
+  }
 }
 
 export async function getPost(id: string) {
@@ -157,7 +198,11 @@ export async function insertComment(authorId: string, postId: string, body: stri
 }
 
 export async function getCommentAuthor(id: string) {
-  const { data } = await createAdminSupabaseClient().from('community_comments').select('author_id').eq('id', id).maybeSingle()
+  const { data } = await createAdminSupabaseClient()
+    .from('community_comments')
+    .select('author_id')
+    .eq('id', id)
+    .maybeSingle()
   return data as { author_id: string | null } | null
 }
 

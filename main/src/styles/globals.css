@@ -2,8 +2,10 @@
 
 @theme {
   /* 큰 화면 반응형: 기본 sm 40 · md 48 · lg 64 · xl 80 · 2xl 96rem 위에 추가 (3xl:, 4xl:, max-3xl: 등) */
-  --breakpoint-3xl: 120rem; /* 1920px */
-  --breakpoint-4xl: 160rem; /* 2560px */
+  --breakpoint-3xl: 120rem;
+  /* 1920px */
+  --breakpoint-4xl: 160rem;
+  /* 2560px */
 
   /* 상단 헤더(아일랜드) 높이: pt-header, top-header, calc(…var(--spacing-header)) */
   --spacing-header: 3.25rem;
@@ -78,6 +80,7 @@
   &:where([data-theme='dark'], [data-theme='dark'] *) {
     @slot;
   }
+
   @media (prefers-color-scheme: dark) {
     &:where([data-theme='system'], [data-theme='system'] *) {
       @slot;
@@ -255,50 +258,7 @@
 
 }
 
-/*
- * 게시판 새 글 테두리: 카드 테두리를 따라 빛이 돈다 (Board의 PostCard, 읽으면 꺼짐)
- * 카드에 relative · rounded 가 있어야 한다
- */
-@property --fresh-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes fresh-spin {
-  to {
-    --fresh-angle: 360deg;
-  }
-}
-
 .checking {
   border: 1px dashed red;
   box-sizing: border-box;
-}
-
-.fresh-ring {
-  position: absolute;
-  inset: 0;
-  padding: 1.5px;
-  border-radius: inherit;
-  pointer-events: none;
-  background: conic-gradient(from var(--fresh-angle),
-      rgb(91 127 224 / 0.18) 0deg,
-      rgb(91 127 224 / 0.18) 200deg,
-      #7cae5b 250deg,
-      #5b7fe0 300deg,
-      #e0a526 340deg,
-      rgb(91 127 224 / 0.18) 360deg);
-  /* 가운데를 비워 테두리만 남긴다 */
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  animation: fresh-spin 3.2s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fresh-ring {
-    animation: none;
-    background: #5b7fe0;
-  }
 }

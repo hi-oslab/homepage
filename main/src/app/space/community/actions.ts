@@ -17,6 +17,7 @@ import {
   insertPost,
   removeComment,
   removePost,
+  setPinOrder,
   toggleReaction,
   updatePost,
   type CommunityComment,
@@ -44,7 +45,10 @@ const pinUntil = () => new Date(Date.now() + PIN_DAYS * 24 * 60 * 60 * 1000).toI
 export type PostDraft = { kind: CommunityKind; title: string; content: string }
 
 /** 입력 확인 · 정리 (공지는 운영자만) */
-function normalize(user: User, draft: PostDraft): Result<{ kind: CommunityKind; title: string; body: string; content: string }> {
+function normalize(
+  user: User,
+  draft: PostDraft,
+): Result<{ kind: CommunityKind; title: string; body: string; content: string }> {
   if (!(draft.kind in BOARDS)) return { ok: false, message: '게시판을 골라 주세요.' }
   if (draft.kind === 'notice' && !user.is_master) return { ok: false, message: '공지는 운영자만 쓸 수 있어요.' }
   const title = draft.title.trim().replace(/\s+/g, ' ')
@@ -100,6 +104,22 @@ export async function setPinnedAction(id: string, pinned: boolean) {
   })
 }
 
+/** 고정 공지 순서 바꾸기 (운영자만). ids 순서대로 앞에서부터 */
+export async function setPinOrderAction(ids: string[]) {
+  return run(async (user) => {
+    if (!user.is_master) return { ok: false, message: '운영자만 순서를 바꿀 수 있어요.' }
+    try {
+      await setPinOrder(ids)
+    } catch (error) {
+      // 순서 칸이 아직 없으면(마이그레이션 전)
+      if ((error as { code?: string }).code === '42703')
+        return { ok: false, message: 'DB 마이그레이션(20261008_community_pin_order.sql)이 필요해요.' }
+      throw error
+    }
+    return { ok: true }
+  })
+}
+
 export async function toggleReactionAction(postId: string, emoji: string) {
   return run<ReactionSummary[]>(async (user) => {
     if (!(REACTIONS as readonly string[]).includes(emoji)) return { ok: false, message: '쓸 수 없는 반응이에요.' }
@@ -129,7 +149,9 @@ export async function deletePostAction(id: string) {
     const keys = extractUrlsFromBlocks(parseBlocks(post.content))
       .map((url) => keyFromPublicR2Url(url))
       .filter((key): key is string => Boolean(key && folder && key.startsWith(folder)))
-    await Promise.all(keys.map((key) => deleteR2Object(key).catch((error) => console.error('R2 삭제 실패', key, error))))
+    await Promise.all(
+      keys.map((key) => deleteR2Object(key).catch((error) => console.error('R2 삭제 실패', key, error))),
+    )
     return { ok: true }
   })
 }

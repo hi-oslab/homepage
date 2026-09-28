@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import { useState } from 'react'
 import { MemberModal } from '@/app/members/components/MemberModal'
 import { ROW_HOVER } from '@/components/admin/styles'
+import { useToast } from '@/components/admin/ui'
 import { ProfileImage } from '@/components/ProfileImage'
 import type { Member } from '@/types/cms'
 import { IoIosMore } from 'react-icons/io'
@@ -19,28 +20,33 @@ export function MemberRow({
   isMe,
 }: {
   name: string
-  /** 프로필카드 (없으면 눌러도 모달이 뜨지 않는다) */
+  /** 프로필카드 (없으면 눌렀을 때 모달 대신 "아직 없어요" 안내) */
   profile: Member | null
   isMe: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const toast = useToast()
 
-  const openCard = () => profile && setOpen(true)
+  // 프로필카드가 없으면 모달 대신 아래에 안내를 띄운다
+  const openCard = () => {
+    if (profile) return setOpen(true)
+    toast.show(
+      isMe ? '아직 프로필카드가 없어요. 프로필 설정에서 만들 수 있어요' : `${name}님은 아직 프로필카드가 없어요`,
+      'info',
+    )
+  }
 
   return (
     <>
       <li
         role='button'
-        tabIndex={profile ? 0 : -1}
-        aria-disabled={!profile}
-        title={profile ? undefined : '아직 프로필카드가 없어요'}
+        tabIndex={0}
         onClick={openCard}
         onKeyDown={(event) => (event.key === 'Enter' || event.key === ' ') && (event.preventDefault(), openCard())}
         className={classNames(
-          'flex items-center justify-between',
+          'flex cursor-pointer items-center justify-between',
           'gap-2 pl-3 pr-2 py-2 text-sm',
           ROW_HOVER,
-          profile ? 'cursor-pointer' : 'cursor-default',
         )}
       >
         <div className={classNames('flex w-full items-center justify-start gap-3 text-left')}>
@@ -61,6 +67,7 @@ export function MemberRow({
       </li>
       {/* 줄 바깥에 둔다: 안에 두면 모달의 닫기 클릭이 React 트리를 타고 줄로 올라와 다시 열린다 */}
       {profile && <MemberModal member={open ? profile : null} onClose={() => setOpen(false)} />}
+      {toast.node}
     </>
   )
 }

@@ -11,7 +11,8 @@ export default async function AdminProfilePage({ searchParams }: { searchParams:
     getAdminMembers(),
     getRoles(),
   ])
-  const welcome = (await searchParams).welcome === '1' && !user.onboarded_at
+  // 첫 방문으로 온 이 화면에서는 안내를 계속 보여준다 (만들기 · 저장으로 onboarded_at이 채워진 뒤에도)
+  const welcome = (await searchParams).welcome === '1'
 
   // 역할은 운영자가 관리하는 목록, 분야는 다른 프로필에서 쓰인 값을 추천
   const roles = roleList.map((role) => role.name)

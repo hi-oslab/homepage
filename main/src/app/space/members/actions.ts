@@ -60,10 +60,11 @@ export async function createMyProfileAction() {
   revalidateMemberPages()
 }
 
-/** 첫 로그인 안내를 건너뛴다 (나중에 내 프로필에서 다시 할 수 있음) */
-export async function skipProfileSetupAction() {
+/** 첫 방문 안내(프로필카드 설정 화면)를 봤다고 기록한다. 다음부터는 홈에서 바로 시작 */
+export async function markOnboardedAction() {
   const user = await requireUser()
-  if (!user.onboarded_at) await updateAdminUser(user.id, { onboarded_at: new Date().toISOString() })
+  if (user.onboarded_at) return
+  await updateAdminUser(user.id, { onboarded_at: new Date().toISOString() })
   revalidatePath('/space', 'layout')
 }
 

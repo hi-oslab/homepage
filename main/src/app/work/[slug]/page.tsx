@@ -59,7 +59,11 @@ export default async function Page({ params }: { params: PageParams }) {
 
   return (
     <>
-      <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* 제목 · 설명에 '</script>'가 있어도 태그를 닫지 못하게 '<'를 이스케이프 (JSON 값은 그대로) */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <WorkDetailLayout work={work} />
     </>
   )

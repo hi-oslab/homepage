@@ -3,6 +3,7 @@
 import classNames from 'classnames'
 import { GoComment } from 'react-icons/go'
 import { ROW_HOVER } from '@/components/admin/styles'
+import { MentionText } from '@/components/mentions/MentionText'
 import type { Suggestion } from '@/lib/suggestion-types'
 import { StatusCheck, StatusControl } from './parts'
 import type { SuggestionHandlers } from './useSuggestions'
@@ -34,7 +35,7 @@ export function SuggestionRow({
           item.status === 'done' ? 'text-mute line-through' : item.status === 'rejected' ? 'text-mute' : 'text-ink',
         )}
       >
-        {item.body}
+        <MentionText text={item.body} />
       </span>
       <span className='hidden shrink-0 text-xs text-mute sm:inline'>{item.author_name}</span>
       {item.comments.length > 0 && (

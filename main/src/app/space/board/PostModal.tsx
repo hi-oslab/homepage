@@ -5,8 +5,11 @@ import { useState, useTransition } from 'react'
 import { GoPin, GoTrash } from 'react-icons/go'
 import { BlockRenderer } from '@/components/BlockRenderer'
 import { Modal } from '@/components/admin/Modal'
-import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
 import { buttonClass, iconButtonClass } from '@/components/admin/ui'
+import { InlineDecoratorProvider } from '@/components/blocks/InlineDecorator'
+import { useMentions } from '@/components/mentions/MentionProvider'
+import { MentionText, renderMentions } from '@/components/mentions/MentionText'
+import { MentionTextarea } from '@/components/mentions/MentionTextarea'
 import { ProfileImage } from '@/components/ProfileImage'
 import { parseBlocks } from '@/lib/blocks'
 import type { Block } from '@/types/blocks'
@@ -61,7 +64,14 @@ export function PostModal({
 }) {
   const [comment, setComment] = useState('')
   const [isPending, startTransition] = useTransition()
-  if (!post) return <Modal open={false} onClose={onClose} title=''>{null}</Modal>
+  const { members } = useMentions()
+  if (!post)
+    return (
+      <Modal open={false} onClose={onClose} title=''>
+        {null}
+      </Modal>
+    )
+  const decorateMentions = (text: string) => renderMentions(text, members)
 
   const isAuthor = post.author_id === viewer.id
   const canManage = isAuthor || viewer.isMaster
@@ -157,7 +167,12 @@ export function PostModal({
                 {isPinned(post) ? '고정 풀기' : '다시 고정 (일주일)'}
               </button>
             )}
-            <button type='button' disabled={isPending} onClick={remove} className={buttonClass('danger', 'sm', 'ml-auto')}>
+            <button
+              type='button'
+              disabled={isPending}
+              onClick={remove}
+              className={buttonClass('danger', 'sm', 'ml-auto')}
+            >
               지우기
             </button>
           </>
@@ -168,7 +183,12 @@ export function PostModal({
         {/* 작성자 · 제목 */}
         <header className='flex flex-col gap-4'>
           <span className='flex items-center gap-2.5'>
-            <ProfileImage src={post.author_image} name={post.author_name} size='sm' className='size-9 shrink-0 text-sm' />
+            <ProfileImage
+              src={post.author_image}
+              name={post.author_name}
+              size='sm'
+              className='size-9 shrink-0 text-sm'
+            />
             <span className='flex flex-col'>
               <span className='text-sm'>{post.author_name}</span>
               <span className='text-xs text-mute'>
@@ -176,16 +196,27 @@ export function PostModal({
               </span>
             </span>
           </span>
-          {post.title && <h2 className='text-2xl leading-tight font-medium tracking-[-0.03em] break-keep md:text-3xl'>{post.title}</h2>}
+          {post.title && (
+            <h2 className='text-2xl leading-tight font-medium tracking-[-0.03em] break-keep md:text-3xl'>
+              {post.title}
+            </h2>
+          )}
         </header>
 
         {/* 본문: 블록(새 글) 또는 글자(예전 글) */}
+        {/* 문단 속 '@이름'은 멘션으로 (누르면 프로필카드) */}
         {blocks.length > 0 ? (
           <div className='flex flex-col'>
-            <BlockRenderer blocks={blocks} blockClassNames={POST_BLOCK_CLASSES} />
+            <InlineDecoratorProvider decorate={decorateMentions}>
+              <BlockRenderer blocks={blocks} blockClassNames={POST_BLOCK_CLASSES} />
+            </InlineDecoratorProvider>
           </div>
         ) : (
-          post.body && <p className='text-[15px] leading-relaxed break-keep whitespace-pre-wrap text-ink/80'>{post.body}</p>
+          post.body && (
+            <p className='text-[15px] leading-relaxed break-keep whitespace-pre-wrap text-ink/80'>
+              <MentionText text={post.body} />
+            </p>
+          )
         )}
 
         {/* 반응 */}
@@ -200,7 +231,11 @@ export function PostModal({
                 title={reaction ? reaction.names.join(', ') : undefined}
                 className={classNames(
                   'flex h-8 items-center gap-1 rounded-full px-2.5 text-sm transition-all active:scale-90',
-                  reaction?.mine ? 'bg-ink text-paper' : reaction ? 'bg-tile' : 'bg-transparent opacity-50 hover:bg-tile hover:opacity-100',
+                  reaction?.mine
+                    ? 'bg-ink text-paper'
+                    : reaction
+                      ? 'bg-tile'
+                      : 'bg-transparent opacity-50 hover:bg-tile hover:opacity-100',
                 )}
               >
                 <span>{emoji}</span>
@@ -215,7 +250,12 @@ export function PostModal({
           <span className='text-xs text-mute'>댓글</span>
           {post.comments.map((item) => (
             <div key={item.id} className='group flex gap-2.5'>
-              <ProfileImage src={item.author_image} name={item.author_name} size='sm' className='size-7 shrink-0 text-[11px]' />
+              <ProfileImage
+                src={item.author_image}
+                name={item.author_name}
+                size='sm'
+                className='size-7 shrink-0 text-[11px]'
+              />
               <div className='rounded-inner flex min-w-0 flex-1 flex-col gap-0.5 bg-surface px-3.5 py-2.5'>
                 <span className='flex items-baseline gap-2 text-xs'>
                   <span className='text-ink'>{item.author_name}</span>
@@ -223,7 +263,9 @@ export function PostModal({
                     <RelativeTime iso={item.created_at} />
                   </span>
                 </span>
-                <p className='text-sm leading-relaxed break-keep whitespace-pre-wrap'>{item.body}</p>
+                <p className='text-sm leading-relaxed break-keep whitespace-pre-wrap'>
+                  <MentionText text={item.body} />
+                </p>
               </div>
               {(item.author_id === viewer.id || viewer.isMaster) && (
                 <button
@@ -237,11 +279,11 @@ export function PostModal({
               )}
             </div>
           ))}
-          <div className='flex items-end gap-2 rounded-2xl bg-surface px-3.5 py-2.5'>
-            <AutoTextarea
+          <div className='flex items-end gap-2 rounded-inner bg-ink/[0.05] px-3.5 py-2.5'>
+            <MentionTextarea
               value={comment}
               maxLength={COMMENT_MAX}
-              placeholder='댓글 남기기 (Enter로 등록, Shift+Enter 줄바꿈)'
+              placeholder="댓글 남기기 ('@'로 멤버 언급 · Enter로 등록)"
               onChange={(event) => setComment(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -251,7 +293,12 @@ export function PostModal({
               }}
               className='py-1 text-sm'
             />
-            <button type='button' disabled={!comment.trim() || isPending} onClick={addComment} className={buttonClass('primary', 'sm', 'shrink-0')}>
+            <button
+              type='button'
+              disabled={!comment.trim() || isPending}
+              onClick={addComment}
+              className={buttonClass('primary', 'sm', 'shrink-0')}
+            >
               등록
             </button>
           </div>

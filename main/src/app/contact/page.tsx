@@ -18,6 +18,9 @@ export default function Contact() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState<Status>('idle')
+  // 스팸 거르기: 숨은 칸(사람은 못 보고 봇만 채운다) · 폼을 연 뒤 걸린 시간
+  const [website, setWebsite] = useState('')
+  const [openedAt] = useState(() => Date.now())
 
   async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
@@ -27,7 +30,7 @@ export default function Contact() {
     const res = await fetch('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message }),
+      body: JSON.stringify({ name, email, message, website, elapsed: Date.now() - openedAt }),
     })
 
     setStatus(res.ok ? 'sent' : 'error')
@@ -70,6 +73,17 @@ export default function Contact() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className='flex flex-col gap-2'>
+                {/* 숨은 칸: 화면 · 스크린리더 · 탭 이동에서 빠져 있어 사람은 채우지 않는다 */}
+                <input
+                  type='text'
+                  name='website'
+                  tabIndex={-1}
+                  autoComplete='off'
+                  aria-hidden
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className='absolute -left-[9999px] h-px w-px opacity-0'
+                />
                 <div className='grid grid-cols-1 gap-2 lg:grid-cols-2'>
                   <input
                     type='text'

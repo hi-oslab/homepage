@@ -4,8 +4,9 @@ import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import { GoChevronDown, GoComment, GoTrash } from 'react-icons/go'
-import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
 import { buttonClass, iconButtonClass } from '@/components/admin/ui'
+import { MentionText } from '@/components/mentions/MentionText'
+import { MentionTextarea } from '@/components/mentions/MentionTextarea'
 import { ProfileImage } from '@/components/ProfileImage'
 import { SUGGESTION_COMMENT_MAX, type Suggestion } from '@/lib/suggestion-types'
 import { RelativeTime } from '../DashboardActions'
@@ -46,7 +47,7 @@ export function SuggestionDetail({
               item.status === 'done' ? 'text-mute line-through' : item.status === 'rejected' ? 'text-mute' : 'text-ink',
             )}
           >
-            {item.body}
+            <MentionText text={item.body} />
           </p>
           <People item={item} />
         </div>
@@ -102,7 +103,9 @@ export function SuggestionDetail({
                       <span className='text-ink'>{entry.author_name}</span>
                       <RelativeTime iso={entry.created_at} />
                     </span>
-                    <p className='text-sm leading-relaxed break-keep whitespace-pre-wrap'>{entry.body}</p>
+                    <p className='text-sm leading-relaxed break-keep whitespace-pre-wrap'>
+                      <MentionText text={entry.body} />
+                    </p>
                   </div>
                   {(entry.author_id === viewer.id || viewer.isMaster) && (
                     <button
@@ -119,11 +122,11 @@ export function SuggestionDetail({
                   )}
                 </div>
               ))}
-              <div className='flex items-end gap-2 rounded-xl bg-paper px-3 py-2'>
-                <AutoTextarea
+              <div className='flex items-end gap-2 rounded-inner bg-ink/[0.05] px-3 py-2'>
+                <MentionTextarea
                   value={comment}
                   maxLength={SUGGESTION_COMMENT_MAX}
-                  placeholder='코멘트 남기기 (Enter로 등록)'
+                  placeholder="코멘트 남기기 ('@'로 멤버 언급 · Enter로 등록)"
                   onChange={(event) => setComment(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
