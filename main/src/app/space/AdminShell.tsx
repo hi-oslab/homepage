@@ -15,12 +15,15 @@ import {
   GoPulse,
   GoPerson,
   GoShieldCheck,
+  GoSidebarCollapse,
+  GoSidebarExpand,
   GoSignOut,
   GoStack,
   GoSync,
 } from 'react-icons/go'
 import { useToast } from '@/components/admin/ui'
 import { logout, revalidateAll } from './actions'
+import { NAV_COLLAPSED_COOKIE } from './nav'
 import { OperatorBadge } from '@/components/OperatorBadge'
 
 export type ShellUser = { name: string; username: string; isMaster: boolean; hasProfile: boolean; pendingCount: number }
@@ -54,11 +57,31 @@ const NAV_GROUPS: NavItem[][] = [
   ],
 ]
 
-export function AdminShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
+export function AdminShell({
+  user,
+  navCollapsed = false,
+  children,
+}: {
+  user: ShellUser
+  navCollapsed?: boolean
+  children: React.ReactNode
+}) {
   const pathname = usePathname()
+  const [collapsed, setCollapsed] = useState(navCollapsed)
+
+  const toggleNav = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    document.cookie = `${NAV_COLLAPSED_COOKIE}=${next ? '1' : ''}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
+  }
   const router = useRouter()
   const toast = useToast()
   const [isRevalidating, startRevalidate] = useTransition()
+
+  const footerItem = classNames(
+    'flex items-center gap-2.5 rounded-lg py-2 text-left text-sm text-ink/60 transition-colors hover:bg-tile hover:text-ink',
+    collapsed ? 'justify-center px-2' : 'px-3',
+  )
 
   const isActive = (href: string, exact?: boolean) => (exact ? pathname === href : pathname.startsWith(href))
 
@@ -76,83 +99,99 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
   return (
     <div className='flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col md:flex-row'>
       {/* 사이드바 (모바일에서는 숨기고 아래 바텀탭) */}
-      <aside className='z-30 hidden shrink-0 flex-col gap-6 bg-paper px-4 pt-4 pb-2 md:sticky md:flex md:top-header md:h-[calc(100dvh-var(--spacing-header))] md:w-56 md:px-5 md:pt-8 md:pb-6'>
-        <Link href='/space' className='hidden flex-col gap-0.5 md:flex'>
-          <span className='text-xl font-medium tracking-[-0.03em]'>Member Space</span>
-          <span className='text-xs text-mute'>Open Source Lab</span>
-        </Link>
+      {/* 접으면 아이콘만 남는 좁은 레일 */}
+      <aside
+        className={classNames(
+          'z-30 hidden shrink-0 flex-col gap-6 bg-paper pt-8 pb-6 transition-[width] duration-200 md:sticky md:top-header md:flex md:h-[calc(100dvh-var(--spacing-header))]',
+          collapsed ? 'w-17 px-3' : 'w-56 px-5',
+        )}
+      >
+        <div className={classNames('flex items-start justify-between gap-2', collapsed && 'justify-center')}>
+          {!collapsed && (
+            <Link href='/space' className='flex min-w-0 flex-col gap-0.5'>
+              <span className='truncate text-xl font-medium tracking-[-0.03em]'>Member Space</span>
+              <span className='truncate text-xs text-mute'>Open Source Lab</span>
+            </Link>
+          )}
+          <button
+            type='button'
+            onClick={toggleNav}
+            aria-label={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
+            title={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
+            className='flex size-8 shrink-0 items-center justify-center rounded-lg text-ink/50 transition-colors hover:bg-tile hover:text-ink'
+          >
+            {collapsed ? <GoSidebarCollapse size={16} /> : <GoSidebarExpand size={16} />}
+          </button>
+        </div>
 
-        <nav className='-mx-1 flex gap-1 overflow-x-auto md:mx-0 md:flex-col md:overflow-visible'>
+        <nav className='flex flex-col gap-1'>
           {NAV_GROUPS.map((group) => group.filter((item) => !item.master || user.isMaster))
             // 운영자 메뉴만 있는 묶음은 멤버에게 통째로 빠진다
             .filter((group) => group.length > 0)
             .map((group, index) => (
               <Fragment key={group[0].href}>
-                {/* 묶음 구분선: 모바일 가로 탭에서는 세로선, 데스크탑에서는 가로선 */}
+                {/* 묶음 구분선 */}
                 {index > 0 && (
                   <span
                     aria-hidden
-                    className='mx-1 my-1.5 w-px shrink-0 self-stretch bg-ink/10 md:mx-3 md:my-2 md:h-px md:w-auto'
+                    className={classNames('my-2 h-px bg-ink/10', collapsed ? 'mx-2' : 'mx-3')}
                   />
                 )}
                 {group.map(({ label, href, icon: Icon, exact, badge }) => (
                   <Link
                     key={href}
                     href={href}
+                    title={collapsed ? label : undefined}
                     className={classNames(
-                      'flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                      'relative flex shrink-0 items-center gap-2.5 rounded-lg py-2 text-sm transition-colors',
+                      collapsed ? 'justify-center px-2' : 'px-3',
                       isActive(href, exact) ? 'bg-ink text-white' : 'text-ink/60 hover:bg-tile hover:text-ink',
                     )}
                   >
                     <Icon size={15} />
-                    {label}
-                    {badge && user.pendingCount > 0 && (
-                      <span className='ml-auto flex size-5 items-center justify-center rounded-full bg-danger text-[11px] text-white'>
-                        {user.pendingCount}
-                      </span>
-                    )}
+                    {collapsed ? <span className='sr-only'>{label}</span> : <span className='truncate'>{label}</span>}
+                    {badge &&
+                      user.pendingCount > 0 &&
+                      (collapsed ? (
+                        <span className='absolute top-1 right-1 size-2 rounded-full bg-danger ring-2 ring-paper' />
+                      ) : (
+                        <span className='ml-auto flex size-5 items-center justify-center rounded-full bg-danger text-[11px] text-white'>
+                          {user.pendingCount}
+                        </span>
+                      ))}
                   </Link>
                 ))}
               </Fragment>
             ))}
         </nav>
 
-        <div className='mt-auto hidden flex-col gap-1 md:flex'>
-          <div className='mb-2 flex flex-col gap-0.5 px-3'>
-            <span className='flex items-center gap-1.5 truncate text-sm'>
-              {user.name}
-              {user.isMaster && (
-                <OperatorBadge />
-              )}
-            </span>
-            <span className='truncate text-xs text-mute'>@{user.username}</span>
-          </div>
-          <a
-            href='/'
-            target='_blank'
-            rel='noopener noreferrer'
-            className='flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink/60 transition-colors hover:bg-tile hover:text-ink'
-          >
+        <div className='mt-auto flex flex-col gap-1'>
+          {!collapsed && (
+            <div className='mb-2 flex flex-col gap-0.5 px-3'>
+              <span className='flex items-center gap-1.5 truncate text-sm'>
+                {user.name}
+                {user.isMaster && <OperatorBadge />}
+              </span>
+              <span className='truncate text-xs text-mute'>@{user.username}</span>
+            </div>
+          )}
+          <a href='/' target='_blank' rel='noopener noreferrer' title={collapsed ? '사이트 보기' : undefined} className={footerItem}>
             <GoLinkExternal size={15} />
-            사이트 보기
+            <FooterLabel collapsed={collapsed}>사이트 보기</FooterLabel>
           </a>
           <button
             type='button'
             onClick={refreshSite}
             disabled={isRevalidating}
             title='공개 페이지 캐시를 즉시 갱신합니다'
-            className='flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-ink/60 transition-colors hover:bg-tile hover:text-ink disabled:opacity-50'
+            className={classNames(footerItem, 'disabled:opacity-50')}
           >
             <GoSync size={15} className={isRevalidating ? 'animate-spin' : ''} />
-            {isRevalidating ? '갱신 중…' : '사이트 갱신'}
+            <FooterLabel collapsed={collapsed}>{isRevalidating ? '갱신 중…' : '사이트 갱신'}</FooterLabel>
           </button>
-          <button
-            type='button'
-            onClick={signOut}
-            className='flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-ink/60 transition-colors hover:bg-tile hover:text-ink'
-          >
+          <button type='button' onClick={signOut} title={collapsed ? '로그아웃' : undefined} className={footerItem}>
             <GoSignOut size={15} />
-            로그아웃
+            <FooterLabel collapsed={collapsed}>로그아웃</FooterLabel>
           </button>
         </div>
       </aside>
@@ -173,6 +212,10 @@ export function AdminShell({ user, children }: { user: ShellUser; children: Reac
     </div>
   )
 }
+
+/** 사이드바 아래 메뉴 글자: 접으면 화면에서만 숨긴다 */
+const FooterLabel = ({ collapsed, children }: { collapsed: boolean; children: React.ReactNode }) =>
+  collapsed ? <span className='sr-only'>{children}</span> : <span className='truncate'>{children}</span>
 
 /* ─── 모바일 바텀탭 ─────────────────────────────────────────────────────── */
 

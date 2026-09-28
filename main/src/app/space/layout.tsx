@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AuthSetupError, getCurrentUser, hasMaster, isApproved } from '@/lib/admin-auth'
 import { getAdminUsers, getHelpRequests } from '@/lib/cms'
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
+import { NAV_COLLAPSED_COOKIE } from './nav'
 import { NotificationCenter } from './NotificationCenter'
 import { getNotifications } from '@/lib/notifications'
 
@@ -26,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isApproved(user)) return <AdminNotice kind={user.status === 'rejected' ? 'rejected' : 'pending'} name={user.name} />
 
   // 마스터에게는 승인 대기 + 미처리 문의 수를 메뉴 배지로 보여준다
-  const [pendingCount, notifications] = await Promise.all([
+  const [pendingCount, notifications, cookieStore] = await Promise.all([
     user.is_master
       ? Promise.all([getAdminUsers(), getHelpRequests('open')]).then(
           ([users, requests]) => users.filter((item) => item.status === 'pending').length + requests.length,
@@ -34,10 +36,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       : 0,
     // 오른쪽 아래 알림 (멤버 공간 모든 화면)
     getNotifications(user),
+    cookies(),
   ])
 
   return (
     <AdminShell
+      navCollapsed={cookieStore.get(NAV_COLLAPSED_COOKIE)?.value === '1'}
       user={{
         name: user.name,
         username: user.username,

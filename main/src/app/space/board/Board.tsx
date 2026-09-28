@@ -3,7 +3,7 @@
 import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { GoComment, GoPin, GoPlus } from 'react-icons/go'
 import { buttonClass, useServerState, useToast } from '@/components/admin/ui'
 import { ProfileImage } from '@/components/ProfileImage'
@@ -27,6 +27,30 @@ function firstImage(post: CommunityPost) {
 }
 
 /**
+ * 읽은 글 기록 (이 브라우저에만 저장). since 이후에 올라온 남의 글 중 안 읽은 글을 '새 글'로 강조한다.
+ * 처음 쓰는 브라우저에서는 최근 일주일 치만 새 글로 본다.
+ */
+type ReadState = { since: string; ids: string[] }
+const FRESH_DAYS = 7
+const readKey = (userId: string) => `osl-board-read:${userId}`
+const loadRead = (userId: string): ReadState => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(readKey(userId)) ?? 'null')
+    if (saved?.since && Array.isArray(saved.ids)) return saved
+  } catch {
+    // 막혀 있거나 깨져 있으면 새로 시작
+  }
+  return { since: new Date(Date.now() - FRESH_DAYS * 24 * 60 * 60 * 1000).toISOString(), ids: [] }
+}
+const saveRead = (userId: string, state: ReadState) => {
+  try {
+    localStorage.setItem(readKey(userId), JSON.stringify(state))
+  } catch {
+    // 저장이 막혀 있어도 이번 화면에서는 꺼진다
+  }
+}
+
+/**
  * 게시판: 공지 · 자유 · 협업 · 정보공유를 탭으로 나누고, 기본은 모두 모아 최신순.
  * 고정된 공지(기본 일주일)는 맨 위 줄에 따로 두고, 나머지 글은 벽돌처럼 쌓는다.
  * 카드를 누르면 모달로 본문 · 반응 · 댓글.
@@ -39,6 +63,23 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
   const [tab, setTab] = useState<Tab>('all')
   const [openId, setOpenId] = useState<string | null>(null)
   const [composer, setComposer] = useState<{ post: CommunityPost | null; kind?: CommunityKind } | null>(null)
+  // 처음 그릴 때는 서버와 같게(강조 없음) 두고, 브라우저에서 읽어 온다
+  const [read, setRead] = useState<ReadState | null>(null)
+
+  useEffect(() => setRead(loadRead(viewer.id)), [viewer.id])
+
+  const isFresh = (post: CommunityPost) =>
+    read !== null && post.author_id !== viewer.id && post.created_at > read.since && !read.ids.includes(post.id)
+
+  // 글을 열면 읽음 처리 (기준 시각보다 오래된 · 지워진 글의 기록은 정리)
+  const open = (post: CommunityPost) => {
+    setOpenId(post.id)
+    if (!read || !isFresh(post)) return
+    const live = new Set(posts.filter((item) => item.created_at > read.since).map((item) => item.id))
+    const next = { since: read.since, ids: [...read.ids.filter((id) => live.has(id)), post.id] }
+    saveRead(viewer.id, next)
+    setRead(next)
+  }
 
   const inTab = posts.filter((post) => tab === 'all' || post.kind === tab)
   const pinned = inTab.filter(isPinned)
@@ -94,7 +135,7 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
       {pinned.length > 0 && (
         <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
           {pinned.map((post, index) => (
-            <PostCard key={post.id} post={post} index={index} pinned onOpen={() => setOpenId(post.id)} />
+            <PostCard key={post.id} post={post} index={index} pinned fresh={isFresh(post)} onOpen={() => open(post)} />
           ))}
         </div>
       )}
@@ -112,7 +153,7 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
         >
           {rest.map((post, index) => (
             <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
-              <PostCard post={post} index={index} onOpen={() => setOpenId(post.id)} />
+              <PostCard post={post} index={index} fresh={isFresh(post)} onOpen={() => open(post)} />
             </div>
           ))}
         </motion.div>
@@ -169,11 +210,14 @@ function PostCard({
   post,
   index,
   pinned,
+  fresh,
   onOpen,
 }: {
   post: CommunityPost
   index: number
   pinned?: boolean
+  /** 안 읽은 새 글: 테두리를 따라 빛이 돈다 (열면 꺼짐) */
+  fresh?: boolean
   onOpen: () => void
 }) {
   const image = firstImage(post)
@@ -189,12 +233,25 @@ function PostCard({
       whileHover={{ y: -3 }}
       className={classNames(
         // 모바일(2열)에서는 여백 · 글자를 줄인 가벼운 카드
-        'flex w-full flex-col gap-2 rounded-2xl p-3 text-left transition-shadow hover:shadow-[0_10px_30px_rgba(17,17,17,0.08)] sm:gap-3 sm:p-4',
+        'relative flex w-full flex-col gap-2 rounded-2xl p-3 text-left transition-shadow hover:shadow-[0_10px_30px_rgba(17,17,17,0.08)] sm:gap-3 sm:p-4',
         pinned ? 'bg-ink text-white' : 'bg-surface',
       )}
     >
+      <AnimatePresence>
+        {fresh && (
+          <motion.span
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className='fresh-ring'
+          />
+        )}
+      </AnimatePresence>
       <span className='flex items-center justify-between gap-2'>
         <span className='flex items-center gap-1.5'>
+          {fresh && <span className='sr-only'>새 글</span>}
           <BoardChip kind={post.kind} className={pinned ? 'bg-white/15 text-white' : undefined} />
           {pinned && (
             <span className='flex items-center gap-1 text-[11px] text-white/60'>

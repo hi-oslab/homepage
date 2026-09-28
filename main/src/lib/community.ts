@@ -9,7 +9,7 @@ const POST_COLUMNS = 'id,author_id,kind,title,body,content,pinned_until,created_
 type AccountRow = { id: string; name: string; member_id: string | null }
 
 /** 계정 id → 이름 · 프로필 이미지 */
-async function authors(ids: (string | null)[]) {
+export async function authors(ids: (string | null)[]) {
   const unique = Array.from(new Set(ids.filter(Boolean))) as string[]
   const result = new Map<string, { name: string; image: string | null }>()
   if (!unique.length) return result

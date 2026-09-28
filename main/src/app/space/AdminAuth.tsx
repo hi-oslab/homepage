@@ -14,6 +14,7 @@ import {
   emptyAccountProfile,
   formatJoined,
 } from './AccountFields'
+import { requestBriefing } from './briefing'
 import {
   checkUsernameAction,
   helpRequestAction,
@@ -90,8 +91,10 @@ export function LoginForm({ hasMaster }: { hasMaster: boolean }) {
           event.preventDefault()
           startTransition(async () => {
             const result = await callAction(() => signInAction(form.username, form.password))
-            if ('message' in result) setError(result.message)
-            else router.replace('/space')
+            if ('message' in result) return setError(result.message)
+            // 멤버 공간에 들어가면 새 소식을 한 번 브리핑
+            requestBriefing()
+            router.replace('/space')
           })
         }}
         className='flex flex-col gap-2'

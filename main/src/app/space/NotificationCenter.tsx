@@ -6,9 +6,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { GoBell, GoComment, GoMegaphone, GoPersonAdd, GoX } from 'react-icons/go'
+import { Modal } from '@/components/admin/Modal'
 import { buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
 import { callAction } from '@/lib/call-action'
 import type { NotificationItem, NotificationKind } from '@/lib/notifications'
+import { takeBriefing } from './briefing'
 import { RelativeTime } from './DashboardActions'
 import { approveAsMasterAction, setUserStatusAction } from './users/actions'
 
@@ -18,6 +20,9 @@ const ICONS: Record<NotificationKind, React.ComponentType<{ size?: number }>> = 
   post: GoComment,
   comment: GoComment,
 }
+
+/** 로그인 브리핑에 보여줄 최대 개수 (나머지는 '외 N개') */
+const BRIEFING_LIMIT = 5
 
 /** 마지막으로 알림을 연 시각 (이 브라우저에만 저장. 막혀 있으면 모두 새 알림으로 본다) */
 const seenKey = (userId: string) => `osl-notifications-seen:${userId}`
@@ -50,11 +55,16 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
   const [open, setOpen] = useState(false)
   // 처음 그릴 때는 서버와 같게(빈 값) 두고, 브라우저에서 읽어 온다
   const [seen, setSeen] = useState<string | null>(null)
+  // 로그인 직후 한 번 띄우는 새 소식 요약
+  const [briefing, setBriefing] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const panelRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => setSeen(readSeen(userId)), [userId])
+  useEffect(() => {
+    setSeen(readSeen(userId))
+    if (takeBriefing()) setBriefing(true)
+  }, [userId])
 
   const isNew = (item: NotificationItem) => seen !== null && item.at > seen
   const signups = items.filter((item) => item.kind === 'signup')
@@ -62,14 +72,25 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
   // 처리할 승인 대기가 있거나 새 알림이 있으면 버튼에 점
   const attention = signups.length > 0 || others.some(isNew)
 
+  const fresh = others.filter(isNew)
+
+  const markSeen = () => {
+    const now = new Date().toISOString()
+    writeSeen(userId, now)
+    setSeen(now)
+  }
+
   const toggle = () => {
-    if (open) {
-      // 닫을 때 읽음 처리 (열어 둔 동안은 새 알림 강조를 유지)
-      const now = new Date().toISOString()
-      writeSeen(userId, now)
-      setSeen(now)
-    }
+    // 닫을 때 읽음 처리 (열어 둔 동안은 새 알림 강조를 유지)
+    if (open) markSeen()
     setOpen((value) => !value)
+  }
+
+  // 브리핑 '확인'은 읽음 처리, '알림 모두 보기'는 강조를 남긴 채 알림 창으로
+  const closeBriefing = (showAll?: boolean) => {
+    setBriefing(false)
+    if (showAll) setOpen(true)
+    else markSeen()
   }
 
   // 바깥을 누르거나 Esc로 닫기
@@ -217,6 +238,58 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
         {attention && <span className='absolute top-2.5 right-2.5 size-2 rounded-full bg-danger ring-2 ring-ink' />}
       </button>
       {toast.node}
+
+      {/* 로그인 브리핑: 새 소식이나 처리할 승인 대기가 있을 때만 */}
+      <Modal
+        open={briefing && seen !== null && (fresh.length > 0 || signups.length > 0)}
+        onClose={() => closeBriefing()}
+        title='다녀간 사이 새 소식'
+        meta={[fresh.length > 0 && `새 알림 ${fresh.length}개`, signups.length > 0 && `승인 대기 ${signups.length}명`]
+          .filter(Boolean)
+          .join(' · ')}
+        footer={
+          <>
+            <button type='button' onClick={() => closeBriefing()} className={buttonClass('primary', 'md')}>
+              확인
+            </button>
+            <button type='button' onClick={() => closeBriefing(true)} className={buttonClass('secondary', 'md')}>
+              알림 모두 보기
+            </button>
+          </>
+        }
+      >
+        <div className='flex flex-col gap-1'>
+          {signups.length > 0 && (
+            <Link
+              href='/space/users'
+              onClick={() => closeBriefing()}
+              className='mb-1 flex items-center justify-between gap-3 rounded-xl bg-surface p-3 text-sm transition-colors hover:bg-tile'
+            >
+              <span className='flex items-center gap-3'>
+                <span className='flex size-6 items-center justify-center rounded-full bg-danger text-white'>
+                  <GoPersonAdd size={12} />
+                </span>
+                {signups.length}명이 가입 승인을 기다리고 있어요
+              </span>
+              <span className='text-xs text-mute'>처리하기</span>
+            </Link>
+          )}
+          {fresh.slice(0, BRIEFING_LIMIT).map((item) =>
+            item.href ? (
+              <Link key={item.id} href={item.href} onClick={() => closeBriefing()} className='rounded-xl p-2 transition-colors hover:bg-tile'>
+                <Row item={item} highlight />
+              </Link>
+            ) : (
+              <div key={item.id} className='p-2'>
+                <Row item={item} highlight />
+              </div>
+            ),
+          )}
+          {fresh.length > BRIEFING_LIMIT && (
+            <p className='px-2 pt-1 text-xs text-mute'>외 {fresh.length - BRIEFING_LIMIT}개는 알림에서 볼 수 있어요.</p>
+          )}
+        </div>
+      </Modal>
     </div>
   )
 }
