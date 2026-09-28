@@ -79,7 +79,10 @@ function MemberDetail({ member }: { member: Member }) {
       {(email || websiteUrl) && (
         <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm'>
           {email && (
-            <a href={`mailto:${email.trim()}`} className='inline-flex items-center gap-1 transition-colors hover:text-mute'>
+            <a
+              href={`mailto:${email.trim()}`}
+              className='inline-flex items-center gap-1 transition-colors hover:text-mute'
+            >
               Email
               <Arrow className='size-3.5' />
             </a>

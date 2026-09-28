@@ -3,10 +3,10 @@
 import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { GoComment, GoPin, GoPlus } from 'react-icons/go'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { GoComment, GoPin, GoPlus, GoSearch } from 'react-icons/go'
 import { buttonClass, useServerState, useToast } from '@/components/admin/ui'
-import { INSET_HOVER } from '@/components/admin/styles'
+import { INSET_HOVER, fieldClass } from '@/components/admin/styles'
 import { ProfileImage } from '@/components/ProfileImage'
 import { MentionText } from '@/components/mentions/MentionText'
 import { parseBlocks } from '@/lib/blocks'
@@ -25,6 +25,26 @@ import { PinOrderModal } from './PinOrderModal'
 import { PostModal } from './PostModal'
 
 type Tab = 'all' | CommunityKind
+type Sort = 'latest' | 'oldest'
+const SORTS: Record<Sort, string> = { latest: '최신순', oldest: '오래된순' }
+
+/** 벽돌 열 수: 모바일도 2열, 넓은 화면일수록 늘린다 (xl 3 · 3xl 4 · 4xl 5, globals.css 기준점과 같게) */
+const COLUMN_BREAKPOINTS: [query: string, columns: number][] = [
+  ['(min-width: 160rem)', 5],
+  ['(min-width: 120rem)', 4],
+  ['(min-width: 80rem)', 3],
+]
+function useColumnCount() {
+  const [columns, setColumns] = useState(2)
+  useEffect(() => {
+    const lists = COLUMN_BREAKPOINTS.map(([query, count]) => [window.matchMedia(query), count] as const)
+    const update = () => setColumns(lists.find(([list]) => list.matches)?.[1] ?? 2)
+    update()
+    lists.forEach(([list]) => list.addEventListener('change', update))
+    return () => lists.forEach(([list]) => list.removeEventListener('change', update))
+  }, [])
+  return columns
+}
 
 /** 카드에 보여줄 첫 이미지 (이미지 · 갤러리 블록) */
 function firstImage(post: CommunityPost) {
@@ -76,10 +96,31 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
     else window.scrollBy(0, element.getBoundingClientRect().top - before)
   }, [tab])
 
+  const [sort, setSort] = useState<Sort>('latest')
+  const [query, setQuery] = useState('')
+  const columns = useColumnCount()
+
   const inTab = posts.filter((post) => tab === 'all' || post.kind === tab)
-  // 고정 공지는 운영자가 정한 순서로 (새로 고정된 건 맨 앞)
-  const pinned = inTab.filter(isPinned).sort(byPinOrder)
-  const rest = inTab.filter((post) => !isPinned(post))
+  // 검색: 제목 · 본문 · 작성자 이름 (띄어쓰기로 나눈 낱말이 모두 들어 있어야)
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const matched = words.length
+    ? inTab.filter((post) => {
+        const haystack = `${post.title}\n${post.body}\n${post.author_name}`.toLowerCase()
+        return words.every((word) => haystack.includes(word))
+      })
+    : inTab
+  // 고정 공지가 늘 맨 앞(운영자가 정한 순서), 그 뒤는 고른 시간순
+  const pinned = matched.filter(isPinned).sort(byPinOrder)
+  const rest = matched
+    .filter((post) => !isPinned(post))
+    .sort((a, b) =>
+      sort === 'latest' ? b.created_at.localeCompare(a.created_at) : a.created_at.localeCompare(b.created_at),
+    )
+  const ordered = [...pinned, ...rest]
+  // 벽돌 배치를 열마다 번갈아 나눠 담는다: 첫 줄이 곧 맨 앞 순서 (CSS columns는 한 열을 먼저 채워 순서가 섞인다)
+  const stacks = Array.from({ length: columns }, (_, column) =>
+    ordered.filter((_, index) => index % columns === column),
+  )
   const openPost = posts.find((post) => post.id === openId) ?? null
 
   // 표가 아직 없으면(마이그레이션 전)
@@ -136,48 +177,76 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
       </div>
       {tab !== 'all' && <p className='-mt-1 px-1 text-xs text-mute'>{BOARDS[tab].hint}</p>}
 
-      {/* 고정된 공지 */}
-      {pinned.length > 0 && (
-        <div className='flex flex-col gap-2'>
-          {/* 운영자: 순서 바꾸기 (공지가 둘 이상일 때) */}
-          {viewer.isMaster && pinned.length > 1 && (
-            <div className='flex items-center justify-between px-1'>
-              <span className='flex items-center gap-1 text-xs text-mute'>
-                <GoPin size={11} />
-                고정 공지 {pinned.length}개
-              </span>
-              <button type='button' onClick={() => setOrdering(true)} className={buttonClass('ghost', 'sm')}>
-                순서 바꾸기
-              </button>
-            </div>
-          )}
-          {/* 순서가 왼쪽 → 오른쪽, 위 → 아래로 읽히도록 벽돌(columns) 대신 격자 */}
-          <div className='grid grid-cols-2 items-start gap-2 sm:gap-3 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5'>
-            {pinned.map((post, index) => (
-              <PostCard key={post.id} post={post} index={index} pinned onOpen={() => open(post)} />
-            ))}
-          </div>
+      {/* 검색 · 정렬 · (운영자) 고정 순서 */}
+      <div className='-mt-1 flex flex-wrap items-center gap-2'>
+        <label className='relative flex min-w-0 flex-1 basis-48 items-center'>
+          <GoSearch size={14} className='pointer-events-none absolute left-3 text-mute' />
+          <input
+            type='search'
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder='제목 · 내용 · 작성자 검색'
+            aria-label='글 검색'
+            className={fieldClass('bg-ink/[0.05] pl-9')}
+          />
+        </label>
+        <div className='flex shrink-0 rounded-lg bg-ink/[0.05] p-0.5 text-sm'>
+          {(Object.keys(SORTS) as Sort[]).map((value) => (
+            <button
+              key={value}
+              type='button'
+              aria-pressed={sort === value}
+              onClick={() => setSort(value)}
+              className={classNames(
+                'rounded-md px-3 py-1.5 transition-colors',
+                sort === value
+                  ? 'bg-surface text-ink shadow-[0_1px_3px_rgb(var(--shadow-rgb)/0.12)]'
+                  : 'text-mute hover:text-ink',
+              )}
+            >
+              {SORTS[value]}
+            </button>
+          ))}
         </div>
-      )}
+        {viewer.isMaster && pinned.length > 1 && (
+          <button type='button' onClick={() => setOrdering(true)} className={buttonClass('ghost', 'sm', 'shrink-0')}>
+            <GoPin size={12} />
+            고정 순서
+          </button>
+        )}
+      </div>
 
-      {/* 나머지 글: 벽돌처럼 쌓기 */}
+      {/* 글: 고정 공지가 맨 앞, 그 뒤는 고른 순서. 열마다 번갈아 담은 벽돌 배치 */}
       <AnimatePresence mode='popLayout'>
         <motion.div
-          key={tab}
+          key={`${tab}-${sort}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          // 모바일도 2열 (카드를 가볍게). 홈 오른쪽에 할 일 카드 칸이 있어서 아주 넓은 화면에서만 3열
-          className='columns-2 gap-2 sm:gap-3 xl:columns-3 3xl:columns-4 4xl:columns-5'
+          className='flex items-start gap-2 sm:gap-3'
         >
-          {rest.map((post, index) => (
-            <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
-              <PostCard post={post} index={index} onOpen={() => open(post)} />
+          {stacks.map((stack, column) => (
+            <div key={column} className='flex min-w-0 flex-1 flex-col gap-2 sm:gap-3'>
+              {stack.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  index={ordered.indexOf(post)}
+                  pinned={isPinned(post)}
+                  onOpen={() => open(post)}
+                />
+              ))}
             </div>
           ))}
         </motion.div>
       </AnimatePresence>
+
+      {inTab.length > 0 && matched.length === 0 && (
+        <p className='rounded-inner bg-ink/[0.04] px-6 py-10 text-center text-sm text-mute'>
+          ‘{query.trim()}’에 맞는 글이 없어요.
+        </p>
+      )}
 
       {inTab.length === 0 && (
         <div className='flex flex-col items-center gap-3 rounded-inner bg-ink/[0.04] px-6 py-14 text-center'>

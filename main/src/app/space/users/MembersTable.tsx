@@ -11,7 +11,16 @@ import { ROLE_LABELS } from '@/lib/roles'
 
 /* ─── 정렬 ─────────────────────────────────────────────────────────────── */
 
-export type SortKey = 'name' | 'role' | 'student_id' | 'major' | 'phone' | 'joined' | 'username' | 'operator'
+export type SortKey =
+  | 'name'
+  | 'role'
+  | 'profile'
+  | 'student_id'
+  | 'major'
+  | 'phone'
+  | 'joined'
+  | 'username'
+  | 'operator'
 export type Sort = { key: SortKey; dir: 'asc' | 'desc' }
 /** 승인 대기 처리 */
 export type Decision = 'approve' | 'operator' | 'reject'
@@ -23,6 +32,8 @@ export const DEFAULT_SORT: Sort = { key: 'joined', dir: 'desc' }
 const FIRST_DIR: Record<SortKey, Sort['dir']> = {
   name: 'asc',
   role: 'asc',
+  // 없음 → 비공개 → 공개 (프로필카드가 없는 멤버부터 찾기 쉽게)
+  profile: 'asc',
   student_id: 'asc',
   major: 'asc',
   phone: 'asc',
@@ -46,6 +57,8 @@ export function sortUsers(users: AdminUser[], sort: Sort, profiles: Map<string, 
         return user.is_master ? 2 : user.master_requested ? 1 : 0
       case 'role':
         return (user.member_id ? profiles.get(user.member_id)?.role : '') ?? ''
+      case 'profile':
+        return PROFILE_RANK[profileState(user, profiles)]
       case 'joined':
         return (user.joined_year ?? 0) * 2 + (user.joined_half === 'H2' ? 1 : 0)
       case 'phone':
@@ -64,6 +77,20 @@ export function sortUsers(users: AdminUser[], sort: Sort, profiles: Map<string, 
     return compared * direction || a.created_at.localeCompare(b.created_at)
   })
 }
+
+/* ─── 프로필카드 상태 ─────────────────────────────────────────────────── */
+
+export type ProfileState = 'none' | 'private' | 'public'
+
+/** 프로필카드가 없으면(연결이 끊긴 경우 포함) 없음, 있으면 공개 여부 */
+export const profileState = (user: AdminUser, profiles: Map<string, Member>): ProfileState => {
+  const profile = user.member_id ? profiles.get(user.member_id) : undefined
+  return !profile ? 'none' : profile.published ? 'public' : 'private'
+}
+
+const PROFILE_RANK: Record<ProfileState, number> = { none: 0, private: 1, public: 2 }
+export const PROFILE_LABELS: Record<ProfileState, string> = { none: '없음', private: '비공개', public: '공개' }
+const PROFILE_DOTS: Record<ProfileState, string> = { none: 'bg-danger', private: 'bg-ink/20', public: 'bg-success' }
 
 /** 누르면 정렬되는 칸 제목 */
 function SortHeader({
@@ -103,18 +130,19 @@ function SortHeader({
 
 /** 멤버 목록 표. 행을 누르면 상세 모달이 열린다 */
 /*
- * 칸: [선택] 이미지 · 이름 · 역할 · 학번 · 전공 · 전화번호 · 가입 시기 · 아이디 · 권한 · 더보기
+ * 칸: [선택] 이미지 · 이름 · 역할 · 프로필(없음 · 비공개 · 공개) · 학번 · 전공 · 전화번호 · 가입 시기 · 아이디 · 권한 · 더보기
  * 소속 묶음마다 표가 따로라 칸 위치가 맞도록 너비를 비율로 고정하고, 빈 공간 없이 표 전체를 나눠 쓴다.
  * 좁은 화면에서는 뒤쪽 칸부터 숨기고, 숨은 정보는 더보기(상세 모달)에서 본다.
  */
 const COLUMNS: { key: SortKey; label: string; className: string }[] = [
-  { key: 'name', label: '이름', className: 'w-[14%]' },
+  { key: 'name', label: '이름', className: 'w-[13%]' },
   { key: 'role', label: '역할', className: 'hidden w-[12%] sm:table-cell' },
+  { key: 'profile', label: '프로필', className: 'hidden w-[9%] sm:table-cell' },
   { key: 'student_id', label: '학번', className: 'hidden w-[10%] md:table-cell' },
-  { key: 'major', label: '전공', className: 'hidden w-[17%] md:table-cell' },
-  { key: 'phone', label: '전화번호', className: 'hidden w-[13%] lg:table-cell' },
+  { key: 'major', label: '전공', className: 'hidden w-[13%] md:table-cell' },
+  { key: 'phone', label: '전화번호', className: 'hidden w-[12%] lg:table-cell' },
   { key: 'joined', label: '가입 시기', className: 'hidden w-[11%] xl:table-cell' },
-  { key: 'username', label: '아이디', className: 'hidden w-[12%] lg:table-cell' },
+  { key: 'username', label: '아이디', className: 'hidden w-[11%] lg:table-cell' },
   { key: 'operator', label: '권한', className: 'hidden w-[9%] sm:table-cell' },
 ]
 
@@ -159,7 +187,12 @@ export function MembersTable({
                 aria-label='이 묶음 전체 선택'
                 checked={allSelected}
                 indeterminate={selectedCount > 0 && !allSelected}
-                onChange={(event) => onSelect(users.map((user) => user.id), event.target.checked)}
+                onChange={(event) =>
+                  onSelect(
+                    users.map((user) => user.id),
+                    event.target.checked,
+                  )
+                }
               />
             </th>
             <th className='w-12 px-1'>
@@ -211,6 +244,22 @@ export function MembersTable({
                   {user.id === currentUserId && <span className='ml-1.5 text-xs text-mute'>(나)</span>}
                 </td>
                 <td className={classNames(text, cell('role'))}>{profile?.role || '—'}</td>
+                <td className={classNames('px-3 py-3', cell('profile'))}>
+                  {(() => {
+                    const state = profileState(user, profiles)
+                    return (
+                      <span
+                        className={classNames(
+                          'flex items-center gap-1.5 text-xs',
+                          state === 'public' ? 'text-ink' : 'text-mute',
+                        )}
+                      >
+                        <span className={classNames('size-1.5 shrink-0 rounded-full', PROFILE_DOTS[state])} />
+                        {PROFILE_LABELS[state]}
+                      </span>
+                    )
+                  })()}
+                </td>
                 <td className={classNames(text, 'tabular-nums', cell('student_id'))}>{user.student_id || '—'}</td>
                 <td className={classNames(text, cell('major'))}>{user.major || '—'}</td>
                 <td className={classNames(text, 'tabular-nums', cell('phone'))}>{user.phone || '—'}</td>

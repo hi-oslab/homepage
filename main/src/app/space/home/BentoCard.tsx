@@ -6,19 +6,18 @@ import Link from 'next/link'
 import { BLOCK_PAD, surfaceClass } from '@/components/admin/styles'
 
 /**
- * 홈의 카드 한 칸: 차례로 떠오르며 나타나고, 올리면 살짝 들린다
+ * 홈의 카드 한 칸: 올리면 살짝 들린다 (나타나는 모션은 page.tsx의 PopIn이 맡는다)
  * - className: 바깥(그리드 칸 차지 등 배치용, page.tsx에서 넘긴다)
  * - bodyClassName: 카드 안쪽 모양
  */
 export function BentoCard({
-  index = 0,
   href,
   tone = 'light',
   className,
   bodyClassName,
   children,
 }: {
-  /** 나타나는 순서 */
+  /** (예전 등장 순서, 지금은 쓰지 않음 · PopIn이 무작위로) */
   index?: number
   /** 카드 전체를 누르면 갈 곳 */
   href?: string
@@ -29,9 +28,6 @@ export function BentoCard({
 }) {
   const body = (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={href ? { y: -3 } : undefined}
       className={classNames(
         'flex h-full flex-col gap-3 transition-shadow',

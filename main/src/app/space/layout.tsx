@@ -7,6 +7,7 @@ import { getAdminMembers, getAdminUsers, getHelpRequests, getRoles } from '@/lib
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
 import { OnboardingModal } from './home/OnboardingModal'
+import { ONBOARDING_MARKER } from './home/PopIn'
 import { NAV_COLLAPSED_COOKIE, SPACE_THEMES, THEME_COOKIE, type SpaceTheme } from './nav'
 import { NotificationCenter } from './NotificationCenter'
 import { getNotifications } from '@/lib/notifications'
@@ -82,6 +83,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <MentionProvider members={mentionMembers}>
         {children}
         <NotificationCenter items={notifications} userId={user.id} />
+        {/* 홈 섹션 등장 모션(PopIn)이 창이 끝날 때까지 기다리게 하는 표시 */}
+        {needsOnboarding && <span hidden {...{ [ONBOARDING_MARKER]: '' }} />}
         {needsOnboarding && (
           <OnboardingModal
             member={myProfile}

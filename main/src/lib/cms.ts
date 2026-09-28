@@ -49,17 +49,34 @@ async function sortByJoined(members: Member[]): Promise<Member[]> {
     .not('member_id', 'is', null)
   if (error) throw error
   const joined = new Map(
-    (data ?? []).map((row) => [row.member_id as string, (row.joined_year ?? 0) * 2 + (row.joined_half === 'H2' ? 1 : 0)]),
+    (data ?? []).map((row) => [
+      row.member_id as string,
+      (row.joined_year ?? 0) * 2 + (row.joined_half === 'H2' ? 1 : 0),
+    ]),
   )
   return members
     .slice()
     .sort((a, b) => (joined.get(b.id) ?? 0) - (joined.get(a.id) ?? 0) || b.created_at.localeCompare(a.created_at))
 }
 
+/**
+ * 공개 Members: 공개로 켠 프로필카드 중 '승인된 계정에 연결된 것'만.
+ * 계정이 없거나(예전에 만든 카드 · 지워진 계정) 승인되지 않은 계정의 카드는 멤버 관리에서 보이지 않으므로
+ * 공개 페이지에도 내보내지 않는다 (멤버 관리의 '공개'와 공개 페이지가 늘 같게).
+ */
 export const getPublishedMembers = cache(async (): Promise<Member[]> => {
-  const { data, error } = await createPublicSupabaseClient().from('members').select('*').eq('published', true)
+  const [{ data, error }, { data: owners, error: ownerError }] = await Promise.all([
+    createPublicSupabaseClient().from('members').select('*').eq('published', true),
+    createAdminSupabaseClient()
+      .from('admin_users')
+      .select('member_id')
+      .eq('status', 'approved')
+      .not('member_id', 'is', null),
+  ])
   if (error) throw error
-  return sortByJoined((data ?? []) as Member[])
+  if (ownerError) throw ownerError
+  const linked = new Set((owners ?? []).map((row) => row.member_id as string))
+  return sortByJoined(((data ?? []) as Member[]).filter((member) => linked.has(member.id)))
 })
 
 export async function getAdminWorks(
@@ -115,7 +132,12 @@ export async function createWork(authorId: string): Promise<Work> {
 }
 
 export async function updateWork(id: string, input: Partial<WorkInput>): Promise<Work> {
-  const { data, error } = await createAdminSupabaseClient().from('works').update(input).eq('id', id).select('*').single()
+  const { data, error } = await createAdminSupabaseClient()
+    .from('works')
+    .update(input)
+    .eq('id', id)
+    .select('*')
+    .single()
   if (error) throw error
   return data as Work
 }
@@ -131,7 +153,9 @@ export async function getAdminMembers(): Promise<Member[]> {
   return sortByJoined((data ?? []) as Member[])
 }
 
-export async function createMember(defaults: Partial<Pick<Member, 'name' | 'email' | 'published'>> = {}): Promise<Member> {
+export async function createMember(
+  defaults: Partial<Pick<Member, 'name' | 'email' | 'published'>> = {},
+): Promise<Member> {
   // 순서는 따로 두지 않는다 (가입 시기 최신순으로 정렬해서 보여준다)
   const { data, error } = await createAdminSupabaseClient()
     .from('members')
@@ -142,8 +166,16 @@ export async function createMember(defaults: Partial<Pick<Member, 'name' | 'emai
   return data as Member
 }
 
-export async function updateMember(id: string, input: Partial<Omit<Member, 'id' | 'created_at' | 'updated_at'>>): Promise<Member> {
-  const { data, error } = await createAdminSupabaseClient().from('members').update(input).eq('id', id).select('*').single()
+export async function updateMember(
+  id: string,
+  input: Partial<Omit<Member, 'id' | 'created_at' | 'updated_at'>>,
+): Promise<Member> {
+  const { data, error } = await createAdminSupabaseClient()
+    .from('members')
+    .update(input)
+    .eq('id', id)
+    .select('*')
+    .single()
   if (error) throw error
   return data as Member
 }
@@ -309,7 +341,11 @@ export async function getAdminHistory(): Promise<HistoryItem[]> {
 }
 
 export async function createHistoryItem(input: HistoryInput): Promise<HistoryItem> {
-  const { data, error } = await createAdminSupabaseClient().from('history_items').insert(input).select(HISTORY_COLUMNS).single()
+  const { data, error } = await createAdminSupabaseClient()
+    .from('history_items')
+    .insert(input)
+    .select(HISTORY_COLUMNS)
+    .single()
   if (error) throw error
   return data as HistoryItem
 }

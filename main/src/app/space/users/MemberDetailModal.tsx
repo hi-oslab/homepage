@@ -73,11 +73,17 @@ export function MemberDetailModal({
         )
       }
       meta={user && `@${user.username} · 신청 ${new Date(user.created_at).toLocaleDateString('ko-KR')}`}
-      footer={user && <Footer user={user} isMe={isMe} busy={busy} onRun={onRun} onIssueReset={onIssueReset} onRemoved={onRemoved} />}
+      footer={
+        user && (
+          <Footer user={user} isMe={isMe} busy={busy} onRun={onRun} onIssueReset={onIssueReset} onRemoved={onRemoved} />
+        )
+      }
     >
       {user && (
         <div className={classNames('flex flex-col gap-3 transition-opacity', busy && 'opacity-50')}>
-          {resetLink && <ResetLinkPanel link={resetLink} name={user.name} onClose={onCloseResetLink} onCopied={onCopiedResetLink} />}
+          {resetLink && (
+            <ResetLinkPanel link={resetLink} name={user.name} onClose={onCloseResetLink} onCopied={onCopiedResetLink} />
+          )}
 
           <Panel title='가입 정보'>
             <dl className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3'>
@@ -188,7 +194,8 @@ function Footer({
     )
 
   const approveAsMaster = () => {
-    if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`)) return
+    if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`))
+      return
     onRun(user.id, () => approveAsMasterAction(user.id), `${user.name}님을 운영자로 승인했습니다`)
   }
 
@@ -199,7 +206,12 @@ function Footer({
       )
     )
       return
-    onRun(user.id, () => deleteUserAction(user.id), '계정을 삭제했습니다', () => onRemoved(user))
+    onRun(
+      user.id,
+      () => deleteUserAction(user.id),
+      '계정을 삭제했습니다',
+      () => onRemoved(user),
+    )
   }
 
   return (
@@ -220,18 +232,33 @@ function Footer({
         </button>
       )}
       {user.status === 'pending' && (
-        <button type='button' disabled={busy} onClick={() => setStatus('rejected')} className={buttonClass('secondary', 'sm')}>
+        <button
+          type='button'
+          disabled={busy}
+          onClick={() => setStatus('rejected')}
+          className={buttonClass('secondary', 'sm')}
+        >
           거절
         </button>
       )}
       {user.status === 'approved' && !isMe && (
-        <button type='button' disabled={busy} onClick={() => setStatus('pending')} className={buttonClass('ghost', 'sm')}>
+        <button
+          type='button'
+          disabled={busy}
+          onClick={() => setStatus('pending')}
+          className={buttonClass('ghost', 'sm')}
+        >
           승인 취소
         </button>
       )}
       {!isMe && (
         <span className='ml-auto flex gap-2'>
-          <button type='button' disabled={busy} onClick={() => onIssueReset(user)} className={buttonClass('ghost', 'sm')}>
+          <button
+            type='button'
+            disabled={busy}
+            onClick={() => onIssueReset(user)}
+            className={buttonClass('ghost', 'sm')}
+          >
             비밀번호 재설정 링크
           </button>
           <button type='button' disabled={busy} onClick={remove} className={buttonClass('danger', 'sm')}>
@@ -264,7 +291,12 @@ export function ResetLinkPanel({
         </button>
       </div>
       <div className='flex flex-col gap-2 sm:flex-row'>
-        <Input readOnly value={link.url} onFocus={(event) => event.target.select()} className='bg-paper/10 text-sm text-paper' />
+        <Input
+          readOnly
+          value={link.url}
+          onFocus={(event) => event.target.select()}
+          className='bg-paper/10 text-sm text-paper'
+        />
         <button
           type='button'
           onClick={async () => {
@@ -278,8 +310,8 @@ export function ResetLinkPanel({
         </button>
       </div>
       <p className='text-xs leading-relaxed text-paper/60'>
-        카톡 등으로 본인에게만 전달하세요. 한 번 사용하면 무효가 되고, {new Date(link.expiresAt).toLocaleString('ko-KR')}에
-        만료됩니다. 닫으면 다시 볼 수 없어요.
+        카톡 등으로 본인에게만 전달하세요. 한 번 사용하면 무효가 되고,{' '}
+        {new Date(link.expiresAt).toLocaleString('ko-KR')}에 만료됩니다. 닫으면 다시 볼 수 없어요.
       </p>
     </div>
   )

@@ -61,7 +61,12 @@ export function RolesModal({
 
   const remove = (role: MemberRole) => {
     const count = usage(role.name)
-    if (!confirm(`'${role.name}' 역할을 삭제할까요?${count ? `\n이 역할을 쓰는 프로필 ${count}개의 역할이 비워집니다.` : ''}`)) return
+    if (
+      !confirm(
+        `'${role.name}' 역할을 삭제할까요?${count ? `\n이 역할을 쓰는 프로필 ${count}개의 역할이 비워집니다.` : ''}`,
+      )
+    )
+      return
     startTransition(async () => {
       const result = await deleteRoleAction(role.id)
       if ('message' in result) return onMessage(result.message, 'error')
@@ -83,7 +88,11 @@ export function RolesModal({
             placeholder='새 역할 이름 (예: Designer)'
             maxLength={40}
           />
-          <button type='submit' disabled={isPending || !name.trim()} className={buttonClass('primary', 'md', 'shrink-0')}>
+          <button
+            type='submit'
+            disabled={isPending || !name.trim()}
+            className={buttonClass('primary', 'md', 'shrink-0')}
+          >
             추가
           </button>
         </form>
@@ -144,7 +153,9 @@ function RoleRow({
         }}
         className='bg-transparent focus:bg-field'
       />
-      <span className='shrink-0 text-xs whitespace-nowrap text-mute'>{usage ? `${usage}명 사용 중` : '사용 안 함'}</span>
+      <span className='shrink-0 text-xs whitespace-nowrap text-mute'>
+        {usage ? `${usage}명 사용 중` : '사용 안 함'}
+      </span>
       <button
         type='button'
         disabled={disabled}

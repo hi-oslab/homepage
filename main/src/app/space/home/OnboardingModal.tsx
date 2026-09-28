@@ -9,6 +9,7 @@ import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
 import type { Member } from '@/types/cms'
 import { MemberForm, toMemberDraft, type MemberDraft } from '../members/MemberForm'
 import { completeOnboardingAction, createMyProfileAction } from '../members/actions'
+import { HOME_INTRO_EVENT } from './PopIn'
 
 /**
  * 프로필 설정 창 (space/layout.tsx): 첫 방문을 안 끝냈거나 프로필카드가 없으면 멤버 공간 어느 화면에서든 뜬다.
@@ -74,8 +75,11 @@ export function OnboardingModal({
         await completeOnboardingAction(draft)
         setOpen(false)
         // 홈으로 (이미 홈이면 다시 그려) 방금 채운 프로필(인사 · 멤버 목록)을 반영한다
-        if (pathname === '/space') router.refresh()
-        else router.push('/space')
+        if (pathname === '/space') {
+          router.refresh()
+          // 기다리던 홈 섹션들이 이제 톡톡 등장한다
+          window.dispatchEvent(new Event(HOME_INTRO_EVENT))
+        } else router.push('/space')
       } catch (error) {
         toast.show(error instanceof Error && error.message ? error.message : '저장하지 못했어요', 'error')
       }

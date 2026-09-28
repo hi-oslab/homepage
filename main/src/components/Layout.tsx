@@ -31,8 +31,8 @@ interface LayoutProps {
 export const Layout = (props: LayoutProps) => {
   const { children } = props
   const pathname = usePathname()
-  // 멤버 스페이스는 자체 사이드바를 쓰므로 푸터를 숨긴다
-  const isMemberSpace = pathname.startsWith('/space')
+  // 멤버 스페이스는 자체 사이드바를 쓰고, Members는 화면 전체가 3D 씬이라 푸터를 숨긴다
+  const isMemberSpace = pathname.startsWith('/space') || pathname === '/members'
 
   return (
     <div className={classNames('w-screen h-fit')}>

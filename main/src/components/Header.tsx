@@ -41,6 +41,14 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const islandSpring = { type: 'spring', stiffness: 420, damping: 36, mass: 0.8 } as const
 
+/** Members 씬 위 헤더: 이 헤더 안에서만 색 토큰을 뒤집는다 (바탕 검정 · 글자 흰색) */
+const SCENE_HEADER_COLORS = {
+  '--color-paper': '#000000',
+  '--color-ink': '#f1f1ef',
+  '--color-tile': '#1f1f1f',
+  '--color-mute': '#8e8e89',
+} as React.CSSProperties
+
 type SessionUser = { username: string; name: string; isMaster: boolean; status: string }
 
 const isActive = (href: string, pathname: string) =>
@@ -121,7 +129,12 @@ export const Header = () => {
     : []
 
   return (
-    <header ref={headerRef} className='fixed inset-x-0 top-0 z-50 min-h-header bg-paper'>
+    <header
+      ref={headerRef}
+      className='fixed inset-x-0 top-0 z-50 min-h-header bg-paper'
+      // Members(검은 3D 씬)에서만 헤더 안의 색을 검은 버전으로 (사이트 전체 테마는 그대로)
+      style={pathname === '/members' ? SCENE_HEADER_COLORS : undefined}
+    >
       {/* 바탕을 --spacing-header(본문 여백 · sticky 기준)만큼 채워서, 스크롤한 내용이 헤더 아래 틈으로 비치지 않게 한다 */}
       <motion.div layout transition={islandSpring} className='relative px-1 md:px-2 text-ink'>
         {/* 한 줄 바 */}

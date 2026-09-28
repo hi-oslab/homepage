@@ -26,7 +26,7 @@ export async function MembersSection({ className }: { className?: string }) {
     .filter((group) => group.members.length > 0)
 
   return (
-    <HomeSection title='멤버 관리' meta={`${approved.length}명`} className={classNames('w-full h-fit', className)}>
+    <HomeSection title='멤버 리스트' meta={`${approved.length}명`} className={classNames('w-full h-fit', className)}>
       <div className='flex min-h-0 h-fit flex-col gap-5'>
         {groups.map(({ affiliation, members }) => (
           <div key={affiliation ?? 'none'} className='flex flex-col gap-1'>

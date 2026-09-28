@@ -15,6 +15,9 @@ import {
 } from './actions'
 
 /** 건의 한 건을 다루는 동작 (목록 줄 · 모달이 받아 쓴다) */
+/** 해결된 건의: 완료 · 불가 (보류는 아직 해결 전으로 본다) */
+const isResolved = (item: Suggestion) => item.status === 'done' || item.status === 'rejected'
+
 export type SuggestionHandlers = {
   viewer: Viewer
   busy: boolean
@@ -34,8 +37,12 @@ export function useSuggestions(initialItems: Suggestion[] | null, viewer: Viewer
   const [items, setItems] = useServerState(initialItems)
   const [isPending, startTransition] = useTransition()
 
-  const active = (items ?? []).filter((item) => !item.archived)
-  const archived = (items ?? []).filter((item) => item.archived)
+  // 해결 안 된 건의(요청 · 확인중 · 보류)가 위, 해결된 건의(완료 · 불가)가 아래. 각 묶음 안은 최신 등록순
+  const sorted = (items ?? [])
+    .slice()
+    .sort((a, b) => Number(isResolved(a)) - Number(isResolved(b)) || b.created_at.localeCompare(a.created_at))
+  const active = sorted.filter((item) => !item.archived)
+  const archived = sorted.filter((item) => item.archived)
   const patch = (id: string, next: Partial<Suggestion>) =>
     setItems((current) => (current ?? []).map((item) => (item.id === id ? { ...item, ...next } : item)))
 

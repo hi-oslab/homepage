@@ -57,7 +57,9 @@ function placements(members: Member[], stage: Stage, tile: number): Placement[] 
       const x = (random() * 2 - 1) * halfW * 0.95
       const y = (random() * 2 - 1) * halfH * 0.9
       const gap = placed.length
-        ? Math.min(...placed.map((other) => Math.hypot(x * scale - other.sx, y * scale - other.sy) - (size + other.size) / 2))
+        ? Math.min(
+            ...placed.map((other) => Math.hypot(x * scale - other.sx, y * scale - other.sy) - (size + other.size) / 2),
+          )
         : Infinity
       if (gap > best.gap) best = { x, y, gap }
       if (gap === Infinity) break
@@ -91,7 +93,12 @@ export function MemberSpace({ members }: { members: Member[] }) {
 
   return (
     // 멤버 수만큼 스크롤 길이를 늘려 한 명씩 천천히 지나가게
-    <section ref={sectionRef} aria-label='멤버 공간' style={{ height: `${160 + members.length * 45}dvh` }} className='relative -mx-4 md:-mx-8'>
+    <section
+      ref={sectionRef}
+      aria-label='멤버 공간'
+      style={{ height: `${160 + members.length * 45}dvh` }}
+      className='relative -mx-4 md:-mx-8'
+    >
       <div
         ref={stageRef}
         className='sticky top-header h-[calc(100dvh-var(--spacing-header))] w-full overflow-hidden'
@@ -151,7 +158,11 @@ function Tile({
   const depth = useTransform(camera, (cam) => z + cam)
   const transform = useTransform(depth, (d) => `translate3d(${x}px, ${y}px, ${d}px) translate(-50%, -50%)`)
   // 멀리서 서서히 나타나고, 카메라에 가까워지면 사라진다
-  const opacity = useTransform(depth, [FARTHEST - 600, FARTHEST + 200, PERSPECTIVE * 0.45, PERSPECTIVE * 0.8], [0, 1, 1, 0])
+  const opacity = useTransform(
+    depth,
+    [FARTHEST - 600, FARTHEST + 200, PERSPECTIVE * 0.45, PERSPECTIVE * 0.8],
+    [0, 1, 1, 0],
+  )
   const pointerEvents = useTransform(opacity, (value) => (value < 0.2 ? 'none' : 'auto'))
 
   return (

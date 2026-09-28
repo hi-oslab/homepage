@@ -7,6 +7,7 @@ import {
   SuggestionsSection,
   TodoCard,
 } from './home/sections'
+import { PopIn } from './home/PopIn'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,10 +23,11 @@ export default async function SpaceHomePage() {
   const user = await getCurrentUser().catch(() => null)
   if (!isApproved(user)) return null
   return (
-    <div className='relative isolate flex w-full flex-col gap-2'>
+    <div className='relative isolate flex w-full flex-col gap-4'>
       {/* 위쪽에 옅은 강조색 빛: 유리 면(glass) 블록이 바탕과 구분되도록 */}
       <div aria-hidden className='pointer-events-none absolute inset-x-0 -top-4 -z-10 h-80 md:-top-4' />
       {/*
+        섹션마다 PopIn으로 감싸 무작위 순서로 톡 튀어 오르게 한다 (그리드 칸 배치 className은 PopIn에)
         위 줄: 인사 · 확인할 일 · 최근 프로젝트 | 건의사항
         아래 줄: 라운지 | 멤버
         - 모바일(~sm): 전부 한 줄씩 세로로
@@ -33,20 +35,32 @@ export default async function SpaceHomePage() {
         - xl~: 오른쪽 칸(건의사항 · 멤버)이 생긴다. 위아래 줄의 오른쪽 칸 너비를 같게 맞춰 세로선이 이어진다
         - 3xl~ · 4xl~: 오른쪽 칸만 조금씩 넓힌다 (라운지는 열 수가 늘어난다, board/Board.tsx)
       */}
-      <header className='grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_340px] 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
-        <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+      <header className='grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px] 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
           {/* 인사 + 내 프로필카드 (이미지 · 역할 · 프로필 설정 버튼) */}
-          <GreetingSection className='sm:col-span-2' />
+          <PopIn className='sm:col-span-2'>
+            <GreetingSection className='h-full' />
+          </PopIn>
           {/* 확인할 일: 승인 대기(운영자) · 작성 중인 프로젝트 · 소속 · 프로필카드 */}
-          <TodoCard index={1} />
-          <RecentWorksCard index={0} />
+          <PopIn>
+            <TodoCard />
+          </PopIn>
+          <PopIn>
+            <RecentWorksCard />
+          </PopIn>
         </div>
-        <SuggestionsSection />
+        <PopIn>
+          <SuggestionsSection className='h-full' />
+        </PopIn>
       </header>
 
-      <div className='grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
-        <LoungeSection />
-        <MembersSection />
+      <div className='grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
+        <PopIn>
+          <LoungeSection />
+        </PopIn>
+        <PopIn>
+          <MembersSection />
+        </PopIn>
       </div>
     </div>
   )

@@ -15,6 +15,7 @@ import {
 import { AFFILIATION_LABELS, formatJoined } from '../AccountFields'
 import type { AdminUser, HelpRequest, Member, MemberAffiliation, MemberRole } from '@/types/cms'
 import { downloadCsv } from '@/lib/csv'
+import { ProfileImage } from '@/components/ProfileImage'
 import {
   approveAsMasterAction,
   createResetLinkAction,
@@ -25,7 +26,16 @@ import {
 } from './actions'
 import { deleteMemberAction, setMemberPublishedAction, setMemberRoleAction } from '../members/actions'
 import { MemberDetailModal, ResetLinkPanel, type ActionResult, type ResetLink } from './MemberDetailModal'
-import { DEFAULT_SORT, MembersTable, nextSort, sortUsers, type Decision, type Sort } from './MembersTable'
+import {
+  DEFAULT_SORT,
+  MembersTable,
+  PROFILE_LABELS,
+  nextSort,
+  profileState,
+  sortUsers,
+  type Decision,
+  type Sort,
+} from './MembersTable'
 import { RequestList } from './RequestList'
 import { RolesModal } from './RolesModal'
 
@@ -55,6 +65,7 @@ function toCsvRows(users: AdminUser[], profiles: Map<string, Member>): string[][
   const header = [
     '이름',
     '역할',
+    '프로필',
     '학번',
     '전공',
     '전화번호',
@@ -74,6 +85,7 @@ function toCsvRows(users: AdminUser[], profiles: Map<string, Member>): string[][
       return [
         user.name,
         profile?.role ?? '',
+        PROFILE_LABELS[profileState(user, profiles)],
         user.student_id,
         user.major,
         user.phone,
@@ -331,6 +343,28 @@ export function UsersManager({
     })
   }
 
+  /*
+   * 계정 없는 프로필카드: 어떤 계정에도 연결되지 않은 카드 (예전에 만든 카드 · 계정이 지워진 뒤 남은 카드).
+   * 공개 페이지에는 나가지 않지만(getPublishedMembers), 남아 있는 걸 여기서 보고 지운다.
+   */
+  const linkedIds = new Set(users.map((user) => user.member_id).filter(Boolean))
+  const orphans = profiles.filter((member) => !linkedIds.has(member.id))
+  const removeOrphan = (member: Member) => {
+    if (!confirm(`계정 없는 프로필카드 '${member.name}'을(를) 삭제할까요? 되돌릴 수 없습니다.`)) return
+    setBusyId(member.id)
+    startTransition(async () => {
+      try {
+        await deleteMemberAction(member.id)
+        setProfiles((current) => current.filter((item) => item.id !== member.id))
+        toast.show('프로필카드를 삭제했습니다')
+      } catch {
+        toast.show('삭제하지 못했습니다', 'error')
+      } finally {
+        setBusyId(null)
+      }
+    })
+  }
+
   const resolve = (request: HelpRequest) =>
     run(
       request.id,
@@ -491,6 +525,50 @@ export function UsersManager({
                   ? '승인을 기다리는 가입 신청이 없습니다.'
                   : '해당하는 멤버가 없습니다.'}
             </div>
+          )}
+
+          {/* 승인됨 탭 맨 아래: 계정 없는 프로필카드 (공개 페이지에는 나가지 않음) */}
+          {tab === 'approved' && orphans.length > 0 && (
+            <section className='flex flex-col gap-2'>
+              <h2 className='flex items-baseline gap-1.5 px-1 text-sm text-danger'>
+                계정 없는 프로필카드 {orphans.length}개
+                <span className='text-xs text-mute'>
+                  어떤 계정에도 연결되지 않은 카드예요. 공개 페이지에는 보이지 않아요.
+                </span>
+              </h2>
+              <ul className='rounded-block flex flex-col bg-surface p-1'>
+                {orphans.map((member) => (
+                  <li
+                    key={member.id}
+                    className={classNames(
+                      'flex items-center gap-3 rounded-inner px-3 py-2',
+                      busyId === member.id && 'opacity-50',
+                    )}
+                  >
+                    <ProfileImage
+                      src={member.cover_image_url}
+                      name={member.name}
+                      size='sm'
+                      className='size-8 shrink-0'
+                    />
+                    <span className='flex min-w-0 flex-1 flex-col'>
+                      <span className='truncate text-sm'>{member.name}</span>
+                      <span className='truncate text-xs text-mute'>
+                        {[member.role, member.published ? '공개로 켜져 있음' : '비공개'].filter(Boolean).join(' · ')}
+                      </span>
+                    </span>
+                    <button
+                      type='button'
+                      disabled={busyId === member.id}
+                      onClick={() => removeOrphan(member)}
+                      className={buttonClass('danger', 'sm')}
+                    >
+                      삭제
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
       )}
