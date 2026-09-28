@@ -200,7 +200,7 @@ export function PostModal({
                 title={reaction ? reaction.names.join(', ') : undefined}
                 className={classNames(
                   'flex h-8 items-center gap-1 rounded-full px-2.5 text-sm transition-all active:scale-90',
-                  reaction?.mine ? 'bg-ink text-white' : reaction ? 'bg-tile' : 'bg-transparent opacity-50 hover:bg-tile hover:opacity-100',
+                  reaction?.mine ? 'bg-ink text-paper' : reaction ? 'bg-tile' : 'bg-transparent opacity-50 hover:bg-tile hover:opacity-100',
                 )}
               >
                 <span>{emoji}</span>
@@ -216,7 +216,7 @@ export function PostModal({
           {post.comments.map((item) => (
             <div key={item.id} className='group flex gap-2.5'>
               <ProfileImage src={item.author_image} name={item.author_name} size='sm' className='size-7 shrink-0 text-[11px]' />
-              <div className='flex min-w-0 flex-1 flex-col gap-0.5 rounded-2xl bg-surface px-3.5 py-2.5'>
+              <div className='rounded-inner flex min-w-0 flex-1 flex-col gap-0.5 bg-surface px-3.5 py-2.5'>
                 <span className='flex items-baseline gap-2 text-xs'>
                   <span className='text-ink'>{item.author_name}</span>
                   <span className='text-mute'>

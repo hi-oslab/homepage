@@ -34,7 +34,7 @@ export function SuggestionDetail({
   }
 
   return (
-    <div className={classNames('flex flex-col rounded-2xl bg-surface', defaultOpen && 'ring-1 ring-ink/15')}>
+    <div className={classNames('rounded-block flex flex-col bg-surface', defaultOpen && 'ring-1 ring-ink/15')}>
       <div className='group flex items-start gap-3 px-4 pt-3.5 pb-2'>
         <span className='pt-0.5'>
           <StatusCheck item={item} handlers={handlers} />
@@ -97,7 +97,7 @@ export function SuggestionDetail({
                     size='sm'
                     className='size-6 shrink-0 text-[10px]'
                   />
-                  <div className='flex min-w-0 flex-1 flex-col gap-0.5 rounded-xl bg-paper px-3 py-2'>
+                  <div className='rounded-inner flex min-w-0 flex-1 flex-col gap-0.5 bg-paper px-3 py-2'>
                     <span className='flex items-baseline gap-2 text-xs'>
                       <span className='text-ink'>{entry.author_name}</span>
                       <RelativeTime iso={entry.created_at} />

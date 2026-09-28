@@ -33,8 +33,8 @@ export default async function AdminSystemPage() {
       {/* 전체 요약 */}
       <section
         className={classNames(
-          'flex flex-wrap items-center justify-between gap-3 rounded-xl p-5',
-          overall === 'ok' ? 'bg-ink text-white' : overall === 'warn' ? 'bg-[#f6ecd2]' : 'bg-danger-soft',
+          'rounded-block flex flex-wrap items-center justify-between gap-3 p-5',
+          overall === 'ok' ? 'bg-ink text-paper' : overall === 'warn' ? 'bg-[#e0a526]/15' : 'bg-danger-soft',
         )}
       >
         <div className='flex items-center gap-3'>
@@ -43,7 +43,7 @@ export default async function AdminSystemPage() {
             {overall === 'ok' ? '모두 정상이에요' : overall === 'warn' ? '확인이 필요한 항목이 있어요' : '문제가 있는 항목이 있어요'}
           </span>
         </div>
-        <div className={classNames('flex items-center gap-3 text-sm', overall === 'ok' ? 'text-white/60' : 'text-ink/60')}>
+        <div className={classNames('flex items-center gap-3 text-sm', overall === 'ok' ? 'text-paper/60' : 'text-ink/60')}>
           <span>
             정상 {counts.ok} · 주의 {counts.warn} · 오류 {counts.error + missingRequired.length}
           </span>
@@ -69,7 +69,7 @@ export default async function AdminSystemPage() {
               <span
                 className={classNames(
                   'size-1.5 shrink-0 rounded-full',
-                  item.set ? 'bg-success' : item.required ? 'bg-danger' : 'bg-[#c9c9c4]',
+                  item.set ? 'bg-success' : item.required ? 'bg-danger' : 'bg-ink/20',
                 )}
               />
               <code className='font-mono text-[12px]'>{item.name}</code>
@@ -119,7 +119,7 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
       {service.metrics.length > 0 && (
         <dl className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
           {service.metrics.map((metric) => (
-            <div key={metric.label} className='flex flex-col gap-0.5 rounded-lg bg-field px-3 py-2'>
+            <div key={metric.label} className='rounded-inner flex flex-col gap-0.5 bg-field px-3 py-2'>
               <dt className='truncate text-[11px] text-mute'>{metric.label}</dt>
               <dd className='truncate text-base font-medium tracking-[-0.02em]'>{metric.value}</dd>
               {metric.hint && <span className='truncate text-[11px] text-mute'>{metric.hint}</span>}

@@ -146,7 +146,7 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className='flex max-h-[min(70dvh,560px)] w-[min(calc(100vw-2rem),380px)] flex-col overflow-hidden rounded-2xl bg-paper shadow-[0_12px_40px_rgba(17,17,17,0.18)]'
+            className='rounded-block flex max-h-[min(70dvh,560px)] w-[min(calc(100vw-2rem),380px)] flex-col overflow-hidden bg-paper shadow-[0_12px_40px_rgb(var(--shadow-rgb)/0.18)]'
           >
             <div className='flex shrink-0 items-center justify-between px-4 pt-4 pb-2'>
               <span className='text-base font-medium tracking-[-0.02em]'>알림</span>
@@ -163,7 +163,7 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
                   {signups.map((item) => (
                     <div
                       key={item.id}
-                      className={classNames('flex flex-col gap-2 rounded-xl bg-surface p-3', busyId === item.id && 'opacity-50')}
+                      className={classNames('rounded-inner flex flex-col gap-2 bg-surface p-3', busyId === item.id && 'opacity-50')}
                     >
                       <Row item={item} highlight={false} />
                       <div className='flex flex-wrap gap-1 pl-8'>
@@ -232,7 +232,7 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
         onClick={toggle}
         aria-expanded={open}
         aria-label={attention ? '알림 (새 알림 있음)' : '알림'}
-        className='relative flex size-12 items-center justify-center rounded-full bg-ink text-white shadow-[0_8px_24px_rgba(17,17,17,0.25)] transition-transform hover:scale-105'
+        className='relative flex size-12 items-center justify-center rounded-full bg-ink text-paper shadow-[0_8px_24px_rgb(var(--shadow-rgb)/0.25)] transition-transform hover:scale-105'
       >
         <GoBell size={18} />
         {attention && <span className='absolute top-2.5 right-2.5 size-2 rounded-full bg-danger ring-2 ring-ink' />}
@@ -263,7 +263,7 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
             <Link
               href='/space/users'
               onClick={() => closeBriefing()}
-              className='mb-1 flex items-center justify-between gap-3 rounded-xl bg-surface p-3 text-sm transition-colors hover:bg-tile'
+              className='mb-1 flex items-center justify-between gap-3 bg-surface p-3 text-sm transition-colors hover:bg-tile'
             >
               <span className='flex items-center gap-3'>
                 <span className='flex size-6 items-center justify-center rounded-full bg-danger text-white'>
@@ -301,7 +301,7 @@ function Row({ item, highlight }: { item: NotificationItem; highlight: boolean }
       <span
         className={classNames(
           'flex size-6 shrink-0 items-center justify-center rounded-full',
-          highlight ? 'bg-ink text-white' : 'bg-tile text-ink/60',
+          highlight ? 'bg-ink text-paper' : 'bg-tile text-ink/60',
         )}
       >
         <Icon size={12} />

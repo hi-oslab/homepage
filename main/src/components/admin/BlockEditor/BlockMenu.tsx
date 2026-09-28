@@ -10,7 +10,7 @@ export const GRID_COLUMNS = 6
 
 /** 블록 보관함 겉모양: 어두운 상자 */
 const PANEL =
-  'flex w-[min(calc(100vw-2rem),600px)] flex-col overflow-hidden rounded-xl bg-ink text-white shadow-[0_12px_32px_rgba(17,17,17,0.25)]'
+  'rounded-block flex w-[min(calc(100vw-2rem),600px)] flex-col overflow-hidden bg-ink text-paper shadow-[0_12px_32px_rgb(var(--shadow-rgb)/0.25)]'
 
 /**
  * 블록 위쪽에 띄우는 층 (모달 · 스크롤 영역에 잘리지 않도록 화면 맨 위 층에 그린다)
@@ -88,17 +88,17 @@ function BlockGrid({
             onClick={() => onSelect(entry)}
             className={classNames(
               'flex w-full flex-col items-center gap-1.5 rounded-lg px-1 py-2.5 text-center',
-              index === activeIndex ? 'bg-white/12' : 'hover:bg-white/8',
+              index === activeIndex ? 'bg-paper/12' : 'hover:bg-paper/8',
             )}
           >
-            <span className='flex size-8 items-center justify-center rounded-md bg-white/10 text-xs text-white/75'>
+            <span className='flex size-8 items-center justify-center rounded-md bg-paper/10 text-xs text-paper/75'>
               {entry.icon}
             </span>
-            <span className='text-[11px] leading-tight break-keep text-white/85'>{entry.label}</span>
+            <span className='text-[11px] leading-tight break-keep text-paper/85'>{entry.label}</span>
           </button>
         </li>
       ))}
-      {entries.length === 0 && <li className='col-span-full px-2 py-3 text-xs text-white/50'>맞는 블록이 없어요</li>}
+      {entries.length === 0 && <li className='col-span-full px-2 py-3 text-xs text-paper/50'>맞는 블록이 없어요</li>}
     </ul>
   )
 }
@@ -130,8 +130,8 @@ export function SlashMenu({
       onMouseDown={(event) => event.preventDefault()}
       className={PANEL}
     >
-      <div className='border-b border-white/10 px-3.5 py-2.5 text-sm text-white/40'>
-        {query ? <span className='text-white'>/{query}</span> : '블록 이름을 이어서 입력해 찾을 수 있어요'}
+      <div className='border-b border-white/10 px-3.5 py-2.5 text-sm text-paper/40'>
+        {query ? <span className='text-paper'>/{query}</span> : '블록 이름을 이어서 입력해 찾을 수 있어요'}
       </div>
       <BlockGrid entries={entries} activeIndex={activeIndex} onHover={onHover} onSelect={onSelect} />
     </FloatingPanel>
@@ -204,7 +204,7 @@ export function PlusMenu({
             onClose()
           }
         }}
-        className='border-b border-white/10 bg-transparent px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-white/35'
+        className='border-b border-white/10 bg-transparent px-3.5 py-2.5 text-sm text-paper outline-none placeholder:text-paper/35'
       />
       <BlockGrid entries={entries} activeIndex={current} onHover={setActiveIndex} onSelect={onSelect} />
     </FloatingPanel>

@@ -84,7 +84,9 @@ export async function deleteUserAction(id: string) {
 }
 
 /** 선택한 계정을 한 번에 삭제. 본인 계정은 빼고, 운영자가 한 명도 남지 않게 되면 막는다 */
-export async function deleteUsersAction(ids: string[]): Promise<{ ok: true; deleted: string[] } | { ok: false; message: string }> {
+export async function deleteUsersAction(
+  ids: string[],
+): Promise<{ ok: true; deleted: string[] } | { ok: false; message: string }> {
   try {
     const master = await requireMaster()
     const targets = ids.filter((id) => id !== master.id)
@@ -103,6 +105,41 @@ export async function deleteUsersAction(ids: string[]): Promise<{ ok: true; dele
   } catch (error) {
     console.error(error)
     return { ok: false, message: '삭제하지 못했습니다. 권한을 확인해 주세요.' }
+  }
+}
+
+/**
+ * 선택한 가입 신청을 한 번에 승인 · 거절. 승인 대기 계정만 처리한다
+ * (이미 승인된 멤버가 선택에 섞여 있어도 상태가 바뀌지 않도록). 운영자 신청자도 멤버로 승인된다
+ */
+export async function setUsersStatusAction(
+  ids: string[],
+  status: 'approved' | 'rejected',
+): Promise<{ ok: true; users: AdminUser[] } | { ok: false; message: string }> {
+  try {
+    const master = await requireMaster()
+    const pendingIds = new Set(
+      (await getAdminUsers())
+        .filter((user) => user.status === 'pending' && user.id !== master.id)
+        .map((user) => user.id),
+    )
+    const users: AdminUser[] = []
+    for (const id of ids) {
+      if (!pendingIds.has(id)) continue
+      users.push(
+        await updateAdminUser(id, {
+          status,
+          approved_at: status === 'approved' ? new Date().toISOString() : null,
+          is_master: false,
+          master_requested: false,
+        }),
+      )
+    }
+    revalidatePath('/space', 'layout')
+    return { ok: true, users }
+  } catch (error) {
+    console.error(error)
+    return { ok: false, message: '처리하지 못했습니다. 권한을 확인해 주세요.' }
   }
 }
 

@@ -3,6 +3,7 @@
 import classNames from 'classnames'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { BLOCK_PAD, surfaceClass } from '@/components/admin/styles'
 
 /**
  * 홈의 카드 한 칸: 차례로 떠오르며 나타나고, 올리면 살짝 들린다
@@ -33,9 +34,10 @@ export function BentoCard({
       transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={href ? { y: -3 } : undefined}
       className={classNames(
-        'flex h-full flex-col gap-3 rounded-3xl p-4 transition-shadow md:p-5',
-        tone === 'dark' ? 'bg-ink text-white' : 'bg-surface',
-        href && 'hover:shadow-[0_12px_32px_rgba(17,17,17,0.08)]',
+        'flex h-full flex-col gap-3 transition-shadow',
+        BLOCK_PAD,
+        surfaceClass(tone === 'dark' ? 'inverse' : 'solid'),
+        href && 'hover:shadow-[0_12px_32px_rgb(var(--shadow-rgb)/0.08)]',
         bodyClassName,
       )}
     >

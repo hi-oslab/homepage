@@ -34,14 +34,14 @@ export function Composer({
     if (await onSubmit(body)) setDraft('')
   }
   return (
+    // 흰 블록 · 모달 안에서도 입력칸인 게 보이도록 회색 면 + 포커스 때 강조색 테두리
     <div
       className={classNames(
-        'flex items-center gap-2',
-        // 홈: 목록 아래 한 줄 (+ 표시 · 테두리 없음) / 모달: 흰 칸
-        compact ? 'border-t border-tile pt-1.5' : 'rounded-2xl bg-surface px-3.5 py-2.5',
+        'flex items-center gap-2 rounded-inner bg-ink/[0.05] py-1.5 pr-1.5 pl-3 transition-shadow',
+        'focus-within:bg-surface focus-within:ring-1 focus-within:ring-accent',
       )}
     >
-      {compact && <GoPlus size={14} className='ml-0.5 shrink-0 text-mute' />}
+      {compact && <GoPlus size={15} className='shrink-0 text-accent' />}
       <AutoTextarea
         value={draft}
         maxLength={SUGGESTION_MAX}
@@ -55,16 +55,14 @@ export function Composer({
         }}
         className='py-1 text-sm'
       />
-      {(!compact || draft.trim()) && (
-        <button
-          type='button'
-          disabled={!draft.trim() || busy}
-          onClick={submit}
-          className={buttonClass('primary', 'sm', 'shrink-0')}
-        >
-          등록
-        </button>
-      )}
+      <button
+        type='button'
+        disabled={!draft.trim() || busy}
+        onClick={submit}
+        className={buttonClass('primary', 'sm', 'shrink-0')}
+      >
+        등록
+      </button>
     </div>
   )
 }
@@ -76,7 +74,7 @@ export function StatusCheck({ item, handlers }: { item: Suggestion; handlers: Su
   const className = classNames(
     'flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors',
     done
-      ? 'border-ink bg-ink text-white'
+      ? 'border-ink bg-ink text-paper'
       : item.status === 'rejected'
         ? 'border-mute/40 text-mute'
         : 'border-ink/25 bg-surface',

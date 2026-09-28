@@ -1,28 +1,49 @@
 import classNames from 'classnames'
-import { GoPlus } from 'react-icons/go'
+import Link from 'next/link'
+import { GoGear } from 'react-icons/go'
+import { BLOCK_PAD, buttonClass, surfaceClass } from '@/components/admin/styles'
 import { OperatorBadge } from '@/components/OperatorBadge'
-import { createWorkAction } from '../../works/actions'
-import { getHomeUser } from '../data'
+import { ProfileImage } from '@/components/ProfileImage'
+import { getHomeUser, getMyProfile } from '../data'
 
-/** 인사말: 오늘 날짜 · 이름 · 새 프로젝트 기록하기 */
+/** 인사말 + 내 프로필카드: 프로필 이미지 · 오늘 날짜 · 이름 · 역할 · 공개 여부 · 프로필 설정 버튼 */
 export async function GreetingSection({ className }: { className?: string }) {
-  const user = await getHomeUser()
+  const [user, profile] = await Promise.all([getHomeUser(), getMyProfile()])
   const today = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(new Date())
+  const status = profile
+    ? [profile.role, profile.published ? '공개 중' : '비공개'].filter(Boolean).join(' · ')
+    : '아직 프로필카드가 없어요'
 
   return (
-    <div className={classNames('flex flex-col gap-2 rounded-3xl bg-surface p-5 md:p-6', className)}>
-      <span className='text-sm text-mute'>{today}</span>
-      <h1 className='flex items-center gap-3 text-3xl font-medium tracking-[-0.04em] md:text-4xl'>
-        안녕하세요, {user.name}님{user.is_master && <OperatorBadge className='text-xs' />}
-      </h1>
-      <form action={createWorkAction}>
-        <button
-          type='submit'
-          className='mt-1 flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm text-white transition-transform hover:-translate-y-0.5'
-        >
-          <GoPlus size={14} />새 프로젝트 기록하기
-        </button>
-      </form>
+    // 좁은 화면에서는 설정 버튼이 아래 줄로 내려간다
+    <div
+      className={classNames(
+        'flex flex-wrap items-center justify-between gap-x-4 gap-y-3',
+        surfaceClass('glass'),
+        BLOCK_PAD,
+        className,
+      )}
+    >
+      <div className='flex min-w-0 items-center gap-3 sm:gap-4'>
+        <ProfileImage
+          src={profile?.cover_image_url}
+          name={user.name}
+          size='sm'
+          className='size-12 shrink-0 text-lg sm:size-14 md:size-16'
+        />
+        <div className='flex min-w-0 flex-col gap-1'>
+          <span className='text-sm text-mute'>{today}</span>
+          <h1 className='flex min-w-0 items-center gap-2 text-2xl font-medium tracking-[-0.04em] sm:gap-3 sm:text-3xl md:text-4xl'>
+            <span className='truncate'>안녕하세요, {user.name}님</span>
+            {user.is_master && <OperatorBadge className='shrink-0 text-xs' />}
+          </h1>
+          <span className='truncate text-xs text-mute'>{status}</span>
+        </div>
+      </div>
+      <Link href='/space/profile' className={buttonClass('secondary', 'sm', 'shrink-0')}>
+        <GoGear size={13} />
+        {profile ? '프로필 설정' : '프로필카드 만들기'}
+      </Link>
     </div>
   )
 }

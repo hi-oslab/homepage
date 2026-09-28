@@ -3,7 +3,15 @@
 import classNames from 'classnames'
 import { useMemo, useState, useTransition } from 'react'
 import { GoSearch } from 'react-icons/go'
-import { Checkbox, Input, PageHeader, buttonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
+import {
+  Checkbox,
+  Input,
+  PageHeader,
+  buttonClass,
+  useRefreshOnFocus,
+  useServerState,
+  useToast,
+} from '@/components/admin/ui'
 import { AFFILIATION_LABELS, formatJoined } from '../AccountFields'
 import type { AdminUser, HelpRequest, Member, MemberAffiliation, MemberRole } from '@/types/cms'
 import { downloadCsv } from '@/lib/csv'
@@ -13,6 +21,7 @@ import {
   deleteUsersAction,
   resolveHelpRequestAction,
   setUserStatusAction,
+  setUsersStatusAction,
 } from './actions'
 import { deleteMemberAction, setMemberPublishedAction, setMemberRoleAction } from '../members/actions'
 import { MemberDetailModal, ResetLinkPanel, type ActionResult, type ResetLink } from './MemberDetailModal'
@@ -31,10 +40,13 @@ const AFFILIATION_GROUPS: { key: GroupKey; label: string }[] = [
   { key: 'external', label: AFFILIATION_LABELS.external },
   { key: 'none', label: '소속 미지정' },
 ]
-const inGroup = (user: AdminUser, key: GroupKey) =>
-  key === 'none' ? !user.affiliation : user.affiliation === key
+const inGroup = (user: AdminUser, key: GroupKey) => (key === 'none' ? !user.affiliation : user.affiliation === key)
 
-const STATUS_LABELS: Record<AdminUser['status'], string> = { pending: '승인 대기', approved: '승인됨', rejected: '거절됨' }
+const STATUS_LABELS: Record<AdminUser['status'], string> = {
+  pending: '승인 대기',
+  approved: '승인됨',
+  rejected: '거절됨',
+}
 const formatDate = (iso: string | null) => (iso ? new Date(iso).toLocaleString('ko-KR') : '')
 
 /** CSV 한 줄 = 멤버 한 명 (표보다 자세하게) */
@@ -82,7 +94,12 @@ function toCsvRows(users: AdminUser[], profiles: Map<string, Member>): string[][
 const matchesQuery = (user: AdminUser, query: string) => {
   const normalize = (text: string) => text.toLowerCase().replace(/[\s-]/g, '')
   const q = normalize(query)
-  return !q || [user.name, user.username, user.phone, user.student_id, user.major].some((text) => normalize(text ?? '').includes(q))
+  return (
+    !q ||
+    [user.name, user.username, user.phone, user.student_id, user.major].some((text) =>
+      normalize(text ?? '').includes(q),
+    )
+  )
 }
 
 export function UsersManager({
@@ -121,7 +138,7 @@ export function UsersManager({
   const [openId, setOpenId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [resetLink, setResetLink] = useState<ResetLink | null>(null)
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
   const toast = useToast()
 
   const profileMap = useMemo(() => new Map(profiles.map((member) => [member.id, member])), [profiles])
@@ -149,7 +166,8 @@ export function UsersManager({
     if (decision === 'approve')
       return run(user.id, () => setUserStatusAction(user.id, 'approved'), `${user.name}님을 승인했습니다`)
     if (decision === 'operator') {
-      if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`)) return
+      if (!confirm(`${user.name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`))
+        return
       return run(user.id, () => approveAsMasterAction(user.id), `${user.name}님을 운영자로 승인했습니다`)
     }
     if (!confirm(`${user.name}님의 가입 신청을 거절할까요?`)) return
@@ -184,7 +202,11 @@ export function UsersManager({
     // 본인 계정은 여기서 지울 수 없다 (탈퇴는 계정 설정에서)
     const targets = visible.filter((user) => selected.has(user.id) && user.id !== currentUserId)
     if (targets.length === 0) return toast.show('본인 계정은 여기서 삭제할 수 없어요', 'error')
-    const names = targets.slice(0, 5).map((user) => user.name).join(', ') + (targets.length > 5 ? ` 외 ${targets.length - 5}명` : '')
+    const names =
+      targets
+        .slice(0, 5)
+        .map((user) => user.name)
+        .join(', ') + (targets.length > 5 ? ` 외 ${targets.length - 5}명` : '')
     if (
       !confirm(
         `${targets.length}명의 계정을 삭제할까요?\n${names}\n\n작성한 프로젝트는 남고 작성자 정보만 비워지며, Members 페이지의 프로필은 함께 삭제됩니다. 되돌릴 수 없습니다.`,
@@ -200,6 +222,34 @@ export function UsersManager({
       setProfiles((current) => current.filter((member) => !removedProfiles.has(member.id)))
       setSelected(new Set())
       toast.show(`${deleted.size}명의 계정을 삭제했습니다`)
+    })
+  }
+
+  /** 승인 대기 탭: 선택한 신청을 한 번에 승인 · 거절 */
+  const decideSelected = (status: 'approved' | 'rejected') => {
+    const targets = visible.filter((user) => selected.has(user.id) && user.status === 'pending')
+    if (targets.length === 0) return
+    const names =
+      targets
+        .slice(0, 5)
+        .map((user) => user.name)
+        .join(', ') + (targets.length > 5 ? ` 외 ${targets.length - 5}명` : '')
+    const verb = status === 'approved' ? '승인' : '거절'
+    const note =
+      status === 'approved' && targets.some((user) => user.master_requested)
+        ? '\n\n운영자 신청자도 멤버로 승인됩니다. 운영자로 승인하려면 한 명씩 처리해 주세요.'
+        : ''
+    if (!confirm(`${targets.length}명의 가입 신청을 ${verb}할까요?\n${names}${note}`)) return
+    startTransition(async () => {
+      const result = await setUsersStatusAction(
+        targets.map((user) => user.id),
+        status,
+      )
+      if ('message' in result) return toast.show(result.message, 'error')
+      const updated = new Map(result.users.map((user) => [user.id, user]))
+      setUsers((current) => current.map((user) => updated.get(user.id) ?? user))
+      setSelected(new Set())
+      toast.show(`${result.users.length}명을 ${verb}했습니다`)
     })
   }
 
@@ -358,13 +408,42 @@ export function UsersManager({
               aria-label='보이는 멤버 전체 선택'
               checked={selectedVisible === visible.length && visible.length > 0}
               indeterminate={selectedVisible > 0 && selectedVisible < visible.length}
-              onChange={(event) => select(visible.map((user) => user.id), event.target.checked)}
+              onChange={(event) =>
+                select(
+                  visible.map((user) => user.id),
+                  event.target.checked,
+                )
+              }
             />
             {selectedVisible > 0 ? <span className='text-ink'>{selectedVisible}명 선택됨</span> : '전체 선택'}
           </label>
           {selectedVisible > 0 && (
             <>
-              <button type='button' onClick={exportCsv} className={buttonClass('primary', 'sm')}>
+              {tab === 'pending' && (
+                <>
+                  <button
+                    type='button'
+                    disabled={isPending}
+                    onClick={() => decideSelected('approved')}
+                    className={buttonClass('primary', 'sm')}
+                  >
+                    선택 승인
+                  </button>
+                  <button
+                    type='button'
+                    disabled={isPending}
+                    onClick={() => decideSelected('rejected')}
+                    className={buttonClass('secondary', 'sm')}
+                  >
+                    선택 거절
+                  </button>
+                </>
+              )}
+              <button
+                type='button'
+                onClick={exportCsv}
+                className={buttonClass(tab === 'pending' ? 'secondary' : 'primary', 'sm')}
+              >
                 CSV 내보내기
               </button>
               <button type='button' onClick={() => setSelected(new Set())} className={buttonClass('ghost', 'sm')}>
@@ -405,7 +484,7 @@ export function UsersManager({
             )
           })}
           {visible.length === 0 && (
-            <div className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>
+            <div className='rounded-block bg-surface py-16 text-center text-sm text-mute'>
               {query.trim()
                 ? `'${query.trim()}'에 해당하는 멤버가 없어요.`
                 : tab === 'pending'

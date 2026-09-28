@@ -1,10 +1,11 @@
 import classNames from 'classnames'
+import { BLOCK_PAD, surfaceClass } from '@/components/admin/styles'
 
 /**
  * 홈 섹션 공통 틀: 제목 줄(제목 · 보조 숫자 · 설명 · 오른쪽 버튼) + 내용.
  * 서버 · 클라이언트 컴포넌트 어디서나 쓸 수 있다 (상태 없음).
  *
- * - tone: surface(흰 카드) · tile(연회색 바탕, 안에 카드를 담는 영역)
+ * - tone: surface(흰 블록, 기본) · tile(블록 안에 들어가는 회색 면)
  * - size: sm(작은 제목, 촘촘하게) · lg(큰 제목, 넉넉하게)
  * - className: 바깥 틀에 붙는다 (배치는 page.tsx에서 이걸로 정한다)
  */
@@ -13,7 +14,7 @@ export function HomeSection({
   meta,
   description,
   action,
-  tone = 'tile',
+  tone = 'surface',
   size = 'lg',
   className,
   children,
@@ -36,8 +37,8 @@ export function HomeSection({
     <section
       className={classNames(
         'flex min-w-0 flex-col',
-        tone === 'surface' ? 'bg-surface' : 'bg-tile/60',
-        size === 'sm' ? 'rounded-2xl px-4 py-3 md:px-5' : 'gap-4 rounded-3xl p-3 md:p-5',
+        surfaceClass(tone === 'surface' ? 'solid' : 'inset'),
+        size === 'sm' ? 'px-4 py-3' : ['gap-3', BLOCK_PAD],
         className,
       )}
     >
@@ -48,7 +49,7 @@ export function HomeSection({
               <h2
                 className={classNames(
                   'flex items-baseline gap-2',
-                  size === 'sm' ? 'text-sm font-medium' : 'text-2xl font-medium tracking-[-0.03em]',
+                  size === 'sm' ? 'text-sm font-semibold' : 'text-2xl font-semibold tracking-[-0.03em]',
                 )}
               >
                 {title}

@@ -189,7 +189,7 @@ export function WorksList({
       </DndContext>
 
       {filtered.length === 0 && (
-        <div className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>
+        <div className='rounded-block bg-surface py-16 text-center text-sm text-mute'>
           {works.length === 0 ? '아직 프로젝트가 없습니다. 첫 프로젝트를 추가해 보세요.' : '조건에 맞는 프로젝트가 없습니다.'}
         </div>
       )}
@@ -224,8 +224,8 @@ function WorkRow({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={classNames(
-        'group relative flex items-center gap-3 rounded-xl bg-surface p-2 pr-3 transition-colors',
-        isDragging ? 'z-10 opacity-80' : 'hover:bg-white',
+        'rounded-inner group relative flex items-center gap-3 bg-surface p-2 pr-3 transition-colors',
+        isDragging ? 'z-10 opacity-80' : 'hover:bg-surface',
       )}
     >
       <button
@@ -242,7 +242,7 @@ function WorkRow({
       </button>
 
       <Link href={`/space/works/${work.id}`} className='flex min-w-0 flex-1 items-center gap-4'>
-        <span className='h-12 w-16 shrink-0 overflow-hidden rounded-md bg-field'>
+        <span className='rounded-inner h-12 w-16 shrink-0 overflow-hidden bg-field'>
           {work.thumbnail_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={work.thumbnail_url} alt='' className='size-full object-cover' />

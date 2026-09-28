@@ -195,7 +195,7 @@ export function WorkEditor({
           )}
           <button type='button' onClick={save} disabled={isSaving || !dirty} className={buttonClass('primary')}>
             저장
-            <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
+            <kbd className='hidden font-sans text-[11px] text-paper/50 sm:inline'>⌘S</kbd>
           </button>
         </div>
       </EditorBar>
@@ -222,7 +222,7 @@ export function WorkEditor({
 
           {/* 본문 (블록 왼쪽 조작 칸이 상자 안에 들어가도록 왼쪽 여백은 좁게) */}
           <span className='text-sm text-mute'>본문</span>
-          <section className='flex flex-col gap-1 rounded-2xl bg-surface py-8 pr-4 pl-1 md:py-12 md:pr-8 md:pl-2'>
+          <section className='rounded-block flex flex-col gap-1 bg-surface py-8 pr-4 pl-1 md:py-12 md:pr-8 md:pl-2'>
             <BlockEditor
               blocks={blocks}
               onChange={setBlocks}
@@ -362,7 +362,7 @@ function HeadingField({
     <>
       <div className='flex items-baseline gap-2 text-sm text-mute'>{label}</div>
       <label
-        className={classNames('group/field flex cursor-text flex-col gap-1.5 rounded-2xl bg-surface', BOX_PADDING)}
+        className={classNames('rounded-block group/field flex cursor-text flex-col gap-1.5 bg-surface', BOX_PADDING)}
       >
         {/* 입력 중에는 이름표를 진하게 */}
         <span className='flex items-baseline gap-2 text-xs text-mute transition-colors group-focus-within/field:text-ink'>

@@ -10,8 +10,10 @@ import {
   buttonClass,
   fieldClass,
   iconButtonClass,
+  BLOCK_PAD,
   SELECT_CHEVRON,
   selectClass,
+  surfaceClass,
   type ButtonSize,
   type ButtonVariant,
 } from './styles'
@@ -118,7 +120,7 @@ export const Panel = ({
   children: React.ReactNode
   className?: string
 }) => (
-  <section className={cn('flex flex-col gap-4 rounded-xl bg-surface p-5', className)}>
+  <section className={cn('flex flex-col gap-3', surfaceClass('solid'), BLOCK_PAD, className)}>
     {title && <h2 className='text-sm text-mute'>{title}</h2>}
     {children}
   </section>
@@ -139,7 +141,7 @@ export const SectionCard = ({
   children?: React.ReactNode
   className?: string
 }) => (
-  <section className={cn('flex flex-col gap-5 rounded-2xl bg-surface p-5 md:p-7', className)}>
+  <section className={cn('flex flex-col gap-4', surfaceClass('solid'), BLOCK_PAD, 'md:p-5', className)}>
     {(title || actions) && (
       <div className='flex items-start justify-between gap-3'>
         <div className='flex flex-col gap-1'>
@@ -224,13 +226,13 @@ export const Switch = ({
     <span
       className={cn(
         'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200',
-        checked ? 'bg-ink' : 'bg-[#d9d9d5]',
+        checked ? 'bg-ink' : 'bg-ink/15',
       )}
     >
       <motion.span
         layout
         transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-        className={cn('absolute size-4 rounded-full bg-white', checked ? 'right-0.5' : 'left-0.5')}
+        className={cn('absolute size-4 rounded-full bg-surface', checked ? 'right-0.5' : 'left-0.5')}
       />
     </span>
     {label && <span className={cn(checked ? 'text-ink' : 'text-mute', labelClassName)}>{label}</span>}
@@ -240,7 +242,7 @@ export const Switch = ({
 /** 상태 표시 점 + 텍스트 */
 export const StatusBadge = ({ published }: { published: boolean }) => (
   <span className={cn('inline-flex items-center gap-1.5 text-xs', published ? 'text-ink' : 'text-mute')}>
-    <span className={cn('size-1.5 rounded-full', published ? 'bg-success' : 'bg-[#c9c9c4]')} />
+    <span className={cn('size-1.5 rounded-full', published ? 'bg-success' : 'bg-ink/20')} />
     {published ? '공개' : '비공개'}
   </span>
 )
@@ -414,7 +416,7 @@ export const ImageDrop = ({
             <button
               type='button'
               onClick={onEdit}
-              className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-ink')}
+              className={buttonClass('plain', 'sm', 'bg-black/70 text-white hover:bg-black')}
             >
               모양 바꾸기
             </button>
@@ -422,7 +424,7 @@ export const ImageDrop = ({
           <button
             type='button'
             onClick={() => inputRef.current?.click()}
-            className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-ink')}
+            className={buttonClass('plain', 'sm', 'bg-black/70 text-white hover:bg-black')}
           >
             교체
           </button>
@@ -430,7 +432,7 @@ export const ImageDrop = ({
             <button
               type='button'
               onClick={onRemove}
-              className={buttonClass('plain', 'sm', 'bg-ink/80 text-white hover:bg-danger')}
+              className={buttonClass('plain', 'sm', 'bg-black/70 text-white hover:bg-danger')}
               aria-label='이미지 제거'
             >
               <GoTrash size={12} />
@@ -486,7 +488,7 @@ export function useToast() {
             exit={{ opacity: 0, y: 8 }}
             transition={{ type: 'spring', stiffness: 420, damping: 30 }}
             className={cn(
-              'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm text-white',
+              'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm text-paper',
               toast.kind === 'error' ? 'bg-danger' : 'bg-ink',
             )}
           >

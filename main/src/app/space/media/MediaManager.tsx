@@ -154,11 +154,11 @@ export function MediaManager() {
         </div>
       </div>
 
-      {message && <p className='rounded-xl bg-ink px-4 py-3 text-sm text-white'>{message}</p>}
+      {message && <p className='rounded-block bg-ink px-4 py-3 text-sm text-paper'>{message}</p>}
       {loading ? (
-        <p className='rounded-xl bg-surface py-20 text-center text-sm text-mute'>R2 파일을 확인하는 중…</p>
+        <p className='rounded-block bg-surface py-20 text-center text-sm text-mute'>R2 파일을 확인하는 중…</p>
       ) : visible.length === 0 ? (
-        <p className='rounded-xl bg-surface py-20 text-center text-sm text-mute'>조건에 맞는 파일이 없습니다.</p>
+        <p className='rounded-block bg-surface py-20 text-center text-sm text-mute'>조건에 맞는 파일이 없습니다.</p>
       ) : (
         <ul className='grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4'>
           {visible.map((file) => {
@@ -167,20 +167,20 @@ export function MediaManager() {
             return (
               <li
                 key={file.key}
-                className={`group relative flex flex-col gap-2 rounded-xl p-2 transition-colors ${isSelected ? 'bg-ink text-white' : 'bg-surface'}`}
+                className={`rounded-inner group relative flex flex-col gap-2 p-2 transition-colors ${isSelected ? 'bg-ink text-paper' : 'bg-surface'}`}
               >
                 <button
                   type='button'
                   disabled={!canSelect || optimizing}
                   onClick={() => toggle(file.key)}
                   className={`absolute top-4 right-4 z-10 flex size-6 items-center justify-center rounded-full transition-opacity disabled:hidden ${
-                    isSelected ? 'bg-white text-ink' : 'bg-ink/60 text-white opacity-0 group-hover:opacity-100'
+                    isSelected ? 'bg-white text-black' : 'bg-black/60 text-white opacity-0 group-hover:opacity-100'
                   }`}
                   aria-label='선택'
                 >
                   {isSelected && <GoCheck size={14} />}
                 </button>
-                <div className='flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-field'>
+                <div className='rounded-inner flex aspect-[4/3] items-center justify-center overflow-hidden bg-field'>
                   {file.mimeType.startsWith('image/') ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={file.url} alt='' loading='lazy' className='size-full object-cover' />
@@ -194,10 +194,10 @@ export function MediaManager() {
                   <p className='truncate text-xs' title={file.key}>
                     {file.key.split('/').pop()}
                   </p>
-                  <p className={`text-[11px] ${isSelected ? 'text-white/50' : 'text-mute'}`}>
+                  <p className={`text-[11px] ${isSelected ? 'text-paper/50' : 'text-mute'}`}>
                     {formatBytes(file.size)} · {file.mimeType.split('/')[1]}
                   </p>
-                  <p className={`truncate text-[11px] ${file.references.length ? (isSelected ? 'text-white/70' : 'text-ink/70') : 'text-danger'}`}>
+                  <p className={`truncate text-[11px] ${file.references.length ? (isSelected ? 'text-paper/70' : 'text-ink/70') : 'text-danger'}`}>
                     {file.references.length
                       ? file.references.map((reference) => reference.title).filter((title, index, all) => all.indexOf(title) === index).join(', ')
                       : '미사용 파일'}
@@ -214,7 +214,7 @@ export function MediaManager() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className='flex flex-col gap-3 rounded-xl bg-surface p-4'>
+    <div className='rounded-block flex flex-col gap-3 bg-surface p-4'>
       <p className='text-xs text-mute'>{label}</p>
       <p className='text-2xl font-medium tracking-[-0.03em]'>{value}</p>
     </div>

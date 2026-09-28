@@ -151,7 +151,7 @@ export const Header = () => {
                   aria-current={active ? 'page' : undefined}
                   className={classNames(
                     'relative flex h-8 items-center rounded-lg px-3.5 text-sm transition-colors',
-                    active ? 'text-white' : 'text-ink hover:bg-tile',
+                    active ? 'text-paper' : 'text-ink hover:bg-tile',
                   )}
                 >
                   {active && (
@@ -165,8 +165,8 @@ export const Header = () => {
                     {item.label}
                     {sub && (
                       <>
-                        <span className='text-white/35'>/</span>
-                        <span className='max-w-40 truncate text-white/60'>{sub}</span>
+                        <span className='text-paper/35'>/</span>
+                        <span className='max-w-40 truncate text-paper/60'>{sub}</span>
                       </>
                     )}
                   </span>
@@ -216,15 +216,15 @@ export const Header = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.15 }}
-                      className='absolute top-[calc(100%+10px)] right-0 flex min-w-48 flex-col rounded-xl bg-ink p-1.5 text-xs text-white'
+                      className='absolute top-[calc(100%+10px)] right-0 flex min-w-48 flex-col rounded-xl bg-ink p-1.5 text-xs text-paper'
                     >
-                      <span className='px-2.5 py-1.5 text-white/40'>{session.name}</span>
+                      <span className='px-2.5 py-1.5 text-paper/40'>{session.name}</span>
                       {accountLinks.map((link) => (
                         <Link
                           key={link.href}
                           role='menuitem'
                           href={link.href}
-                          className='rounded-md px-2.5 py-1.5 hover:bg-white/10'
+                          className='rounded-md px-2.5 py-1.5 hover:bg-paper/10'
                         >
                           {link.label}
                         </Link>
@@ -233,7 +233,7 @@ export const Header = () => {
                         type='button'
                         role='menuitem'
                         onClick={signOut}
-                        className='rounded-md px-2.5 py-1.5 text-left hover:bg-white/10'
+                        className='rounded-md px-2.5 py-1.5 text-left hover:bg-paper/10'
                       >
                         로그아웃
                       </button>
@@ -250,20 +250,20 @@ export const Header = () => {
             aria-expanded={menuOpen}
             aria-controls='mobile-menu'
             onClick={() => setMenuOpen((open) => !open)}
-            className='flex h-8 shrink-0 items-center gap-2 rounded-lg bg-ink px-3 text-sm text-white md:hidden'
+            className='flex h-8 shrink-0 items-center gap-2 rounded-lg bg-ink px-3 text-sm text-paper md:hidden'
           >
-            <span className='text-white/50'>{current}</span>
+            <span className='text-paper/50'>{current}</span>
             <span>{menuOpen ? 'Close' : 'Menu'}</span>
             <span aria-hidden className='relative block h-2.5 w-3'>
               <span
                 className={classNames(
-                  'absolute left-0 h-[1.5px] w-full bg-white transition-all duration-300',
+                  'absolute left-0 h-[1.5px] w-full bg-paper transition-all duration-300',
                   menuOpen ? 'top-1 rotate-45' : 'top-0',
                 )}
               />
               <span
                 className={classNames(
-                  'absolute left-0 h-[1.5px] w-full bg-white transition-all duration-300',
+                  'absolute left-0 h-[1.5px] w-full bg-paper transition-all duration-300',
                   menuOpen ? 'top-1 -rotate-45' : 'top-2',
                 )}
               />
@@ -313,13 +313,13 @@ export const Header = () => {
                   <Link
                     href={SPACE.href}
                     aria-current={isActive(SPACE.href, pathname) ? 'page' : undefined}
-                    className='flex items-center justify-between rounded-xl bg-ink px-4 py-3.5 font-sans text-xl font-medium tracking-[-0.03em] text-white'
+                    className='flex items-center justify-between rounded-xl bg-ink px-4 py-3.5 font-sans text-xl font-medium tracking-[-0.03em] text-paper'
                   >
                     <span className='flex items-center gap-2.5'>
                       <StatusDot approved={session.status === 'approved'} />
                       {SPACE.label}
                     </span>
-                    <span aria-hidden className='text-white/50'>
+                    <span aria-hidden className='text-paper/50'>
                       →
                     </span>
                   </Link>
@@ -398,7 +398,7 @@ function SpaceLink({ session, pathname }: { session: SessionUser; pathname: stri
       aria-current={active ? 'page' : undefined}
       className={classNames(
         'relative flex h-8 items-center rounded-lg px-3 text-sm transition-colors',
-        active ? 'text-white' : 'bg-tile text-ink hover:bg-ink/10',
+        active ? 'text-paper' : 'bg-tile text-ink hover:bg-ink/10',
       )}
     >
       {active && (
@@ -409,8 +409,8 @@ function SpaceLink({ session, pathname }: { session: SessionUser; pathname: stri
         {SPACE.label}
         {sub && (
           <>
-            <span className='text-white/35'>/</span>
-            <span className='max-w-40 truncate text-white/60'>{sub}</span>
+            <span className='text-paper/35'>/</span>
+            <span className='max-w-40 truncate text-paper/60'>{sub}</span>
           </>
         )}
       </span>

@@ -213,7 +213,7 @@ export function MemberVoronoi({ members }: { members: Member[] }) {
                     <span className='max-w-48 break-keep text-xs leading-snug text-mute'>
                       {[member.role, member.sub_name].filter(Boolean).join(' · ')}
                     </span>
-                    <span className='rounded-full bg-ink px-3 py-1 text-xs text-white'>소개 보기 ↗</span>
+                    <span className='rounded-full bg-ink px-3 py-1 text-xs text-paper'>소개 보기 ↗</span>
                   </span>
                 </motion.button>
               )

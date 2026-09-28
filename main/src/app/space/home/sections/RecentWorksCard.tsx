@@ -5,7 +5,7 @@ import { BentoCard, type HomeCardProps } from '../BentoCard'
 import { getHomeWorks } from '../data'
 
 /** 보여줄 프로젝트 수 */
-const LIMIT = 4
+const LIMIT = 1
 
 /** 최근 수정된 프로젝트 */
 export async function RecentWorksCard({ index, className }: HomeCardProps) {
@@ -26,7 +26,7 @@ export async function RecentWorksCard({ index, className }: HomeCardProps) {
               href={`/space/works/${work.id}`}
               className='flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-field'
             >
-              <span className='h-8 w-10 shrink-0 overflow-hidden rounded-lg bg-field'>
+              <span className='rounded-inner h-8 w-10 shrink-0 overflow-hidden bg-field'>
                 {work.thumbnail_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={work.thumbnail_url} alt='' className='size-full object-cover' />

@@ -1,12 +1,9 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser, isApproved } from '@/lib/admin-auth'
 import {
-  DraftsCard,
   GreetingSection,
   LoungeSection,
   MembersSection,
-  PendingCard,
-  ProfileCard,
   RecentWorksCard,
   SuggestionsSection,
   TodoCard,
@@ -29,29 +26,31 @@ export default async function SpaceHomePage() {
   if (!user.member_id && !user.onboarded_at) redirect('/space/profile?welcome=1')
 
   return (
-    <div className='flex w-full flex-col gap-6'>
-      <SuggestionsSection />
-
-      {/* 인사 · 함께하는 멤버 */}
-      <header className='grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto]'>
-        <GreetingSection />
-        <MembersSection />
+    <div className='relative isolate flex w-full flex-col gap-2'>
+      {/* 위쪽에 옅은 강조색 빛: 유리 면(glass) 블록이 바탕과 구분되도록 */}
+      <div aria-hidden className='pointer-events-none absolute inset-x-0 -top-4 -z-10 h-80 md:-top-4' />
+      {/*
+        위 줄: 인사 · 확인할 일 · 최근 프로젝트 | 건의사항
+        아래 줄: 라운지 | 멤버
+        - 모바일(~sm): 전부 한 줄씩 세로로
+        - sm~: 확인할 일 · 최근 프로젝트가 나란히
+        - xl~: 오른쪽 칸(건의사항 · 멤버)이 생긴다. 위아래 줄의 오른쪽 칸 너비를 같게 맞춰 세로선이 이어진다
+        - 3xl~ · 4xl~: 오른쪽 칸만 조금씩 넓힌다 (라운지는 열 수가 늘어난다, board/Board.tsx)
+      */}
+      <header className='grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_340px] 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
+        <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+          {/* 인사 + 내 프로필카드 (이미지 · 역할 · 프로필 설정 버튼) */}
+          <GreetingSection className='sm:col-span-2' />
+          {/* 확인할 일: 승인 대기(운영자) · 작성 중인 프로젝트 · 소속 · 프로필카드 */}
+          <TodoCard index={1} />
+          <RecentWorksCard index={0} />
+        </div>
+        <SuggestionsSection />
       </header>
 
-      {/* 넓은 화면: 왼쪽 라운지 · 오른쪽 할 일 카드 / 좁은 화면: 카드가 위, 라운지가 아래 */}
-      <div className='grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start'>
-        {/* 지금 할 일: 모바일 2열 · 태블릿 3열 · 넓은 화면에서는 오른쪽 칸에 세로로 (스크롤해도 따라온다) */}
-        <aside className='grid grid-cols-2 gap-2.5 rounded-3xl bg-tile/60 p-2.5 md:grid-cols-3 xl:sticky xl:top-[calc(var(--spacing-header)+1.5rem)] xl:order-last xl:grid-cols-1'>
-          {/* 좁은 화면: 한 줄 전체, 넓은 화면: 오른쪽 칸 맨 위 */}
-          <RecentWorksCard index={0} className='col-span-2 md:col-span-3 xl:col-span-1' />
-          <ProfileCard index={1} />
-          {/* 운영자: 승인 대기 / 멤버: 작성 중인 프로젝트 */}
-          {user.is_master ? <PendingCard index={2} /> : <DraftsCard index={2} />}
-          {/* 모바일에서는 한 줄 전체 */}
-          <TodoCard index={3} className='col-span-2 md:col-span-1' />
-        </aside>
-
+      <div className='grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start 3xl:grid-cols-[minmax(0,1fr)_400px] 4xl:grid-cols-[minmax(0,1fr)_460px]'>
         <LoungeSection />
+        <MembersSection />
       </div>
     </div>
   )

@@ -23,7 +23,7 @@ export function MemberModal({ member, onClose }: { member: Member | null; onClos
     <AnimatePresence>
       {member && (
         <motion.div
-          className='fixed inset-0 z-[60] flex items-center justify-center bg-ink/40 p-4'
+          className='fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -38,13 +38,13 @@ export function MemberModal({ member, onClose }: { member: Member | null; onClos
             exit={{ y: 16, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
             onClick={(event) => event.stopPropagation()}
-            className='relative max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-xl bg-paper p-5'
+            className='relative max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-block bg-surface p-5 ring-1 ring-ink/10 sm:p-6'
           >
             <button
               type='button'
               onClick={onClose}
               aria-label='닫기'
-              className='absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-paper/80 text-ink transition-colors hover:bg-tile'
+              className='absolute top-4 right-4 z-10 flex size-8 items-center justify-center rounded-full bg-paper/80 text-ink transition-colors hover:bg-tile'
             >
               <GoX size={16} />
             </button>

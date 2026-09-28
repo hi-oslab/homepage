@@ -64,9 +64,9 @@ export function BlockItem({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       data-block-id={block.id}
       className={classNames(
-        'group/block relative flex gap-1 rounded-xl transition-[background-color,box-shadow] md:gap-2',
+        'rounded-inner group/block relative flex gap-1 transition-[background-color,box-shadow] md:gap-2',
         // 옮기는 동안 한 덩어리로 보이도록 바탕 · 그림자, 평소에는 올리면 옅은 바탕
-        isDragging ? 'z-20 bg-surface shadow-[0_10px_30px_rgba(17,17,17,0.16)] ring-1 ring-ink/5' : 'hover:bg-field/60',
+        isDragging ? 'z-20 bg-surface shadow-[0_10px_30px_rgb(var(--shadow-rgb)/0.16)] ring-1 ring-ink/5' : 'hover:bg-field/60',
       )}
     >
       {/* 왼쪽: 아래에 추가 · 끌어서 이동 */}
@@ -161,7 +161,7 @@ function BlockContent({
     default:
       // 입력이 필요한 블록: 옅은 카드 안에 입력칸
       return (
-        <div className='my-1.5 flex flex-col gap-2 rounded-xl bg-paper p-4'>
+        <div className='rounded-inner my-1.5 flex flex-col gap-2 bg-paper p-4'>
           <span className='text-xs text-mute'>{BLOCK_TYPE_LABELS[block.type]}</span>
           <div className='flex flex-col gap-1.5'>
             {block.type === 'media' && (

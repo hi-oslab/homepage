@@ -160,7 +160,7 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
       ))}
 
       {items.length === 0 && (
-        <div className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>
+        <div className='rounded-block bg-surface py-16 text-center text-sm text-mute'>
           아직 연혁이 없습니다. 위에서 첫 항목을 추가해 보세요.
         </div>
       )}
@@ -187,7 +187,7 @@ function HistoryRow({
   return (
     <li
       className={classNames(
-        'group grid grid-cols-[72px_88px_minmax(0,1fr)_auto] items-start gap-1 rounded-xl bg-surface p-2',
+        'rounded-inner group grid grid-cols-[72px_88px_minmax(0,1fr)_auto] items-start gap-1 bg-surface p-2',
         !item.published && 'opacity-60',
       )}
     >

@@ -186,7 +186,8 @@ export function TerminalPanel({
   }, [visible, complete])
 
   return (
-    <div className={classNames('flex min-h-0 flex-col overflow-hidden rounded-xl bg-ink font-mono text-[11px] leading-relaxed text-white', className)}>
+    // 터미널 창은 테마와 상관없이 항상 검은 창 (bg-ink는 다크모드에서 밝아지므로 고정색 black)
+    <div className={classNames('flex min-h-0 flex-col overflow-hidden rounded-xl bg-black font-mono text-[11px] leading-relaxed text-white', className)}>
       {/* 창 상단 */}
       <div className='flex h-9 shrink-0 items-center justify-between px-4 text-[10px] text-white/30'>
         <span className='flex gap-1.5'>

@@ -310,7 +310,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
                 : '멤버는 프로필카드를 관리하고, 오픈소스랩 프로젝트를 함께 기록하고 수정할 수 있어요.'}
             </p>
             {/* 신청 내용 확인 */}
-            <dl className='mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-xl bg-tile p-4 text-sm'>
+            <dl className='rounded-inner mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-tile p-4 text-sm'>
               {[
                 ['아이디', `@${normalizeUsernameInput(credentials.username)}`],
                 ['실명', profile.name],
@@ -563,7 +563,7 @@ export function AdminNotice({ kind, name }: { kind: 'pending' | 'rejected' | 'mi
                   else router.replace('/login')
                 })
               }}
-              className='flex flex-col gap-2 rounded-xl bg-surface p-4'
+              className='rounded-block flex flex-col gap-2 bg-surface p-4'
             >
               <p className='text-sm'>가입 신청을 취소하면 계정 정보가 삭제됩니다.</p>
               <PasswordInput

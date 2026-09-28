@@ -23,7 +23,7 @@ export function RequestList({
   onResolve: (request: HelpRequest) => void
 }) {
   if (requests.length === 0) {
-    return <div className='rounded-xl bg-surface py-16 text-center text-sm text-mute'>처리할 문의가 없습니다.</div>
+    return <div className='rounded-block bg-surface py-16 text-center text-sm text-mute'>처리할 문의가 없습니다.</div>
   }
 
   return (
@@ -42,7 +42,7 @@ export function RequestList({
           <li
             key={request.id}
             className={classNames(
-              'flex flex-col gap-3 rounded-xl bg-surface p-4',
+              'rounded-block flex flex-col gap-3 bg-surface p-4',
               busyId === request.id && 'opacity-50',
             )}
           >
@@ -61,7 +61,7 @@ export function RequestList({
                 처리 완료
               </button>
             </div>
-            {request.message && <p className='rounded-lg bg-field p-3 text-sm'>{request.message}</p>}
+            {request.message && <p className='rounded-inner bg-field p-3 text-sm'>{request.message}</p>}
             <div className='flex flex-col gap-2 text-sm'>
               <span className='text-xs text-mute'>가입 정보와 비교</span>
               {matches.length === 0 && (
@@ -82,7 +82,7 @@ export function RequestList({
                 return (
                   <div
                     key={user.id}
-                    className='flex flex-col gap-2 rounded-lg bg-field p-3 sm:flex-row sm:items-center sm:justify-between'
+                    className='rounded-inner flex flex-col gap-2 bg-field p-3 sm:flex-row sm:items-center sm:justify-between'
                   >
                     <div className='flex flex-wrap gap-x-4 gap-y-1'>
                       {request.kind === 'username' && (

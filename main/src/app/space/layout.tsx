@@ -5,7 +5,7 @@ import { AuthSetupError, getCurrentUser, hasMaster, isApproved } from '@/lib/adm
 import { getAdminUsers, getHelpRequests } from '@/lib/cms'
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
-import { NAV_COLLAPSED_COOKIE } from './nav'
+import { NAV_COLLAPSED_COOKIE, SPACE_THEMES, THEME_COOKIE, type SpaceTheme } from './nav'
 import { NotificationCenter } from './NotificationCenter'
 import { getNotifications } from '@/lib/notifications'
 
@@ -39,9 +39,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     cookies(),
   ])
 
+  const savedTheme = cookieStore.get(THEME_COOKIE)?.value as SpaceTheme | undefined
+  const theme: SpaceTheme = savedTheme && SPACE_THEMES.includes(savedTheme) ? savedTheme : 'light'
   return (
     <AdminShell
       navCollapsed={cookieStore.get(NAV_COLLAPSED_COOKIE)?.value === '1'}
+      theme={theme}
       user={{
         name: user.name,
         username: user.username,
@@ -50,6 +53,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         pendingCount,
       }}
     >
+      {/* 첫 화면에서 헤더(멤버 공간 바깥)까지 바로 같은 테마로: 하이드레이션 전에 <html>에 붙인다.
+          화면 이동 뒤에는 AdminShell의 useSpaceTheme가 붙이고 뗀다 */}
+      <script
+        dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme=${JSON.stringify(theme)}` }}
+      />
       {children}
       <NotificationCenter items={notifications} userId={user.id} />
     </AdminShell>

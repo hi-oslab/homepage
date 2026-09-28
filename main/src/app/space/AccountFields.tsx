@@ -147,7 +147,7 @@ export function AffiliationFields({ value, onChange, large }: FieldsProps) {
                 'flex flex-col items-start gap-0.5 rounded-lg px-3 text-left transition-colors',
                 large ? 'py-3' : 'py-2',
                 value.affiliation === option.value
-                  ? 'bg-ink text-white'
+                  ? 'bg-ink text-paper'
                   : classNames(large ? 'bg-tile' : 'bg-field', 'text-ink hover:bg-ink/10'),
               )}
             >
@@ -155,7 +155,7 @@ export function AffiliationFields({ value, onChange, large }: FieldsProps) {
               <span
                 className={classNames(
                   'text-[11px]',
-                  value.affiliation === option.value ? 'text-white/60' : 'text-mute',
+                  value.affiliation === option.value ? 'text-paper/60' : 'text-mute',
                 )}
               >
                 {option.hint}

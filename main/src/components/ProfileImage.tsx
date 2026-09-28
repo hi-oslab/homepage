@@ -8,9 +8,9 @@ import { cn } from '@/lib/cn'
 
 const SHADOW = {
   /** 표 · 목록의 작은 아바타 */
-  sm: 'drop-shadow-[0_1px_2px_rgba(17,17,17,0.28)]',
+  sm: 'drop-shadow-[0_1px_2px_rgb(var(--shadow-rgb)/0.28)]',
   /** 카드 · 미리보기 */
-  lg: 'drop-shadow-[0_8px_18px_rgba(17,17,17,0.18)]',
+  lg: 'drop-shadow-[0_8px_18px_rgb(var(--shadow-rgb)/0.18)]',
 }
 
 export function ProfileImage({

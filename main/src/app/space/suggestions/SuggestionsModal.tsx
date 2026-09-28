@@ -51,7 +51,7 @@ export function SuggestionsModal({
                 onClick={() => onChange({ tab: value })}
                 className={classNames(
                   'flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors',
-                  state.tab === value ? 'bg-surface text-ink shadow-sm' : 'text-mute hover:text-ink',
+                  state.tab === value ? 'bg-surface text-ink shadow-[0_1px_3px_rgb(var(--shadow-rgb)/0.12)]' : 'text-mute hover:text-ink',
                 )}
               >
                 {label}

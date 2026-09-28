@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { GoComment, GoPin, GoPlus } from 'react-icons/go'
 import { buttonClass, useServerState, useToast } from '@/components/admin/ui'
+import { INSET_HOVER } from '@/components/admin/styles'
 import { ProfileImage } from '@/components/ProfileImage'
 import { parseBlocks } from '@/lib/blocks'
 import { BOARDS, BOARD_ORDER, isPinned, type CommunityKind, type CommunityPost } from '@/lib/community-types'
@@ -89,13 +90,14 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
   // 표가 아직 없으면(마이그레이션 전)
   if (serverPosts === null) {
     return (
-      <section className='rounded-2xl bg-surface p-6 text-sm text-mute'>
+      <section className='rounded-block bg-surface p-4 text-sm text-mute'>
         게시판을 쓰려면 DB 마이그레이션(supabase/migrations/20261006_community_boards.sql)이 필요해요.
       </section>
     )
   }
 
-  const update = (next: CommunityPost) => setPosts((current) => (current ?? []).map((item) => (item.id === next.id ? next : item)))
+  const update = (next: CommunityPost) =>
+    setPosts((current) => (current ?? []).map((item) => (item.id === next.id ? next : item)))
 
   return (
     <section className='flex flex-col gap-4'>
@@ -113,7 +115,11 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
               )}
             >
               {tab === value && (
-                <motion.span layoutId='board-tab' className='absolute inset-0 rounded-full bg-surface shadow-sm' transition={{ type: 'spring', stiffness: 500, damping: 38 }} />
+                <motion.span
+                  layoutId='board-tab'
+                  className='absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgb(var(--shadow-rgb)/0.12)]'
+                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                />
               )}
               {value !== 'all' && <span className={classNames('relative size-1.5 rounded-full', BOARDS[value].dot)} />}
               <span className='relative'>{value === 'all' ? '전체' : BOARDS[value].label}</span>
@@ -133,9 +139,12 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
 
       {/* 고정된 공지 */}
       {pinned.length > 0 && (
-        <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
+        <div className='columns-2 gap-2 sm:gap-3 xl:columns-3 3xl:columns-4 4xl:columns-5'>
+          {/* 아래 글 목록과 같이: 카드가 열 사이에서 쪼개지지 않게, 세로 간격도 같게 */}
           {pinned.map((post, index) => (
-            <PostCard key={post.id} post={post} index={index} pinned fresh={isFresh(post)} onOpen={() => open(post)} />
+            <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
+              <PostCard post={post} index={index} pinned fresh={isFresh(post)} onOpen={() => open(post)} />
+            </div>
           ))}
         </div>
       )}
@@ -149,7 +158,7 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           // 모바일도 2열 (카드를 가볍게). 홈 오른쪽에 할 일 카드 칸이 있어서 아주 넓은 화면에서만 3열
-          className='columns-2 gap-2 sm:gap-3 2xl:columns-3'
+          className='columns-2 gap-2 sm:gap-3 xl:columns-3 3xl:columns-4 4xl:columns-5'
         >
           {rest.map((post, index) => (
             <div key={post.id} className='mb-2 break-inside-avoid sm:mb-3'>
@@ -160,11 +169,17 @@ export function Board({ initialPosts, viewer }: { initialPosts: CommunityPost[] 
       </AnimatePresence>
 
       {inTab.length === 0 && (
-        <div className='flex flex-col items-center gap-3 rounded-2xl bg-surface px-6 py-14 text-center'>
+        <div className='flex flex-col items-center gap-3 rounded-inner bg-ink/[0.04] px-6 py-14 text-center'>
           <p className='text-sm text-mute'>
-            {tab === 'all' ? '아직 글이 없어요. 첫 이야기를 남겨 보세요.' : `${BOARDS[tab].label} 게시판에 아직 글이 없어요.`}
+            {tab === 'all'
+              ? '아직 글이 없어요. 첫 이야기를 남겨 보세요.'
+              : `${BOARDS[tab].label} 게시판에 아직 글이 없어요.`}
           </p>
-          <button type='button' onClick={() => setComposer({ post: null, kind: tab === 'all' ? undefined : tab })} className={buttonClass('secondary', 'sm')}>
+          <button
+            type='button'
+            onClick={() => setComposer({ post: null, kind: tab === 'all' ? undefined : tab })}
+            className={buttonClass('secondary', 'sm')}
+          >
             <GoPlus size={13} />
             글쓰기
           </button>
@@ -221,7 +236,10 @@ function PostCard({
   onOpen: () => void
 }) {
   const image = firstImage(post)
-  const topReactions = post.reactions.slice().sort((a, b) => b.count - a.count).slice(0, 3)
+  const topReactions = post.reactions
+    .slice()
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
 
   return (
     <motion.button
@@ -233,8 +251,9 @@ function PostCard({
       whileHover={{ y: -3 }}
       className={classNames(
         // 모바일(2열)에서는 여백 · 글자를 줄인 가벼운 카드
-        'relative flex w-full flex-col gap-2 rounded-2xl p-3 text-left transition-shadow hover:shadow-[0_10px_30px_rgba(17,17,17,0.08)] sm:gap-3 sm:p-4',
-        pinned ? 'bg-ink text-white' : 'bg-surface',
+        'relative flex w-full flex-col gap-2 p-3 text-left sm:gap-3 sm:p-4',
+        // 흰 라운지 블록 안: 회색 면 · 올리면 진하게 / 고정 글은 강조 면(inverse, 다크모드에서도 어두운 면)
+        pinned ? 'rounded-inner bg-inverse text-on-inverse transition-opacity hover:opacity-90' : INSET_HOVER,
       )}
     >
       <AnimatePresence>
@@ -252,15 +271,17 @@ function PostCard({
       <span className='flex items-center justify-between gap-2'>
         <span className='flex items-center gap-1.5'>
           {fresh && <span className='sr-only'>새 글</span>}
-          <BoardChip kind={post.kind} className={pinned ? 'bg-white/15 text-white' : undefined} />
+          <BoardChip kind={post.kind} className={pinned ? 'bg-on-inverse/15 text-on-inverse' : undefined} />
           {pinned && (
-            <span className='flex items-center gap-1 text-[11px] text-white/60'>
+            <span className='flex items-center gap-1 text-[11px] text-on-inverse/60'>
               <GoPin size={11} />
               고정
             </span>
           )}
         </span>
-        <span className={classNames('truncate text-[10px] sm:text-[11px]', pinned ? 'text-white/50' : 'text-mute')}>
+        <span
+          className={classNames('truncate text-[10px] sm:text-[11px]', pinned ? 'text-on-inverse/50' : 'text-mute')}
+        >
           <RelativeTime iso={post.created_at} />
         </span>
       </span>
@@ -274,7 +295,7 @@ function PostCard({
         <span
           className={classNames(
             'line-clamp-3 text-[13px] leading-relaxed break-keep whitespace-pre-line sm:line-clamp-5 sm:text-sm',
-            pinned ? 'text-white/70' : 'text-ink/70',
+            pinned ? 'text-on-inverse/70' : 'text-ink/70',
           )}
         >
           {post.body}
@@ -282,18 +303,30 @@ function PostCard({
       )}
       {image && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt='' loading='lazy' className='max-h-48 w-full rounded-xl object-cover sm:max-h-72' />
+        <img src={image} alt='' loading='lazy' className='rounded-inner max-h-48 w-full object-cover sm:max-h-72' />
       )}
 
       <span className='flex items-center justify-between gap-2 pt-0.5 sm:pt-1'>
         <span className='flex min-w-0 items-center gap-2' title={post.author_name}>
-          <ProfileImage src={post.author_image} name={post.author_name} size='sm' className='size-5 shrink-0 text-[9px] sm:size-6 sm:text-[10px]' />
+          <ProfileImage
+            src={post.author_image}
+            name={post.author_name}
+            size='sm'
+            className='size-5 shrink-0 text-[9px] sm:size-6 sm:text-[10px]'
+          />
           {/* 모바일에서는 아이콘만 */}
-          <span className={classNames('hidden truncate text-xs sm:inline', pinned ? 'text-white/70' : 'text-ink/70')}>
+          <span
+            className={classNames('hidden truncate text-xs sm:inline', pinned ? 'text-on-inverse/70' : 'text-ink/70')}
+          >
             {post.author_name}
           </span>
         </span>
-        <span className={classNames('flex shrink-0 items-center gap-1.5 text-[11px] sm:gap-2 sm:text-xs', pinned ? 'text-white/60' : 'text-mute')}>
+        <span
+          className={classNames(
+            'flex shrink-0 items-center gap-1.5 text-[11px] sm:gap-2 sm:text-xs',
+            pinned ? 'text-on-inverse/60' : 'text-mute',
+          )}
+        >
           {topReactions.length > 0 && (
             <span className='flex items-center gap-0.5'>
               {/* 모바일에서는 가장 많은 반응 하나만 */}
@@ -302,7 +335,9 @@ function PostCard({
                   {reaction.emoji}
                 </span>
               ))}
-              <span className='ml-0.5 tabular-nums'>{post.reactions.reduce((sum, reaction) => sum + reaction.count, 0)}</span>
+              <span className='ml-0.5 tabular-nums'>
+                {post.reactions.reduce((sum, reaction) => sum + reaction.count, 0)}
+              </span>
             </span>
           )}
           {post.comments.length > 0 && (

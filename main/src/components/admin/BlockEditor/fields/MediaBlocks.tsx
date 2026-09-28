@@ -96,7 +96,7 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
               ))}
             </div>
           ) : (
-            <p className='rounded-lg bg-field py-8 text-center text-[13px] text-muted'>
+            <p className='rounded-inner bg-field py-8 text-center text-[13px] text-muted'>
               이미지가 없습니다
             </p>
           )}

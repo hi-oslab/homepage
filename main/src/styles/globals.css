@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 
 @theme {
+  /* 큰 화면 반응형: 기본 sm 40 · md 48 · lg 64 · xl 80 · 2xl 96rem 위에 추가 (3xl:, 4xl:, max-3xl: 등) */
+  --breakpoint-3xl: 120rem; /* 1920px */
+  --breakpoint-4xl: 160rem; /* 2560px */
+
   /* 상단 헤더(아일랜드) 높이: pt-header, top-header, calc(…var(--spacing-header)) */
   --spacing-header: 3.25rem;
   /* 멤버 공간 모바일 바텀탭 높이 (안전 영역은 따로 더한다): bottom-tabbar, pb-tabbar */
@@ -15,6 +19,10 @@
   --color-primary-500: #1500B7;
   --color-primary-300: #1E00FF;
   --color-primary-100: #A8B2FF;
+  /* 강조색: 가장 중요한 버튼 · 선택 · 알림 점 (bg-accent, text-accent). 바꾸려면 여기만 */
+  --color-accent: #1E00FF;
+  --color-accent-hover: #1500B7;
+  --color-accent-soft: #ECEBFF;
   --color-black: #111;
   --color-gray: #dfdfdf;
   --color-white: #fefefe;
@@ -34,6 +42,14 @@
   --color-danger: #d4380d;
   --color-danger-soft: #fbe9e4;
   --color-success: #2f7d32;
+  /* 강조 블록 (고정 글 · 알림 바 · 검정 카드): bg-inverse + text-on-inverse.
+     ink와 달리 다크모드에서 흰 면으로 뒤집히지 않고, 한 단계 떠 보이는 어두운 면이 된다 */
+  --color-inverse: #111111;
+  --color-on-inverse: #f6f6f4;
+
+  /* 모서리: rounded-block (섹션 · 카드 · 모달 같은 큰 블록), rounded-inner (블록 안의 작은 면 · 이미지) */
+  --radius-block: 1rem;
+  --radius-inner: 0.625rem;
 
   /* 애니메이션: animate-cursor-blink */
   --animate-cursor-blink: cursor-blink 0.8s step-end infinite;
@@ -43,6 +59,76 @@
   --font-mono: var(--font-monoplex-local), monospace;
   --font-monoplex: var(--font-monoplex-local), monospace;
   --font-pretendard: var(--font-pretendard-local), sans-serif;
+}
+
+/*
+ * 다크모드 (멤버 공간): data-theme='dark' 이거나, 'system'이면서 기기가 다크일 때 색 토큰만 바꾼다.
+ * ink(글자 · 검정 면) ↔ paper(바탕)가 서로 뒤집히는 짝이라,
+ * 검정 면 위 글자는 text-white 대신 text-paper를 쓴다. 파랑(accent) · 빨강(danger) 위 글자만 text-white.
+ * 모서리 · 간격 규칙은 components/admin/styles.ts
+ *
+ * 그림자 색: shadow-[0_12px_32px_rgb(var(--shadow-rgb)/0.08)] 처럼 쓴다.
+ * 라이트는 검정 그림자, 다크는 흰 빛 (rgba(17,17,17,…) · shadow-sm 을 직접 쓰지 않는다)
+ */
+:root {
+  --shadow-rgb: 17 17 17;
+}
+
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where([data-theme='system'], [data-theme='system'] *) {
+      @slot;
+    }
+  }
+}
+
+[data-theme='dark'] {
+  --color-paper: #121212;
+  --color-surface: #1c1c1c;
+  --color-tile: #262626;
+  --color-field: #262626;
+  --color-ink: #f1f1ef;
+  --color-mute: #8e8e89;
+  --color-muted: #8e8e89;
+  --color-border: #2e2e2e;
+  --color-beige: #24231f;
+  --color-accent: #5b4fff;
+  --color-accent-hover: #7a70ff;
+  --color-accent-soft: #221d52;
+  --color-danger: #ff6d4d;
+  --color-danger-soft: #3b1f18;
+  --color-success: #62c066;
+  --color-inverse: #34343a;
+  --color-on-inverse: #f1f1ef;
+  --shadow-rgb: 255 255 255;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme='system'] {
+    --color-paper: #121212;
+    --color-surface: #1c1c1c;
+    --color-tile: #262626;
+    --color-field: #262626;
+    --color-ink: #f1f1ef;
+    --color-mute: #8e8e89;
+    --color-muted: #8e8e89;
+    --color-border: #2e2e2e;
+    --color-beige: #24231f;
+    --color-accent: #5b4fff;
+    --color-accent-hover: #7a70ff;
+    --color-accent-soft: #221d52;
+    --color-danger: #ff6d4d;
+    --color-danger-soft: #3b1f18;
+    --color-success: #62c066;
+    --color-inverse: #34343a;
+    --color-on-inverse: #f1f1ef;
+    --shadow-rgb: 255 255 255;
+    color-scheme: dark;
+  }
 }
 
 /* icons: SawarabiMincho (특정 유니코드만) */
@@ -183,6 +269,11 @@
   to {
     --fresh-angle: 360deg;
   }
+}
+
+.checking {
+  border: 1px dashed red;
+  box-sizing: border-box;
 }
 
 .fresh-ring {

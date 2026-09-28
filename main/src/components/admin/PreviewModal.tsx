@@ -48,23 +48,23 @@ export function PreviewModal({
           aria-label={title}
         >
           <motion.div
-            className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-paper'
+            className='rounded-block flex min-h-0 flex-1 flex-col overflow-hidden bg-paper'
             initial={{ y: 24, scale: 0.98 }}
             animate={{ y: 0, scale: 1 }}
             exit={{ y: 16, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className='flex shrink-0 items-center justify-between gap-3 bg-ink px-4 py-2.5 text-white'>
+            <div className='flex shrink-0 items-center justify-between gap-3 bg-ink px-4 py-2.5 text-paper'>
               <div className='flex min-w-0 items-center gap-3 text-sm'>
-                <span className='shrink-0 rounded bg-white/15 px-1.5 py-0.5 text-[11px]'>미리보기</span>
+                <span className='shrink-0 rounded bg-paper/15 px-1.5 py-0.5 text-[11px]'>미리보기</span>
                 <span className='truncate'>{title}</span>
-                {meta && <span className='hidden shrink-0 text-xs text-white/50 sm:inline'>{meta}</span>}
+                {meta && <span className='hidden shrink-0 text-xs text-paper/50 sm:inline'>{meta}</span>}
               </div>
               <button
                 type='button'
                 onClick={onClose}
-                className='flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-white/70 transition-colors hover:bg-white/10 hover:text-white'
+                className='flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-paper/70 transition-colors hover:bg-paper/10 hover:text-paper'
               >
                 <kbd className='hidden font-sans sm:inline'>Esc</kbd>
                 <GoX size={16} />

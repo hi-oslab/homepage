@@ -256,28 +256,28 @@ export function ResetLinkPanel({
   onCopied: () => void
 }) {
   return (
-    <div className='flex flex-col gap-3 rounded-xl bg-ink p-5 text-white'>
+    <div className='rounded-block flex flex-col gap-3 bg-ink p-5 text-paper'>
       <div className='flex items-center justify-between gap-3'>
         <span className='text-sm'>{name}님의 비밀번호 재설정 링크</span>
-        <button type='button' onClick={onClose} className='text-xs text-white/50 hover:text-white'>
+        <button type='button' onClick={onClose} className='text-xs text-paper/50 hover:text-paper'>
           닫기
         </button>
       </div>
       <div className='flex flex-col gap-2 sm:flex-row'>
-        <Input readOnly value={link.url} onFocus={(event) => event.target.select()} className='bg-white/10 text-sm text-white' />
+        <Input readOnly value={link.url} onFocus={(event) => event.target.select()} className='bg-paper/10 text-sm text-paper' />
         <button
           type='button'
           onClick={async () => {
             await navigator.clipboard.writeText(link.url)
             onCopied()
           }}
-          className={buttonClass('plain', 'md', 'shrink-0 bg-white text-ink hover:opacity-85')}
+          className={buttonClass('plain', 'md', 'shrink-0 bg-paper text-ink hover:opacity-85')}
         >
           <GoCopy size={14} />
           복사
         </button>
       </div>
-      <p className='text-xs leading-relaxed text-white/60'>
+      <p className='text-xs leading-relaxed text-paper/60'>
         카톡 등으로 본인에게만 전달하세요. 한 번 사용하면 무효가 되고, {new Date(link.expiresAt).toLocaleString('ko-KR')}에
         만료됩니다. 닫으면 다시 볼 수 없어요.
       </p>

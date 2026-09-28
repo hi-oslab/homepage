@@ -7,7 +7,7 @@ export async function LoungeSection({ className }: { className?: string }) {
   const [posts, viewer] = await Promise.all([getHomeFeed(), getHomeViewer()])
   return (
     <HomeSection
-      title='라운지'
+      title='OSL Lounge'
       description='공지, 자유로운 이야기, 협업 제안, 정보를 나누는 곳이에요.'
       className={className}
     >

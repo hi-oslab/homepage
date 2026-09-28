@@ -130,7 +130,7 @@ export function ProfileEditor({
           </button>
           <button type='button' onClick={save} disabled={!dirty || isPending} className={buttonClass('primary')}>
             저장
-            <kbd className='hidden font-sans text-[11px] text-white/50 sm:inline'>⌘S</kbd>
+            <kbd className='hidden font-sans text-[11px] text-paper/50 sm:inline'>⌘S</kbd>
           </button>
         </div>
       </EditorBar>
@@ -147,7 +147,7 @@ export function ProfileEditor({
               aspect='aspect-square'
               label='이미지를 끌어다 놓거나 눌러서 올리기'
               // 투명 PNG를 자르지 않고, 모양을 따라 그림자
-              imageClassName='object-contain p-[8%] drop-shadow-[0_8px_18px_rgba(17,17,17,0.18)]'
+              imageClassName='object-contain p-[8%] drop-shadow-[0_8px_18px_rgb(var(--shadow-rgb)/0.18)]'
             />
           </SectionCard>
           <div className='hidden flex-col gap-2 lg:flex'>

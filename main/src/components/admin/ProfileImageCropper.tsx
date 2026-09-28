@@ -185,13 +185,13 @@ export function ProfileImageCropper({
 
         {/* 미리보기: 체크무늬로 투명한 곳을 보여주고, 실제 표시처럼 모양을 따라 그림자 */}
         <div
-          className='rounded-xl bg-[conic-gradient(#e7e7e3_25%,#f6f6f4_0_50%,#e7e7e3_0_75%,#f6f6f4_0)] bg-size-[16px_16px] p-4'
+          className='rounded-inner bg-[conic-gradient(#e7e7e3_25%,#f6f6f4_0_50%,#e7e7e3_0_75%,#f6f6f4_0)] bg-size-[16px_16px] p-4'
           style={{ width: PREVIEW + 32 }}
         >
           <canvas
             ref={canvasRef}
             style={{ width: PREVIEW, height: PREVIEW }}
-            className='cursor-grab touch-none drop-shadow-[0_8px_18px_rgba(17,17,17,0.18)] active:cursor-grabbing'
+            className='cursor-grab touch-none drop-shadow-[0_8px_18px_rgb(var(--shadow-rgb)/0.18)] active:cursor-grabbing'
             onPointerDown={(event) => {
               drag.current = { x: event.clientX, y: event.clientY }
               event.currentTarget.setPointerCapture(event.pointerId)

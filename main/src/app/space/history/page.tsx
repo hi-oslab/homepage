@@ -10,7 +10,7 @@ export default async function AdminHistoryPage() {
 
   if (!items) {
     return (
-      <div className='rounded-xl bg-surface p-8 text-sm leading-relaxed'>
+      <div className='rounded-block bg-surface p-8 text-sm leading-relaxed'>
         연혁 테이블이 아직 없습니다. <code className='rounded bg-field px-1.5 py-0.5'>supabase/migrations/20260929_history.sql</code>을
         Supabase SQL Editor에서 실행해 주세요.
       </div>

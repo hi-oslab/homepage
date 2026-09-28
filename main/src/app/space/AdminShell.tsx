@@ -12,7 +12,11 @@ import {
   GoHome,
   GoKebabHorizontal,
   GoLinkExternal,
+  GoBrowser,
+  GoDeviceDesktop,
+  GoMoon,
   GoPulse,
+  GoSun,
   GoPerson,
   GoShieldCheck,
   GoSidebarCollapse,
@@ -23,7 +27,7 @@ import {
 } from 'react-icons/go'
 import { useToast } from '@/components/admin/ui'
 import { logout, revalidateAll } from './actions'
-import { NAV_COLLAPSED_COOKIE } from './nav'
+import { NAV_COLLAPSED_COOKIE, THEME_COOKIE, type SpaceTheme } from './nav'
 import { OperatorBadge } from '@/components/OperatorBadge'
 
 export type ShellUser = { name: string; username: string; isMaster: boolean; hasProfile: boolean; pendingCount: number }
@@ -49,6 +53,7 @@ const NAV_GROUPS: NavItem[][] = [
     { label: '멤버 관리', href: '/space/users', icon: GoShieldCheck, master: true, badge: 'pending' },
     { label: '미디어 관리', href: '/space/media', icon: GoFileMedia, master: true },
     { label: '시스템 상태', href: '/space/system', icon: GoPulse, master: true },
+    // { label: '디자인 가이드', href: '/space/design', icon: GoBrowser, master: true },
   ],
 
   [
@@ -57,17 +62,52 @@ const NAV_GROUPS: NavItem[][] = [
   ],
 ]
 
+/** 테마 버튼: 누를 때마다 라이트 → 다크 → 기기 설정 순으로 바뀐다 */
+const THEME_OPTIONS: Record<
+  SpaceTheme,
+  { label: string; icon: React.ComponentType<{ size?: number }>; next: SpaceTheme }
+> = {
+  light: { label: '라이트 모드', icon: GoSun, next: 'dark' },
+  dark: { label: '다크 모드', icon: GoMoon, next: 'system' },
+  system: { label: '기기 설정 따름', icon: GoDeviceDesktop, next: 'light' },
+}
+
+/**
+ * 멤버 공간 테마. 색은 globals.css의 [data-theme] 토큰이 바꾼다.
+ * 모달처럼 body에 붙는 창도 같은 색을 쓰도록 <html>에도 붙이고, 멤버 공간을 떠나면 뗀다.
+ */
+function useSpaceTheme(initial: SpaceTheme) {
+  const [theme, setTheme] = useState(initial)
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.theme = theme
+    return () => {
+      delete root.dataset.theme
+    }
+  }, [theme])
+  const cycle = () => {
+    const next = THEME_OPTIONS[theme].next
+    setTheme(next)
+    document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
+  }
+  return { theme, cycle }
+}
+
 export function AdminShell({
   user,
   navCollapsed = false,
+  theme: initialTheme = 'light',
   children,
 }: {
   user: ShellUser
   navCollapsed?: boolean
+  theme?: SpaceTheme
   children: React.ReactNode
 }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(navCollapsed)
+  const { theme, cycle: cycleTheme } = useSpaceTheme(initialTheme)
+  const ThemeIcon = THEME_OPTIONS[theme].icon
 
   const toggleNav = () => {
     const next = !collapsed
@@ -97,7 +137,10 @@ export function AdminShell({
   }
 
   return (
-    <div className='flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col md:flex-row'>
+    <div
+      data-theme={theme}
+      className='flex min-h-[calc(100dvh-var(--spacing-header))] w-full flex-col bg-paper text-ink md:flex-row'
+    >
       {/* 사이드바 (모바일에서는 숨기고 아래 바텀탭) */}
       {/* 접으면 아이콘만 남는 좁은 레일 */}
       <aside
@@ -132,10 +175,7 @@ export function AdminShell({
               <Fragment key={group[0].href}>
                 {/* 묶음 구분선 */}
                 {index > 0 && (
-                  <span
-                    aria-hidden
-                    className={classNames('my-2 h-px bg-ink/10', collapsed ? 'mx-2' : 'mx-3')}
-                  />
+                  <span aria-hidden className={classNames('my-2 h-px bg-ink/10', collapsed ? 'mx-2' : 'mx-3')} />
                 )}
                 {group.map(({ label, href, icon: Icon, exact, badge }) => (
                   <Link
@@ -145,7 +185,7 @@ export function AdminShell({
                     className={classNames(
                       'relative flex shrink-0 items-center gap-2.5 rounded-lg py-2 text-sm transition-colors',
                       collapsed ? 'justify-center px-2' : 'px-3',
-                      isActive(href, exact) ? 'bg-ink text-white' : 'text-ink/60 hover:bg-tile hover:text-ink',
+                      isActive(href, exact) ? 'bg-ink text-paper' : 'text-ink/60 hover:bg-tile hover:text-ink',
                     )}
                   >
                     <Icon size={15} />
@@ -175,7 +215,13 @@ export function AdminShell({
               <span className='truncate text-xs text-mute'>@{user.username}</span>
             </div>
           )}
-          <a href='/' target='_blank' rel='noopener noreferrer' title={collapsed ? '사이트 보기' : undefined} className={footerItem}>
+          <a
+            href='/'
+            target='_blank'
+            rel='noopener noreferrer'
+            title={collapsed ? '사이트 보기' : undefined}
+            className={footerItem}
+          >
             <GoLinkExternal size={15} />
             <FooterLabel collapsed={collapsed}>사이트 보기</FooterLabel>
           </a>
@@ -189,6 +235,15 @@ export function AdminShell({
             <GoSync size={15} className={isRevalidating ? 'animate-spin' : ''} />
             <FooterLabel collapsed={collapsed}>{isRevalidating ? '갱신 중…' : '사이트 갱신'}</FooterLabel>
           </button>
+          <button
+            type='button'
+            onClick={cycleTheme}
+            title={`${THEME_OPTIONS[theme].label} (눌러서 바꾸기)`}
+            className={footerItem}
+          >
+            <ThemeIcon size={15} />
+            <FooterLabel collapsed={collapsed}>{THEME_OPTIONS[theme].label}</FooterLabel>
+          </button>
           <button type='button' onClick={signOut} title={collapsed ? '로그아웃' : undefined} className={footerItem}>
             <GoSignOut size={15} />
             <FooterLabel collapsed={collapsed}>로그아웃</FooterLabel>
@@ -197,7 +252,7 @@ export function AdminShell({
       </aside>
 
       {/* 모바일은 바텀탭만큼 아래 여백을 더 둔다 */}
-      <div className='min-w-0 flex-1 px-4 pt-4 pb-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+2rem)] md:px-8 md:pt-8 md:pb-24'>
+      <div className='min-w-0 flex-1 px-4 pt-4 pb-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+2rem)] md:px-4 md:pt-4 md:pb-16'>
         {children}
       </div>
 
@@ -207,6 +262,9 @@ export function AdminShell({
         onRefreshSite={refreshSite}
         refreshing={isRevalidating}
         onSignOut={signOut}
+        themeLabel={THEME_OPTIONS[theme].label}
+        themeIcon={ThemeIcon}
+        onCycleTheme={cycleTheme}
       />
       {toast.node}
     </div>
@@ -233,12 +291,18 @@ function MobileTabBar({
   onRefreshSite,
   refreshing,
   onSignOut,
+  themeLabel,
+  themeIcon: ThemeIcon,
+  onCycleTheme,
 }: {
   user: ShellUser
   isActive: (href: string, exact?: boolean) => boolean
   onRefreshSite: () => void
   refreshing: boolean
   onSignOut: () => void
+  themeLabel: string
+  themeIcon: React.ComponentType<{ size?: number }>
+  onCycleTheme: () => void
 }) {
   const [moreOpen, setMoreOpen] = useState(false)
   const pathname = usePathname()
@@ -256,7 +320,7 @@ function MobileTabBar({
     <>
       <nav
         aria-label='멤버 공간 메뉴'
-        className='fixed inset-x-0 bottom-0 z-40 bg-paper/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(17,17,17,0.06)] backdrop-blur-md md:hidden'
+        className='fixed inset-x-0 bottom-0 z-40 bg-paper/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgb(var(--shadow-rgb)/0.06)] backdrop-blur-md md:hidden'
       >
         <div className='mx-auto grid h-tabbar max-w-md grid-cols-5 px-2'>
           {TABS.map(({ label, href, icon: Icon, exact }) => {
@@ -290,7 +354,9 @@ function MobileTabBar({
             )}
             <span className='relative'>
               <GoKebabHorizontal size={18} className={moreActive ? 'text-ink' : 'text-ink/45'} />
-              {attention && <span className='absolute -top-0.5 -right-1 size-2 rounded-full bg-danger ring-2 ring-paper' />}
+              {attention && (
+                <span className='absolute -top-0.5 -right-1 size-2 rounded-full bg-danger ring-2 ring-paper' />
+              )}
             </span>
             <span className={classNames('relative text-[10px]', moreActive ? 'text-ink' : 'text-ink/45')}>더보기</span>
           </button>
@@ -301,7 +367,7 @@ function MobileTabBar({
       <AnimatePresence>
         {moreOpen && (
           <motion.div
-            className='fixed inset-0 z-[60] flex items-end bg-ink/30 md:hidden'
+            className='fixed inset-0 z-[60] flex items-end bg-black/45 md:hidden'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -313,7 +379,7 @@ function MobileTabBar({
               exit={{ y: 40 }}
               transition={{ type: 'spring', stiffness: 420, damping: 36 }}
               onClick={(event) => event.stopPropagation()}
-              className='flex w-full flex-col gap-1 rounded-t-3xl bg-paper px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]'
+              className='flex w-full flex-col gap-1 rounded-t-3xl bg-surface px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] ring-1 ring-ink/10'
             >
               <span className='mx-auto mb-2 h-1 w-10 rounded-full bg-ink/15' />
               <div className='mb-2 flex items-center gap-1.5 px-3'>
@@ -327,7 +393,7 @@ function MobileTabBar({
                   href={href}
                   className={classNames(
                     'flex items-center gap-3 rounded-xl px-3 py-3 text-[15px]',
-                    isActive(href, exact) ? 'bg-ink text-white' : 'text-ink/80 active:bg-tile',
+                    isActive(href, exact) ? 'bg-ink text-paper' : 'text-ink/80 active:bg-tile',
                   )}
                 >
                   <Icon size={17} />
@@ -340,7 +406,12 @@ function MobileTabBar({
                 </Link>
               ))}
               {moreItems.length > 0 && <span aria-hidden className='mx-3 my-1.5 h-px bg-ink/10' />}
-              <a href='/' target='_blank' rel='noopener noreferrer' className='flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] text-ink/80 active:bg-tile'>
+              <a
+                href='/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] text-ink/80 active:bg-tile'
+              >
                 <GoLinkExternal size={17} />
                 사이트 보기
               </a>
@@ -353,7 +424,19 @@ function MobileTabBar({
                 <GoSync size={17} className={refreshing ? 'animate-spin' : ''} />
                 {refreshing ? '갱신 중…' : '사이트 갱신'}
               </button>
-              <button type='button' onClick={onSignOut} className='flex items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] text-ink/80 active:bg-tile'>
+              <button
+                type='button'
+                onClick={onCycleTheme}
+                className='flex items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] text-ink/80 active:bg-tile'
+              >
+                <ThemeIcon size={17} />
+                {themeLabel}
+              </button>
+              <button
+                type='button'
+                onClick={onSignOut}
+                className='flex items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] text-ink/80 active:bg-tile'
+              >
                 <GoSignOut size={17} />
                 로그아웃
               </button>

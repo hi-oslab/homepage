@@ -29,7 +29,7 @@ export function MemberProfileSection({
 }) {
   if (!member) {
     return (
-      <div className='flex flex-col gap-1 rounded-lg bg-surface p-3'>
+      <div className='rounded-inner flex flex-col gap-1 bg-surface p-3'>
         <span className='text-xs text-mute'>Members 페이지 프로필</span>
         <span className='text-sm text-mute'>아직 프로필을 만들지 않았어요.</span>
       </div>
@@ -44,7 +44,7 @@ export function MemberProfileSection({
   ].filter(([, value]) => value)
 
   return (
-    <div className='flex flex-col gap-3 rounded-lg bg-surface p-3'>
+    <div className='rounded-inner flex flex-col gap-3 bg-surface p-3'>
       <div className='flex items-center justify-between gap-3'>
         <span className='text-xs text-mute'>Members 페이지 프로필 · 역할 말고는 본인이 관리해요</span>
         <Switch

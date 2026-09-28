@@ -150,7 +150,7 @@ export function MembersTable({
   const cell = (key: SortKey) => COLUMNS.find((column) => column.key === key)!.className.replace(/w-\[[^\]]+\]/, '')
 
   return (
-    <div className='overflow-x-auto rounded-xl bg-surface'>
+    <div className='rounded-block overflow-x-auto bg-surface'>
       <table className='w-full table-fixed text-left text-sm whitespace-nowrap'>
         <thead className='text-xs text-mute'>
           <tr>

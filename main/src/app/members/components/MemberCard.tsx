@@ -23,7 +23,7 @@ export const MemberCard = ({ member }: MemberCardProps) => {
         />
         {description && (
           <div className='absolute inset-0 hidden items-end bg-ink/85 p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex'>
-            <p className='break-keep text-sm leading-relaxed text-white'>{description}</p>
+            <p className='break-keep text-sm leading-relaxed text-paper'>{description}</p>
           </div>
         )}
       </div>

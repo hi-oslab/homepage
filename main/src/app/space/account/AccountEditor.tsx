@@ -72,7 +72,7 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
   return (
     <div className='mx-auto flex w-full max-w-[720px] flex-col gap-4 pb-20'>
       {/* 요약 */}
-      <section className='flex items-center gap-4 rounded-2xl bg-surface p-5 md:gap-5 md:p-7'>
+      <section className='rounded-block flex items-center gap-4 bg-surface p-4 md:p-5'>
         <ProfileImage src={profileImage} name={saved.name} size='sm' className='size-16 shrink-0 text-xl md:size-20' />
         <div className='flex min-w-0 flex-col gap-1'>
           <span className='flex items-center gap-2'>
@@ -112,7 +112,7 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
           </dd>
         </dl>
         {passwordOpen && (
-          <form onSubmit={changePassword} className='flex flex-col gap-2 rounded-xl bg-field/60 p-4'>
+          <form onSubmit={changePassword} className='rounded-inner flex flex-col gap-2 bg-field/60 p-4'>
             <PasswordInput
               required
               autoFocus
@@ -173,7 +173,7 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
         }
       >
         {withdrawOpen && (
-          <form onSubmit={withdraw} className='flex flex-col gap-3 rounded-xl bg-danger-soft/50 p-4'>
+          <form onSubmit={withdraw} className='rounded-inner flex flex-col gap-3 bg-danger-soft/50 p-4'>
             <ul className='flex list-disc flex-col gap-1 pl-4 text-sm text-ink/70'>
               <li>작성한 프로젝트는 사이트에 그대로 남고, 이후에는 운영자만 삭제할 수 있어요.</li>
               <li>Members 페이지의 프로필카드도 함께 삭제돼요.</li>
@@ -208,15 +208,15 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             // 모바일에서는 바텀탭 위에
-            className='sticky bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+0.75rem)] z-30 flex items-center justify-between gap-3 rounded-2xl bg-ink px-5 py-3 text-white shadow-[0_12px_32px_rgba(17,17,17,0.25)] md:bottom-4'
+            className='rounded-block sticky bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+0.75rem)] z-30 flex items-center justify-between gap-3 bg-ink px-5 py-3 text-paper shadow-[0_12px_32px_rgb(var(--shadow-rgb)/0.25)] md:bottom-4'
           >
-            <SaveState dirty={dirty} saving={isPending} className='text-white/70' />
+            <SaveState dirty={dirty} saving={isPending} className='text-paper/70' />
             <div className='flex gap-2'>
               <button
                 type='button'
                 disabled={isPending}
                 onClick={() => setProfile(saved)}
-                className={buttonClass('plain', 'sm', 'text-white/70 hover:text-white')}
+                className={buttonClass('plain', 'sm', 'text-paper/70 hover:text-paper')}
               >
                 되돌리기
               </button>
@@ -224,7 +224,7 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
                 type='button'
                 disabled={isPending}
                 onClick={saveProfile}
-                className={buttonClass('plain', 'sm', 'bg-white text-ink hover:opacity-85')}
+                className={buttonClass('plain', 'sm', 'bg-paper text-ink hover:opacity-85')}
               >
                 저장
               </button>

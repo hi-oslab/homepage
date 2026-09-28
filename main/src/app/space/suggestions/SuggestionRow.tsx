@@ -2,6 +2,7 @@
 
 import classNames from 'classnames'
 import { GoComment } from 'react-icons/go'
+import { ROW_HOVER } from '@/components/admin/styles'
 import type { Suggestion } from '@/lib/suggestion-types'
 import { StatusCheck, StatusControl } from './parts'
 import type { SuggestionHandlers } from './useSuggestions'
@@ -24,12 +25,12 @@ export function SuggestionRow({
       onKeyDown={(event) =>
         (event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget && onOpen()
       }
-      className='group flex cursor-pointer items-center gap-3 py-2'
+      className={classNames('group flex cursor-pointer items-center gap-3 px-3 py-2 text-sm', ROW_HOVER)}
     >
       <StatusCheck item={item} handlers={handlers} />
       <span
         className={classNames(
-          'min-w-0 flex-1 truncate text-sm group-hover:underline group-hover:decoration-ink/20 group-hover:underline-offset-4',
+          'min-w-0 flex-1 truncate text-sm',
           item.status === 'done' ? 'text-mute line-through' : item.status === 'rejected' ? 'text-mute' : 'text-ink',
         )}
       >

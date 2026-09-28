@@ -100,7 +100,7 @@ export function RolesModal({
             />
           ))}
           {roles.length === 0 && (
-            <li className='rounded-lg bg-surface px-3 py-8 text-center text-sm text-mute'>
+            <li className='rounded-inner bg-surface px-3 py-8 text-center text-sm text-mute'>
               아직 역할이 없어요. 위에서 추가해 주세요.
             </li>
           )}
@@ -127,7 +127,7 @@ function RoleRow({
   const [value, setValue] = useState(role.name)
 
   return (
-    <li className='flex items-center gap-2 rounded-lg bg-surface py-1.5 pr-1.5 pl-1.5'>
+    <li className='rounded-inner flex items-center gap-2 bg-surface py-1.5 pr-1.5 pl-1.5'>
       <Input
         value={value}
         disabled={disabled}

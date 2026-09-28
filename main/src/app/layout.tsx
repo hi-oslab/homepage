@@ -13,7 +13,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='ko'>
+    // 멤버 공간이 하이드레이션 전에 data-theme을 붙이므로 <html> 속성 차이 경고만 끈다 (자식에는 영향 없음)
+    <html lang='ko' suppressHydrationWarning>
       <head>
         <link rel='preload' href='/fonts/SawarabiMincho.woff2' as='font' type='font/woff2' crossOrigin='anonymous' />
         <script

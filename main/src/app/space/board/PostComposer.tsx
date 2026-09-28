@@ -95,10 +95,10 @@ export function PostComposer({
               onClick={() => setKind(value)}
               className={classNames(
                 'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors',
-                kind === value ? 'bg-ink text-white' : 'bg-tile text-ink/70 hover:text-ink',
+                kind === value ? 'bg-ink text-paper' : 'bg-tile text-ink/70 hover:text-ink',
               )}
             >
-              <span className={classNames('size-1.5 rounded-full', kind === value ? 'bg-white' : BOARDS[value].dot)} />
+              <span className={classNames('size-1.5 rounded-full', kind === value ? 'bg-paper' : BOARDS[value].dot)} />
               {BOARDS[value].label}
             </button>
           ))}
@@ -109,7 +109,7 @@ export function PostComposer({
         </p>
 
         {/* 제목 (본문 글 시작 위치에 맞춘다: 왼쪽 여백 + 블록 조작 칸) */}
-        <label className='group/field flex cursor-text flex-col gap-1.5 rounded-2xl bg-surface py-4 pr-4 pl-[58px] md:pr-6 md:pl-[72px]'>
+        <label className='rounded-block group/field flex cursor-text flex-col gap-1.5 bg-surface py-4 pr-4 pl-[58px] md:pr-6 md:pl-[72px]'>
           <span className='text-xs text-mute transition-colors group-focus-within/field:text-ink'>제목 (선택)</span>
           <AutoTextarea
             autoFocus
@@ -122,7 +122,7 @@ export function PostComposer({
         </label>
 
         {/* 본문 */}
-        <div className='flex flex-col gap-1 rounded-2xl bg-surface py-4 pr-4 pl-1 md:pr-6 md:pl-2'>
+        <div className='rounded-block flex flex-col gap-1 bg-surface py-4 pr-4 pl-1 md:pr-6 md:pl-2'>
           <span className='pl-[54px] text-xs text-mute md:pl-16'>본문</span>
           <BlockEditor
             blocks={blocks}
