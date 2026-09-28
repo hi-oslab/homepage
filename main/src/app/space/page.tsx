@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { getCurrentUser, isApproved } from '@/lib/admin-auth'
 import {
   GreetingSection,
@@ -22,10 +21,6 @@ export default async function SpaceHomePage() {
   // 홈에서는 리다이렉트하지 않는다 (승인 대기 안내는 레이아웃이 보여주므로 여기서 /space 로 보내면 무한 루프)
   const user = await getCurrentUser().catch(() => null)
   if (!isApproved(user)) return null
-  // 첫 로그인: 프로필카드부터
-  // (운영자가 미리 프로필을 연결해 둔 멤버도 한 번은 설정 화면을 보게 한다)
-  if (!user.onboarded_at) redirect('/space/profile?welcome=1')
-
   return (
     <div className='relative isolate flex w-full flex-col gap-2'>
       {/* 위쪽에 옅은 강조색 빛: 유리 면(glass) 블록이 바탕과 구분되도록 */}

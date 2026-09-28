@@ -21,25 +21,16 @@ import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
 import type { Member } from '@/types/cms'
 import { MemberCard } from '@/app/members/components/MemberCard'
 import { MemberForm, toMemberDraft, type MemberDraft } from '../members/MemberForm'
-import {
-  createMyProfileAction,
-  markOnboardedAction,
-  updateMyProfileAction,
-} from '../members/actions'
+import { createMyProfileAction, updateMyProfileAction } from '../members/actions'
 
 export function ProfileEditor({
   member,
   roles,
   fieldSuggestions,
-  welcome,
-  userName,
 }: {
   member: Member | null
   roles: string[]
   fieldSuggestions: string[]
-  /** 첫 로그인 안내 */
-  welcome: boolean
-  userName: string
 }) {
   const router = useRouter()
   const toast = useToast()
@@ -100,9 +91,7 @@ export function ProfileEditor({
   }
 
   if (!saved || !draft) {
-    return (
-      <ProfileSetup welcome={welcome} userName={userName} onDone={() => router.refresh()} />
-    )
+    return <ProfileSetup onDone={() => router.refresh()} />
   }
 
   return (
@@ -115,7 +104,9 @@ export function ProfileEditor({
         </div>
         <div className='flex shrink-0 items-center gap-2'>
           <span
-            title={draft.published ? '저장하면 Members 페이지에 표시됩니다' : '비공개 프로필은 사이트에 표시되지 않습니다'}
+            title={
+              draft.published ? '저장하면 Members 페이지에 표시됩니다' : '비공개 프로필은 사이트에 표시되지 않습니다'
+            }
             className='mr-1 flex items-center'
           >
             <Switch
@@ -135,17 +126,13 @@ export function ProfileEditor({
         </div>
       </EditorBar>
 
-      {/* 첫 방문(홈에서 넘어옴)일 때만 */}
-      {welcome && (
-        <div className='mx-auto w-full max-w-[960px]'>
-          <WelcomeBanner userName={userName} />
-        </div>
-      )}
-
       {/* 넓은 화면: 왼쪽에 이미지 · 카드 미리보기 고정, 오른쪽에 정보 상자. 최대 960px */}
       <div className='mx-auto grid w-full max-w-[960px] grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]'>
         <aside className='flex flex-col gap-4 lg:sticky lg:top-[calc(var(--spacing-header)+5rem)] lg:self-start'>
-          <SectionCard title='프로필 이미지' description='투명 PNG 아이콘을 추천해요. 배경이 있는 사진은 원 · 사각형 · 별 모양으로 오려서 저장돼요.'>
+          <SectionCard
+            title='프로필 이미지'
+            description='투명 PNG 아이콘을 추천해요. 배경이 있는 사진은 원 · 사각형 · 별 모양으로 오려서 저장돼요.'
+          >
             <ImageDrop
               url={draft.cover_image_url}
               onUpload={async (file) => setCropFile(file)}
@@ -188,34 +175,19 @@ export function ProfileEditor({
 }
 
 /**
- * 첫 방문 안내 (편집 화면 위, 건너뛰기 없음). 운영자가 미리 연결한 프로필이면 여기서 첫 방문을 기록해
- * 다음부터는 홈에서 바로 시작한다.
- */
-function WelcomeBanner({ userName }: { userName: string }) {
-  useEffect(() => {
-    markOnboardedAction().catch(() => undefined)
-  }, [])
-  return (
-    <div className='flex flex-col gap-0.5 rounded-block bg-accent-soft px-4 py-3.5 md:px-5'>
-      <span className='text-base font-medium tracking-[-0.01em]'>환영해요, {userName}님</span>
-      <span className='text-sm text-ink/70'>
-        Members 페이지에 보일 프로필카드를 채워 주세요. 처음에는 비공개라, 준비가 되면 공개로 바꾸면 돼요.
-      </span>
-    </div>
-  )
-}
-
-/**
  * 연결된 프로필카드가 없을 때: 버튼 없이 바로 비공개 프로필카드를 만들고 편집 화면으로
  * (모든 멤버가 프로필카드를 갖는다. 운영자가 지운 경우에도 여기 오면 다시 만들어진다)
  */
-function ProfileSetup({ welcome, userName, onDone }: { welcome: boolean; userName: string; onDone: () => void }) {
+function ProfileSetup({ onDone }: { onDone: () => void }) {
   const [failed, setFailed] = useState(false)
   const started = useRef(false)
 
   const create = () => {
     setFailed(false)
-    createMyProfileAction().then(onDone, () => setFailed(true))
+    createMyProfileAction().then(
+      () => onDone(),
+      () => setFailed(true),
+    )
   }
   useEffect(() => {
     if (started.current) return
@@ -227,7 +199,7 @@ function ProfileSetup({ welcome, userName, onDone }: { welcome: boolean; userNam
   return (
     <div className='mx-auto flex w-full max-w-[640px] flex-col gap-4'>
       <PageHeader
-        title={welcome ? `환영해요, ${userName}님` : '프로필카드 설정'}
+        title='프로필카드 설정'
         description={failed ? '프로필카드를 만들지 못했어요.' : '프로필카드를 준비하고 있어요…'}
         actions={
           failed && (

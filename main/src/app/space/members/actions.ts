@@ -51,33 +51,48 @@ export async function deleteMemberAction(id: string) {
 
 /* ─── 본인: 내 프로필 ─────────────────────────────────────────────────── */
 
-/** 내 계정에 연결된 멤버 프로필이 없으면 새로 만든다 (처음엔 비공개) */
-export async function createMyProfileAction() {
+/** 내 계정에 연결된 멤버 프로필이 없으면 새로 만든다 (처음엔 비공개). 있으면 그 프로필 */
+export async function createMyProfileAction(): Promise<Member> {
   const user = await requireUser()
-  if (user.member_id) return
+  if (user.member_id) {
+    const existing = await getMember(user.member_id)
+    if (existing) return existing
+  }
   const member = await createMember({ name: user.name, published: false })
-  await updateAdminUser(user.id, { member_id: member.id, onboarded_at: new Date().toISOString() })
+  await updateAdminUser(user.id, { member_id: member.id })
   revalidateMemberPages()
+  return member
 }
 
-/** 첫 방문 안내(프로필카드 설정 화면)를 봤다고 기록한다. 다음부터는 홈에서 바로 시작 */
-export async function markOnboardedAction() {
-  const user = await requireUser()
-  if (user.onboarded_at) return
-  await updateAdminUser(user.id, { onboarded_at: new Date().toISOString() })
-  revalidatePath('/space', 'layout')
+/** 역할은 운영자가 관리하는 목록 중에서만 (지금 쓰고 있는 역할은 목록에서 빠졌어도 그대로 둘 수 있다) */
+async function assertRole(memberId: string, role: string | undefined) {
+  if (role === undefined || role === '') return
+  const [roles, current] = await Promise.all([getRoles(), getMember(memberId)])
+  if (!roles.some((item) => item.name === role) && role !== current?.role) throw new Error('목록에 없는 역할입니다.')
 }
 
 export async function updateMyProfileAction(input: MemberInput) {
   const user = await requireUser()
   if (!user.member_id) throw new Error('연결된 프로필이 없습니다.')
-  // 역할은 운영자가 관리하는 목록 중에서만 (지금 쓰고 있는 역할은 목록에서 빠졌어도 그대로 둘 수 있다)
-  if (input.role !== undefined && input.role !== '') {
-    const [roles, current] = await Promise.all([getRoles(), getMember(user.member_id)])
-    if (!roles.some((role) => role.name === input.role) && input.role !== current?.role)
-      throw new Error('목록에 없는 역할입니다.')
-  }
+  await assertRole(user.member_id, input.role)
   const member = await updateMember(user.member_id, input)
+  revalidateMemberPages()
+  return member
+}
+
+/**
+ * 첫 로그인 프로필 설정 '완료하기': 프로필카드를 저장하고 첫 방문을 끝낸다 (다음부터는 창이 뜨지 않는다).
+ * 프로필카드가 아직 없으면 여기서 만든다.
+ */
+export async function completeOnboardingAction(input: MemberInput): Promise<Member> {
+  const user = await requireUser()
+  if (!input.name?.trim()) throw new Error('이름을 입력해 주세요.')
+  // 연결된 프로필이 없거나(지워진 경우 포함) 없으면 여기서 만든다
+  const existing = user.member_id ? await getMember(user.member_id) : null
+  const memberId = existing?.id ?? (await createMember({ name: user.name, published: false })).id
+  await assertRole(memberId, input.role)
+  const member = await updateMember(memberId, { ...input, name: input.name.trim() })
+  await updateAdminUser(user.id, { member_id: memberId, onboarded_at: new Date().toISOString() })
   revalidateMemberPages()
   return member
 }

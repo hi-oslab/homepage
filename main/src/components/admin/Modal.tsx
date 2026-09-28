@@ -7,7 +7,10 @@ import { createPortal } from 'react-dom'
 import { GoX } from 'react-icons/go'
 import { FLOATING, SCRIM, surfaceClass } from './styles'
 
-/** 가운데 뜨는 대화상자. 바깥을 누르거나 Esc로 닫힌다 (모바일에서는 아래에서 올라오는 시트) */
+/**
+ * 가운데 뜨는 대화상자. 바깥을 누르거나 Esc로 닫힌다 (모바일에서는 아래에서 올라오는 시트)
+ * dismissible={false}: 닫기 버튼 · Esc · 바깥 누르기로 닫히지 않는다 (첫 로그인 프로필 설정처럼 끝내야 하는 창)
+ */
 export function Modal({
   open,
   onClose,
@@ -17,6 +20,7 @@ export function Modal({
   footer,
   size = 'md',
   tall,
+  dismissible = true,
 }: {
   open: boolean
   onClose: () => void
@@ -30,10 +34,12 @@ export function Modal({
   size?: 'md' | 'lg'
   /** 화면 높이에 가깝게 (글쓰기처럼 긴 내용) */
   tall?: boolean
+  /** false면 사용자가 닫을 수 없다 (완료 버튼 등으로만) */
+  dismissible?: boolean
 }) {
   useEffect(() => {
     if (!open) return
-    const onKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+    const onKeyDown = (event: KeyboardEvent) => dismissible && event.key === 'Escape' && onClose()
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKeyDown)
@@ -41,7 +47,7 @@ export function Modal({
       document.body.style.overflow = overflow
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [open, onClose])
+  }, [open, onClose, dismissible])
 
   if (typeof document === 'undefined') return null
 
@@ -54,7 +60,7 @@ export function Modal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          onClick={onClose}
+          onClick={dismissible ? onClose : undefined}
           role='dialog'
           aria-modal='true'
         >
@@ -78,15 +84,17 @@ export function Modal({
                 <span className='truncate text-xl font-medium tracking-[-0.03em]'>{title}</span>
                 {meta && <span className='truncate text-xs text-mute'>{meta}</span>}
               </div>
-              <button
-                type='button'
-                onClick={onClose}
-                aria-label='닫기'
-                className='flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs text-mute transition-colors hover:bg-tile hover:text-ink'
-              >
-                <kbd className='hidden font-sans sm:inline'>Esc</kbd>
-                <GoX size={16} />
-              </button>
+              {dismissible && (
+                <button
+                  type='button'
+                  onClick={onClose}
+                  aria-label='닫기'
+                  className='flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs text-mute transition-colors hover:bg-tile hover:text-ink'
+                >
+                  <kbd className='hidden font-sans sm:inline'>Esc</kbd>
+                  <GoX size={16} />
+                </button>
+              )}
             </div>
             <div className='min-h-0 flex-1 overflow-y-auto px-5 pb-5 sm:px-7 sm:pb-7'>{children}</div>
             {footer && (

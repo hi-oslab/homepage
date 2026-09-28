@@ -34,7 +34,11 @@ export async function TodoCard({ index, className }: HomeCardProps) {
     !profile && { label: '프로필카드 만들기', href: '/space/profile' },
     profile && !profile.published && { label: '프로필카드 공개하기', href: '/space/profile' },
     profile && !profile.cover_image_url && { label: '프로필 이미지 올리기', href: '/space/profile' },
-    drafts.length > 0 && { label: '작성 중인 프로젝트', href: '/space/works?status=draft', count: `${drafts.length}개` },
+    drafts.length > 0 && {
+      label: '작성 중인 프로젝트',
+      href: '/space/works?status=draft',
+      count: `${drafts.length}개`,
+    },
   ].filter(Boolean) as TodoItem[]
 
   return (
@@ -46,7 +50,9 @@ export async function TodoCard({ index, className }: HomeCardProps) {
             <li key={item.label}>
               <Link href={item.href} className='flex items-center justify-between gap-2 text-sm hover:text-mute'>
                 <span className='flex min-w-0 items-center gap-2'>
-                  <span className={classNames('size-1.5 shrink-0 rounded-full', item.urgent ? 'bg-danger' : 'bg-[#e0a526]')} />
+                  <span
+                    className={classNames('size-1.5 shrink-0 rounded-full', item.urgent ? 'bg-danger' : 'bg-[#e0a526]')}
+                  />
                   <span className='truncate'>{item.label}</span>
                   {item.count && <span className='shrink-0 text-xs text-mute tabular-nums'>{item.count}</span>}
                 </span>

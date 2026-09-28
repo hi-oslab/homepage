@@ -3,9 +3,10 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AuthSetupError, getCurrentUser, hasMaster, isApproved } from '@/lib/admin-auth'
 import { MentionProvider, type MentionMember } from '@/components/mentions/MentionProvider'
-import { getAdminMembers, getAdminUsers, getHelpRequests } from '@/lib/cms'
+import { getAdminMembers, getAdminUsers, getHelpRequests, getRoles } from '@/lib/cms'
 import { AdminNotice } from './AdminAuth'
 import { AdminShell } from './AdminShell'
+import { OnboardingModal } from './home/OnboardingModal'
 import { NAV_COLLAPSED_COOKIE, SPACE_THEMES, THEME_COOKIE, type SpaceTheme } from './nav'
 import { NotificationCenter } from './NotificationCenter'
 import { getNotifications } from '@/lib/notifications'
@@ -29,13 +30,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isApproved(user))
     return <AdminNotice kind={user.status === 'rejected' ? 'rejected' : 'pending'} name={user.name} />
 
-  const [accounts, profiles, openRequests, notifications, cookieStore] = await Promise.all([
+  const [accounts, profiles, openRequests, notifications, cookieStore, roleList] = await Promise.all([
     getAdminUsers(),
     getAdminMembers(),
     user.is_master ? getHelpRequests('open') : [],
     // 오른쪽 아래 알림 (멤버 공간 모든 화면)
     getNotifications(user),
     cookies(),
+    getRoles(),
   ])
   // 마스터에게는 승인 대기 + 미처리 문의 수를 메뉴 배지로 보여준다
   const pendingCount = user.is_master
@@ -55,6 +57,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         profile,
       }
     })
+
+  // 프로필카드가 없거나(운영자가 지운 경우 포함) 첫 방문을 안 끝냈으면 어느 화면이든 프로필 설정 창을 띄운다
+  const myProfile = (user.member_id && profileById.get(user.member_id)) || null
+  const needsOnboarding = !user.onboarded_at || !myProfile
 
   const savedTheme = cookieStore.get(THEME_COOKIE)?.value as SpaceTheme | undefined
   const theme: SpaceTheme = savedTheme && SPACE_THEMES.includes(savedTheme) ? savedTheme : 'light'
@@ -76,6 +82,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <MentionProvider members={mentionMembers}>
         {children}
         <NotificationCenter items={notifications} userId={user.id} />
+        {needsOnboarding && (
+          <OnboardingModal
+            member={myProfile}
+            roles={roleList.map((role) => role.name)}
+            // 분야는 다른 프로필에서 쓰인 값을 추천
+            fieldSuggestions={Array.from(new Set(profiles.flatMap((item) => item.fields)))}
+            userName={user.name}
+          />
+        )}
       </MentionProvider>
     </AdminShell>
   )
