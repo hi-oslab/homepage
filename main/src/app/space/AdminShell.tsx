@@ -6,25 +6,29 @@ import { usePathname, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Fragment, useEffect, useState, useTransition } from 'react'
 import {
-  GoFileMedia,
   GoGear,
-  GoHistory,
   GoHome,
   GoKebabHorizontal,
   GoLinkExternal,
-  GoBrowser,
   GoDeviceDesktop,
   GoMoon,
-  GoPulse,
   GoSun,
   GoPerson,
-  GoShieldCheck,
   GoSidebarCollapse,
   GoSidebarExpand,
   GoSignOut,
   GoStack,
   GoSync,
+  GoFileDirectoryFill,
+  GoHomeFill,
 } from 'react-icons/go'
+import { BsClockFill } from 'react-icons/bs'
+import { BsPersonFill } from 'react-icons/bs'
+import { FaDisease } from 'react-icons/fa'
+import { MdPeopleAlt, MdPermMedia } from 'react-icons/md'
+import { PiPulseFill } from 'react-icons/pi'
+import { IoSettings } from 'react-icons/io5'
+
 import { useToast } from '@/components/admin/ui'
 import { logout, revalidateAll } from './actions'
 import { NAV_COLLAPSED_COOKIE, THEME_COOKIE, type SpaceTheme } from './nav'
@@ -42,23 +46,24 @@ type NavItem = {
   badge?: 'pending'
 }
 
-// 묶음 사이에 구분선이 들어간다: 홈 / 콘텐츠 / 운영 / 계정
+// 묶음 사이에 구분선이 들어간다: Home / Works / Lab Space / 연혁 관리
 const NAV_GROUPS: NavItem[][] = [
-  [{ label: '홈', href: '/space', icon: GoHome, exact: true }],
+  [{ label: 'Home', href: '/space', icon: GoHomeFill, exact: true }],
   [
-    { label: '프로젝트 관리', href: '/space/works', icon: GoStack },
-    { label: '연혁 관리', href: '/space/history', icon: GoHistory, master: true },
+    { label: 'CV', href: '/space/history', icon: BsClockFill, master: true },
+    { label: 'Works', href: '/space/works', icon: GoFileDirectoryFill },
+    { label: 'Lab Space', href: '/space/lab', icon: FaDisease },
   ],
   [
-    { label: '멤버 관리', href: '/space/users', icon: GoShieldCheck, master: true, badge: 'pending' },
-    { label: '미디어 관리', href: '/space/media', icon: GoFileMedia, master: true },
-    { label: '시스템 상태', href: '/space/system', icon: GoPulse, master: true },
+    { label: 'Members', href: '/space/users', icon: MdPeopleAlt, master: true, badge: 'pending' },
+    { label: 'Storage', href: '/space/media', icon: MdPermMedia, master: true },
+    { label: 'System', href: '/space/system', icon: PiPulseFill, master: true },
     // { label: '디자인 가이드', href: '/space/design', icon: GoBrowser, master: true },
   ],
 
   [
-    { label: '프로필카드 설정', href: '/space/profile', icon: GoPerson },
-    { label: '내 정보 설정', href: '/space/account', icon: GoGear },
+    { label: 'My Profile', href: '/space/profile', icon: BsPersonFill },
+    { label: 'Settings', href: '/space/account', icon: IoSettings },
   ],
 ]
 

@@ -123,9 +123,7 @@ export const Header = () => {
   }
 
   const accountLinks = session
-    ? [
-        ...(session.status === 'approved' ? [{ label: '내 정보 설정', href: '/space/account' }] : []),
-      ]
+    ? [...(session.status === 'approved' ? [{ label: '내 정보 설정', href: '/space/account' }] : [])]
     : []
 
   return (
@@ -199,7 +197,7 @@ export const Header = () => {
             <span className='hidden text-ink lg:block'>
               <Location />
             </span>
-            <Clock className='text-ink' />
+            {/* <Clock className='text-ink' /> */}
             {session && (
               <div className='relative'>
                 <button

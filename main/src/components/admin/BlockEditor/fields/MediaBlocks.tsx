@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import type { Block, MediaBlock, GalleryBlock, GalleryItem } from '@/types/blocks'
 import { uploadImage } from '@/lib/storage'
 import { extractVimeoId, extractYoutubeId } from '@/lib/blocks'
-import { GoTrash } from 'react-icons/go'
+import { GoImage, GoTrash } from 'react-icons/go'
 import { VimeoPlayer, YoutubePlayer } from '@/components/EmbedVideoPlayer'
 import { Input, buttonClass, iconButtonClass } from '@/components/admin/ui'
 
@@ -44,6 +44,15 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
     url: urls[0] ?? '',
     urls,
   })
+
+  // 고른 · 끌어다 놓은 파일을 올려서 뒤에 붙인다
+  const addFiles = async (files: File[]) => {
+    const images = files.filter((file) => file.type.startsWith('image/'))
+    if (images.length === 0) return
+    const uploaded = await Promise.all(images.map((file) => upload(file)))
+    const newUrls = uploaded.filter((url): url is string => Boolean(url))
+    if (newUrls.length > 0) onChange(withImageUrls(block, [...imageUrls, ...newUrls]))
+  }
 
   const clearImage = async (index: number) => {
     const url = imageUrls[index]
@@ -96,9 +105,24 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
               ))}
             </div>
           ) : (
-            <p className='rounded-inner bg-field py-8 text-center text-[13px] text-muted'>
-              이미지가 없습니다
-            </p>
+            // 비어 있으면 눌러서 바로 고르거나 끌어다 놓는 자리
+            <button
+              type='button'
+              onClick={() => inputRef.current?.click()}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault()
+                addFiles(Array.from(event.dataTransfer.files))
+              }}
+              disabled={uploading}
+              className='rounded-inner flex flex-col items-center justify-center gap-1 bg-field py-8 text-[13px] text-mute border border-dashed border-ink/15 transition-colors hover:bg-tile hover:text-ink disabled:opacity-60'
+            >
+              <span className='flex items-center gap-1.5 text-sm'>
+                <GoImage size={15} />
+                {uploading ? '업로드 중…' : '이미지 추가'}
+              </span>
+              {!uploading && <span className='text-xs'>눌러서 고르거나 끌어다 놓기 · 여러 장 가능</span>}
+            </button>
           )}
 
           <input
@@ -110,20 +134,20 @@ export const MediaBlockField = ({ block, onChange, projectId, onDeleteImage }: M
             onChange={async (e) => {
               const files = Array.from(e.target.files ?? [])
               e.target.value = ''
-              if (files.length === 0) return
-              const uploaded = await Promise.all(files.map((file) => upload(file)))
-              const newUrls = uploaded.filter((url): url is string => Boolean(url))
-              if (newUrls.length > 0) onChange(withImageUrls(block, [...imageUrls, ...newUrls]))
+              await addFiles(files)
             }}
           />
-          <button
-            type='button'
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-            className={buttonClass('secondary', 'sm', 'w-fit')}
-          >
-            {uploading ? '업로드 중...' : imageUrls.length > 0 ? '+ 이미지 추가' : '파일 업로드'}
-          </button>
+          {/* 이미지가 있을 때만: 뒤에 더 붙이기 (비어 있을 때는 위의 '이미지 추가' 자리) */}
+          {imageUrls.length > 0 && (
+            <button
+              type='button'
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className={buttonClass('secondary', 'sm', 'w-fit')}
+            >
+              {uploading ? '업로드 중…' : '+ 이미지 추가'}
+            </button>
+          )}
 
           <Input
             type='url'

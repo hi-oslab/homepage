@@ -23,7 +23,7 @@ export default async function Page() {
 
   return (
     <div className='flex w-full flex-col px-4 pb-32 md:px-8 md:pb-48'>
-      <InView className='flex min-h-[50dvh] flex-col justify-between gap-16 pt-6 pb-16 md:pt-8 md:pb-24'>
+      <InView className='flex min-h-[30dvh] md:min-h-[50dvh] flex-col justify-between gap-16 pt-6 pb-16 md:pt-8 md:pb-24'>
         <div className='grid grid-cols-2 gap-4 text-sm md:grid-cols-12 md:gap-8'>
           <span className='md:col-span-4'>Works</span>
           <span className='text-mute md:col-span-4'>Exhibitions, performances & projects</span>
