@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { GoX } from 'react-icons/go'
+import { THEMED_BLOCKS } from '@/components/blocks/themeVars'
+import { SCRIM } from './styles'
 
 /** 전체 화면 미리보기 모달. Esc 또는 닫기 버튼으로 닫힌다 */
 export function PreviewModal({
@@ -37,7 +39,7 @@ export function PreviewModal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className='fixed inset-0 z-[70] flex flex-col bg-ink/40 p-2 md:p-4'
+          className={`fixed inset-0 z-[70] flex flex-col p-2 md:p-4 ${SCRIM}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -70,7 +72,10 @@ export function PreviewModal({
                 <GoX size={16} />
               </button>
             </div>
-            <div className='min-h-0 flex-1 overflow-y-auto'>{children}</div>
+            {/* 공개 페이지 블록의 검정 글자를 테마 글자색으로 (다크모드에서 묻히지 않게) */}
+            <div className='min-h-0 flex-1 overflow-y-auto' style={THEMED_BLOCKS}>
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}

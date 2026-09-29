@@ -7,6 +7,7 @@ import { BlockRenderer } from '@/components/BlockRenderer'
 import { Modal } from '@/components/admin/Modal'
 import { buttonClass, iconButtonClass } from '@/components/admin/ui'
 import { InlineDecoratorProvider } from '@/components/blocks/InlineDecorator'
+import { THEMED_BLOCKS } from '@/components/blocks/themeVars'
 import { useMentions } from '@/components/mentions/MentionProvider'
 import { MentionText, renderMentions } from '@/components/mentions/MentionText'
 import { MentionTextarea } from '@/components/mentions/MentionTextarea'
@@ -206,7 +207,8 @@ export function PostModal({
         {/* 본문: 블록(새 글) 또는 글자(예전 글) */}
         {/* 문단 속 '@이름'은 멘션으로 (누르면 프로필카드) */}
         {blocks.length > 0 ? (
-          <div className='flex flex-col'>
+          // 블록의 검정 글자를 테마 글자색으로 (다크모드에서 묻히지 않게)
+          <div className='flex flex-col' style={THEMED_BLOCKS}>
             <InlineDecoratorProvider decorate={decorateMentions}>
               <BlockRenderer blocks={blocks} blockClassNames={POST_BLOCK_CLASSES} />
             </InlineDecoratorProvider>
