@@ -2,18 +2,24 @@ import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { canEditWork, requireUser } from '@/lib/admin-auth'
 import { getAdminWork } from '@/lib/cms'
+import { getLabArticle } from '@/lib/lab'
 import { createUploadUrl, deleteR2Object, keyFromPublicR2Url, publicR2Url } from '@/lib/r2'
 import type { AdminUser } from '@/types/cms'
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
-/** 업로드 폴더(projects/<id>)의 주인인지: 운영자이거나, 프로젝트 / 본인 프로필 / 본인 계정(게시판 글 이미지) */
+/** 업로드 폴더(projects/<id>)의 주인인지: 운영자이거나, 프로젝트 / Lab 글 / 본인 프로필 / 본인 계정 */
 async function ownsFolder(user: AdminUser, folderId: string) {
   if (user.is_master) return true
   if (user.member_id && folderId === user.member_id) return true
   if (folderId === user.id) return true
   const work = await getAdminWork(folderId).catch(() => null)
-  return Boolean(work && canEditWork(user, work))
+  if (work && canEditWork(user, work)) return true
+
+  // Lab 대표 이미지는 <articleId>, 본문 이미지는 lab-<articleId>를 폴더 ID로 사용한다.
+  const articleId = folderId.startsWith('lab-') ? folderId.slice(4) : folderId
+  const article = await getLabArticle(articleId).catch(() => null)
+  return article?.author_id === user.id
 }
 
 export async function POST(request: NextRequest) {
@@ -54,4 +60,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized or storage unavailable' }, { status: 401 })
   }
 }
-
