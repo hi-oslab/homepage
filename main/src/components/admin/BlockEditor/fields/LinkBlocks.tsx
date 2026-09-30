@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { LinkBlock, EmbedBlock } from '@/types/blocks'
 import { Input, Select, Textarea, buttonClass } from '@/components/admin/ui'
+import { toEmbedUrl } from '@/lib/embed'
 
 export const LinkBlockField = ({
   block,
@@ -106,7 +107,7 @@ export const EmbedBlockField = ({
     <Input
       type='url'
       value={block.url}
-      placeholder='임베드할 iframe URL (Figma, CodeSandbox 등)'
+      placeholder='임베드할 URL (Figma 공유 링크는 그대로 붙여 넣어도 돼요)'
       onChange={(e) => onChange({ ...block, url: e.target.value })}
     />
     <Input
@@ -116,7 +117,7 @@ export const EmbedBlockField = ({
       onChange={(e) => onChange({ ...block, title: e.target.value })}
     />
     {block.url && (
-      <iframe src={block.url} title={block.title || 'embed preview'} className='h-80 w-full rounded-md border-0' />
+      <iframe src={toEmbedUrl(block.url)} title={block.title || 'embed preview'} className='h-80 w-full rounded-md border-0' />
     )}
   </div>
 )
