@@ -59,7 +59,7 @@ export function ArticleEditor({
 }: {
   initialArticle: LabArticle
   issues: LabIssue[]
-  /** 미리보기에 보일 글쓴이 (나) */
+  /** 미리보기에 보일 에디터 (나) */
   author: { name: string; image: string | null }
 }) {
   const router = useRouter()

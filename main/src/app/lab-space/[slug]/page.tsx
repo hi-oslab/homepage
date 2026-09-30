@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { LabArticleLayout } from '@/components/LabArticleLayout'
 import { getPublishedLab, getPublishedLabArticleBySlug } from '@/lib/lab'
+import { Discussion } from './Discussion'
 import { ViewCounter } from './ViewCounter'
 
 type PageParams = Promise<{ slug: string }>
@@ -40,6 +41,8 @@ export default async function Page({ params }: { params: PageParams }) {
       {/* 조회수는 브라우저에서 한 번 기록한다 (페이지는 캐시되므로) */}
       <ViewCounter articleId={article.id} />
       <LabArticleLayout article={article} />
+      {/* 좋아요 · 댓글은 보는 사람마다 달라서 브라우저에서 따로 불러온다 */}
+      <Discussion articleId={article.id} />
     </>
   )
 }

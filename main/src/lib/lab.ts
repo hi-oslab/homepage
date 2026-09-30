@@ -217,7 +217,7 @@ async function viewsSince(days: number): Promise<Map<string, number>> {
 
 /* ─── 공개 ─────────────────────────────────────────────────────────────── */
 
-/** 글쓴이 이름 · 프로필 이미지 (계정 → 연결된 프로필카드) */
+/** 에디터 이름 · 프로필 이미지 (계정 → 연결된 프로필카드) */
 async function authors(ids: string[]) {
   const unique = Array.from(new Set(ids))
   if (unique.length === 0) return new Map<string, { name: string; image: string | null }>()
@@ -237,7 +237,7 @@ async function authors(ids: string[]) {
   )
 }
 
-/** 글에 글쓴이 · 주차 이름을 붙인다 */
+/** 글에 에디터 · 주차 이름을 붙인다 */
 export async function toCards(articles: LabArticle[], issues: LabIssue[]): Promise<LabArticleCard[]> {
   const people = await authors(articles.map((article) => article.author_id))
   const issueTitle = new Map(issues.map((issue) => [issue.id, issue.title]))
@@ -249,7 +249,7 @@ export async function toCards(articles: LabArticle[], issues: LabIssue[]): Promi
   }))
 }
 
-/** 공개 Lab Space: 주차 + 공개된 글 (글쓴이 · 주차 이름 포함). 표가 없으면 null */
+/** 공개 Lab Space: 주차 + 공개된 글 (에디터 · 주차 이름 포함). 표가 없으면 null */
 export const getPublishedLab = cache(async () => {
   const issues = await getLabIssues()
   if (!issues) return null

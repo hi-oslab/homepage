@@ -10,7 +10,7 @@ const formatDate = (iso: string) => iso.slice(0, 10).replaceAll('-', '.')
 
 /**
  * Lab Space 글 상세 (공개 페이지 · 멤버 공간 미리보기 공용).
- * 프로젝트 상세(WorkDetailLayout)와 같은 결: 커버 → 주차 · 날짜 → 제목 · 부제 → 글쓴이 → 본문
+ * 프로젝트 상세(WorkDetailLayout)와 같은 결: 커버 → 주차 · 날짜 → 제목 · 부제 → 에디터 → 본문
  */
 export function LabArticleLayout({ article }: { article: LabArticleCard }) {
   const blocks = parseBlocks(article.content)

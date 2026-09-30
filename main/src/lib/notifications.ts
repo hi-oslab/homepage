@@ -43,7 +43,8 @@ export async function getNotifications(user: AdminUser): Promise<NotificationIte
       .then(({ data }) => (data ?? []) as T[])
   type Row = { id: string; author_id: string | null; body: string; created_at: string }
 
-  const [accounts, posts, comments, suggestions, suggestionComments] = await Promise.all([
+  type LabCommentRow = Row & { article_id: string; guest_name: string | null; secret: boolean }
+  const [accounts, posts, comments, suggestions, suggestionComments, labComments] = await Promise.all([
     supabase.from('admin_users').select('id,name,username,status,master_requested,created_at'),
     recent<Row & { kind: string; title: string; content: string | null }>(
       'community_posts',
@@ -52,6 +53,7 @@ export async function getNotifications(user: AdminUser): Promise<NotificationIte
     recent<Row & { post_id: string }>('community_comments', 'id,post_id,author_id,body,created_at'),
     recent<Row>('site_suggestions', 'id,author_id,body,created_at'),
     recent<Row>('site_suggestion_comments', 'id,author_id,body,created_at'),
+    recent<LabCommentRow>('lab_comments', 'id,article_id,author_id,guest_name,secret,body,created_at'),
   ])
   const users = accounts.data ?? []
   const nameOf = (id: string | null) => users.find((item) => item.id === id)?.name ?? '탈퇴한 멤버'
@@ -77,6 +79,42 @@ export async function getNotifications(user: AdminUser): Promise<NotificationIte
   for (const comment of comments) mention(`comment:${comment.id}`, comment, '댓글', comment.body)
   for (const item of suggestions) mention(`suggestion:${item.id}`, item, '건의사항', item.body)
   for (const item of suggestionComments) mention(`suggestion-comment:${item.id}`, item, '건의사항 코멘트', item.body)
+
+  // Lab Space 댓글: 작성한 글에 달린 댓글(게스트 포함, 비밀 댓글도 에디터는 볼 수 있다) · 나를 언급한 멤버 댓글
+  if (labComments.length) {
+    const { data: labArticles } = await supabase
+      .from('lab_articles')
+      .select('id,slug,title,author_id')
+      .in('id', Array.from(new Set(labComments.map((comment) => comment.article_id))))
+    const articleOf = new Map((labArticles ?? []).map((article) => [article.id as string, article]))
+    for (const comment of labComments) {
+      const article = articleOf.get(comment.article_id)
+      if (!article || comment.author_id === user.id) continue
+      const who = comment.guest_name ? `${comment.guest_name}(게스트)` : nameOf(comment.author_id)
+      const href = `/lab-space/${article.slug}`
+      const onMine = article.author_id === user.id
+      // 비밀 댓글은 에디터만 볼 수 있으므로 언급 알림도 보내지 않는다 (게스트는 언급을 쓸 수 없다)
+      if (!comment.guest_name && !comment.secret && mentions(comment.body, approved, user.id)) {
+        items.push({
+          id: `mention:lab-comment:${comment.id}`,
+          kind: 'mention',
+          title: `${who}님이 Lab Space 댓글에서 회원님을 언급했어요`,
+          detail: preview(comment.body),
+          at: comment.created_at,
+          href,
+        })
+      } else if (onMine) {
+        items.push({
+          id: `lab-comment:${comment.id}`,
+          kind: 'comment',
+          title: `${who}님이 작성한 Lab Space 글에 ${comment.secret ? '비밀 ' : ''}댓글을 달았어요`,
+          detail: preview(comment.body),
+          at: comment.created_at,
+          href,
+        })
+      }
+    }
+  }
 
   // 승인 대기 (운영자만, 기간과 상관없이 모두)
   if (user.is_master) {
