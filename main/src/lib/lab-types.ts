@@ -55,7 +55,21 @@ export const canEditLabArticle = (
 export type LabArticleCard = LabArticle & {
   author_name: string
   author_image: string | null
+  /** 지정 편집자의 이름 (작성자는 author_name으로 별도 보관) */
+  editor_names: string[]
   issue_title: string
+}
+
+/** 공개 페이지에 표시할 작성자/공동 편집자 문구 */
+export const labArticleByline = (
+  article: Pick<LabArticleCard, 'author_name' | 'editor_names' | 'edit_scope'>,
+  compact = false,
+) => {
+  if (article.edit_scope === 'all') return 'All'
+  const names =
+    article.edit_scope === 'selected' ? [article.author_name, ...article.editor_names] : [article.author_name]
+  const unique = Array.from(new Set(names))
+  return compact && unique.length > 1 ? `${unique[0]} 외 ${unique.length - 1}명` : unique.join(', ')
 }
 
 /** 작성자가 고칠 수 있는 칸 */

@@ -246,12 +246,13 @@ async function authors(ids: string[]) {
 
 /** 글에 에디터 · 주차 이름을 붙인다 */
 export async function toCards(articles: LabArticle[], issues: LabIssue[]): Promise<LabArticleCard[]> {
-  const people = await authors(articles.map((article) => article.author_id))
+  const people = await authors(articles.flatMap((article) => [article.author_id, ...article.editor_ids]))
   const issueTitle = new Map(issues.map((issue) => [issue.id, issue.title]))
   return articles.map((article) => ({
     ...article,
     author_name: people.get(article.author_id)?.name ?? '탈퇴한 멤버',
     author_image: people.get(article.author_id)?.image ?? null,
+    editor_names: article.editor_ids.map((id) => people.get(id)?.name ?? '탈퇴한 멤버'),
     issue_title: issueTitle.get(article.issue_id) ?? '',
   }))
 }

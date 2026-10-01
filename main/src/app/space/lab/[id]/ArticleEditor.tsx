@@ -361,6 +361,11 @@ export function ArticleEditor({
             content,
             author_name: author.name,
             author_image: author.image,
+            edit_scope: access.edit_scope,
+            editor_ids: access.editor_ids,
+            editor_names: access.editor_ids.map(
+              (id) => editors.find((editor) => editor.id === id)?.name ?? '탈퇴한 멤버',
+            ),
             issue_title: issueTitle,
           }}
         />

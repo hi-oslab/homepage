@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { BlockRenderer } from '@/components/BlockRenderer'
 import { ProfileImage } from '@/components/ProfileImage'
 import { parseBlocks } from '@/lib/blocks'
-import type { LabArticleCard } from '@/lib/lab-types'
+import { labArticleByline, type LabArticleCard } from '@/lib/lab-types'
 
 const CONTENT_MAX_WIDTH = 'max-w-[1080px]'
 
@@ -14,6 +14,7 @@ const formatDate = (iso: string) => iso.slice(0, 10).replaceAll('-', '.')
  */
 export function LabArticleLayout({ article }: { article: LabArticleCard }) {
   const blocks = parseBlocks(article.content)
+  const byline = labArticleByline(article)
 
   return (
     <article className='w-full pb-20 md:pb-32'>
@@ -40,10 +41,17 @@ export function LabArticleLayout({ article }: { article: LabArticleCard }) {
           <p className='mt-5 text-lg leading-snug break-keep text-mute md:text-2xl'>{article.subtitle}</p>
         )}
         <div className='mt-8 flex items-center gap-3 border-t border-ink/10 pt-6'>
-          <ProfileImage src={article.author_image} name={article.author_name} size='sm' className='size-10 text-sm' />
+          <ProfileImage
+            src={article.edit_scope === 'all' ? null : article.author_image}
+            name={byline}
+            size='sm'
+            className='size-10 text-sm'
+          />
           <span className='flex flex-col'>
-            <span className='text-sm'>{article.author_name}</span>
-            <span className='text-xs text-mute'>Written by</span>
+            <span className='text-sm'>{byline}</span>
+            <span className='text-xs text-mute'>
+              {article.edit_scope === 'all' ? 'Open collaboration' : 'Written by'}
+            </span>
           </span>
         </div>
       </header>

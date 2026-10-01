@@ -4,7 +4,13 @@ import { OG_IMAGE } from '@/app/metadata'
 import { InView } from '@/components'
 import { ProfileImage } from '@/components/ProfileImage'
 import { getPublishedLab } from '@/lib/lab'
-import { LAB_BEST_PERIODS, type LabArticleCard, type LabIssue, type LabRecommendMode } from '@/lib/lab-types'
+import {
+  LAB_BEST_PERIODS,
+  labArticleByline,
+  type LabArticleCard,
+  type LabIssue,
+  type LabRecommendMode,
+} from '@/lib/lab-types'
 import { HScroll } from './HScroll'
 
 export const revalidate = 60 // 조회수 · 새 글을 1분마다 반영
@@ -90,9 +96,13 @@ export default async function Page() {
                 <div className='flex items-baseline justify-between gap-4'>
                   <Label>{periodLabel(issue)}</Label>
                 </div>
-                <h2 className='text-4xl leading-none tracking-[-0.04em] font-semibold break-keep md:text-5xl lg:text-6xl'>{issue.title}</h2>
+                <h2 className='text-4xl leading-none tracking-[-0.04em] font-semibold break-keep md:text-5xl lg:text-6xl'>
+                  {issue.title}
+                </h2>
                 {issue.description && (
-                  <p className='max-w-sm text-sm font-normal leading-relaxed break-keep md:max-w-lg lg:max-w-sm'>{issue.description}</p>
+                  <p className='max-w-sm text-sm font-normal leading-relaxed break-keep md:max-w-lg lg:max-w-sm'>
+                    {issue.description}
+                  </p>
                 )}
               </div>
 
@@ -179,7 +189,7 @@ function CompactCard({ article, rank }: { article: LabArticleCard; rank?: number
         <span className='line-clamp-2 text-sm leading-snug font-medium break-keep transition-colors group-hover:text-mute'>
           {article.title}
         </span>
-        <span className='text-[11px] text-mute'>{article.author_name}</span>
+        <span className='text-[11px] text-mute'>{labArticleByline(article, true)}</span>
       </div>
     </Link>
   )
@@ -203,17 +213,19 @@ function RowCard({ article }: { article: LabArticleCard }) {
             {article.title}
           </span>
           {article.subtitle && (
-            <span className='line-clamp-1 text-xs sm:text-sm lg:text-base break-keep text-mute'>{article.subtitle}</span>
+            <span className='line-clamp-1 text-xs sm:text-sm lg:text-base break-keep text-mute'>
+              {article.subtitle}
+            </span>
           )}
         </div>
         <span className='flex items-center gap-1.5 text-[11px] md:text-sm mb-1'>
           <ProfileImage
-            src={article.author_image}
-            name={article.author_name}
+            src={article.edit_scope === 'all' ? null : article.author_image}
+            name={labArticleByline(article, true)}
             size='sm'
             className='size-4 md:size-6 text-[8px] md:text-sm'
           />
-          {article.author_name}
+          {labArticleByline(article, true)}
         </span>
       </div>
     </Link>
