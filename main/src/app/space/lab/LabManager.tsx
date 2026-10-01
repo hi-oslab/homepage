@@ -35,6 +35,9 @@ import {
   LAB_RECOMMEND_MODES,
   LAB_SECTION_LIMITS,
   issuePhase,
+  canEditLabArticle,
+  type LabEditAccess,
+  type LabEditorOption,
   type LabArticleCard,
   type LabIssue,
   type LabSettings,
@@ -64,9 +67,10 @@ export function LabManager({
   isLead,
   settings: initialSettings,
   settingsReady,
+  editors,
 }: {
   issues: LabIssue[]
-  /** 멤버: 직접 작성한 글만 / 운영자: 모든 글 */
+  /** 멤버: 편집 가능한 글 / 운영자: 모든 글 */
   articles: LabArticleCard[]
   userId: string
   isLead: boolean
@@ -74,6 +78,7 @@ export function LabManager({
   settings: LabSettings
   /** 설정 표가 있는지 (20261012 마이그레이션) */
   settingsReady: boolean
+  editors: LabEditorOption[]
 }) {
   const toast = useToast()
   const router = useRouter()
@@ -87,6 +92,7 @@ export function LabManager({
   const [managing, setManaging] = useState(false)
   const [configuring, setConfiguring] = useState(false)
   const [creating, startCreating] = useTransition()
+  const [createFor, setCreateFor] = useState<LabIssue | null>(null)
   const [saving, startSaving] = useTransition()
   /** 목록에서 고른 글 (지우기) */
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
@@ -116,11 +122,13 @@ export function LabManager({
   // 추천 스위치는 '직접 선택'일 때만 의미가 있다
   const manualRecommend = isLead && settings.recommend_enabled && settings.recommend_mode === 'manual'
 
-  const write = (issue: LabIssue) => {
+  const write = (access: LabEditAccess) => {
+    const issue = createFor
+    if (!issue) return
     if (creating) return
     startCreating(async () => {
       // 성공하면 서버가 편집 화면으로 보낸다. 작성 기간이 아니면 안내만 돌아온다
-      const result = await createArticleAction(issue.id)
+      const result = await createArticleAction(issue.id, access)
       if (result && 'message' in result) toast.show(result.message, 'error')
     })
   }
@@ -303,14 +311,14 @@ export function LabManager({
             onPick={() => setPicking(true)}
             creating={creating}
             isLead={isLead}
-            onWrite={write}
+            onWrite={setCreateFor}
             onEdit={() => topic && setForm(formOf(topic))}
           />
 
           <div className='flex min-h-8 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-1'>
             <span className='flex items-center gap-2'>
               <span className='text-xs text-mute tabular-nums'>
-                {mineOnly || !isLead ? '작성한 글' : '글'} {total}
+                {mineOnly ? '작성한 글' : !isLead ? '편집 가능한 글' : '글'} {total}
               </span>
               {/* 선택 막대: 고르면 지우기 버튼이 나온다 */}
               {chosen.length > 0 && (
@@ -331,7 +339,7 @@ export function LabManager({
                 </>
               )}
             </span>
-            {/* 멤버는 원래 직접 작성한 글만 보이므로 운영자에게만 */}
+            {/* 운영자는 전체 글 중 본인 작성 글만 따로 볼 수 있다. */}
             {isLead && (
               <label className='flex cursor-pointer items-center gap-1.5 text-sm text-mute'>
                 <Checkbox checked={mineOnly} onChange={(event) => setMineOnly(event.target.checked)} />
@@ -342,7 +350,7 @@ export function LabManager({
 
           {groups.length === 0 ? (
             <p className='rounded-block bg-surface py-14 text-center text-sm text-mute'>
-              {mineOnly || !isLead ? '아직 작성한 글이 없어요.' : '아직 글이 없어요.'}
+              {mineOnly ? '아직 작성한 글이 없어요.' : !isLead ? '아직 편집 가능한 글이 없어요.' : '아직 글이 없어요.'}
             </p>
           ) : (
             <ArticleTable
@@ -350,7 +358,7 @@ export function LabManager({
               grouped={!topicId}
               userId={userId}
               recommendSwitch={manualRecommend}
-              showAuthor={isLead}
+              showAuthor
               colorOf={colorOf}
               canDelete={canDelete}
               selected={selected}
@@ -368,8 +376,20 @@ export function LabManager({
         open={picking}
         issues={issues}
         creating={creating}
-        onWrite={write}
+        onWrite={(issue) => {
+          setPicking(false)
+          setCreateFor(issue)
+        }}
         onClose={() => setPicking(false)}
+      />
+      <EditAccessModal
+        open={Boolean(createFor)}
+        editors={editors}
+        ownerId={userId}
+        saving={creating}
+        title={createFor ? `'${createFor.title}'에 새 글` : '새 글'}
+        onSave={write}
+        onClose={() => setCreateFor(null)}
       />
       <TopicManageModal
         open={managing}
@@ -1062,9 +1082,9 @@ function ArticleTable({
   const selectedCount = selectable.filter((article) => selected.has(article.id)).length
   const allSelected = selectable.length > 0 && selectedCount === selectable.length
 
-  // 작성한 글은 편집 화면, 다른 사람의 공개 글은 공개 페이지(새 탭)
+  // 공동 편집 권한이 있으면 편집 화면, 아니면 공개 글만 공개 페이지로 연다.
   const open = (article: LabArticleCard) => {
-    if (article.author_id === userId) router.push(`/space/lab/${article.id}`)
+    if (canEditLabArticle(article, userId)) router.push(`/space/lab/${article.id}`)
     else if (article.published) window.open(`/lab-space/${article.slug}`, '_blank', 'noopener')
   }
 
@@ -1106,7 +1126,7 @@ function ArticleTable({
         {groups.map(({ issue, rows }) => (
           <tbody key={issue.id} className='border-t border-ink/10 first-of-type:border-t-0'>
             {rows.map((article) => {
-              const own = article.author_id === userId
+              const editable = canEditLabArticle(article, userId)
               const checked = selected.has(article.id)
               return (
                 <tr
@@ -1114,7 +1134,7 @@ function ArticleTable({
                   onClick={() => open(article)}
                   className={classNames(
                     'border-t border-ink/5 transition-colors first:border-t-0',
-                    (own || article.published) && 'cursor-pointer hover:bg-ink/3',
+                    (editable || article.published) && 'cursor-pointer hover:bg-ink/3',
                     checked && 'bg-ink/3',
                     (busyId === article.id || (deleting && checked)) && 'opacity-50',
                   )}
@@ -1192,7 +1212,7 @@ function ArticleTable({
                   </td>
                   {/* 누르면 어디로 가는지 버튼으로 보여 준다 */}
                   <td className={classNames(TD, 'w-0 text-right whitespace-nowrap')}>
-                    {own ? (
+                    {editable ? (
                       <span className={buttonClass('secondary', 'sm')}>
                         <GoPencil size={12} />
                         편집
@@ -1211,5 +1231,76 @@ function ArticleTable({
         ))}
       </table>
     </div>
+  )
+}
+
+function EditAccessModal({
+  open,
+  editors,
+  ownerId,
+  saving,
+  title,
+  onSave,
+  onClose,
+}: {
+  open: boolean
+  editors: LabEditorOption[]
+  ownerId: string
+  saving: boolean
+  title: string
+  onSave: (access: LabEditAccess) => void
+  onClose: () => void
+}) {
+  const [scope, setScope] = useState<LabEditAccess['edit_scope']>('all')
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
+  const candidates = editors.filter((editor) => editor.id !== ownerId)
+  return (
+    <Modal open={open} onClose={onClose} title={title} meta='누가 이 글을 편집할 수 있을까요?'>
+      <div className='flex flex-col gap-4'>
+        <Field label='편집 권한'>
+          <Select value={scope} onChange={(event) => setScope(event.target.value as LabEditAccess['edit_scope'])}>
+            <option value='all'>전체 멤버</option>
+            <option value='owner'>본인만</option>
+            <option value='selected'>멤버 지정</option>
+          </Select>
+        </Field>
+        {scope === 'selected' && (
+          <div className='rounded-inner max-h-56 overflow-y-auto bg-ink/4 p-2'>
+            {candidates.map((editor) => (
+              <label
+                key={editor.id}
+                className='flex cursor-pointer items-center gap-2 rounded px-2 py-2 text-sm hover:bg-ink/4'
+              >
+                <Checkbox
+                  checked={selected.has(editor.id)}
+                  onChange={(event) =>
+                    setSelected((current) => {
+                      const next = new Set(current)
+                      event.target.checked ? next.add(editor.id) : next.delete(editor.id)
+                      return next
+                    })
+                  }
+                />
+                {editor.name}
+              </label>
+            ))}
+            {candidates.length === 0 && <p className='p-2 text-xs text-mute'>지정할 수 있는 멤버가 없어요.</p>}
+          </div>
+        )}
+        <div className='flex justify-end gap-2'>
+          <button type='button' onClick={onClose} className={buttonClass('ghost')}>
+            취소
+          </button>
+          <button
+            type='button'
+            disabled={saving || (scope === 'selected' && selected.size === 0)}
+            onClick={() => onSave({ edit_scope: scope, editor_ids: scope === 'selected' ? Array.from(selected) : [] })}
+            className={buttonClass('primary')}
+          >
+            {saving ? '여는 중…' : '글 만들기'}
+          </button>
+        </div>
+      </div>
+    </Modal>
   )
 }

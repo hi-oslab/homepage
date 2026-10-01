@@ -21,6 +21,10 @@ export type LabArticle = {
   id: string
   issue_id: string
   author_id: string
+  /** 편집 권한: 모든 멤버 / 작성자만 / 지정 멤버 */
+  edit_scope: LabEditScope
+  /** edit_scope가 selected일 때 편집 가능한 계정 id */
+  editor_ids: string[]
   slug: string
   title: string
   subtitle: string
@@ -35,6 +39,17 @@ export type LabArticle = {
   created_at: string
   updated_at: string
 }
+
+export type LabEditScope = 'all' | 'owner' | 'selected'
+
+export type LabEditorOption = { id: string; name: string }
+
+export type LabEditAccess = { edit_scope: LabEditScope; editor_ids: string[] }
+
+export const canEditLabArticle = (
+  article: Pick<LabArticle, 'author_id' | 'edit_scope' | 'editor_ids'>,
+  userId: string,
+) => article.author_id === userId || article.edit_scope === 'all' || article.editor_ids.includes(userId)
 
 /** 글쓴이 · 주차 이름을 붙인 글 (목록 · 공개 페이지용) */
 export type LabArticleCard = LabArticle & {

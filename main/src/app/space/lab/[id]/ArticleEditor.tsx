@@ -10,6 +10,7 @@ import { AutoTextarea } from '@/components/admin/BlockEditor/AutoTextarea'
 import { PreviewModal } from '@/components/admin/PreviewModal'
 import {
   EditorBar,
+  Checkbox,
   Field,
   ImageDrop,
   Input,
@@ -26,10 +27,10 @@ import {
 import { LabArticleLayout } from '@/components/LabArticleLayout'
 import { parseBlocks, serializeBlocks } from '@/lib/blocks'
 import { callAction } from '@/lib/call-action'
-import type { LabArticle, LabArticleInput, LabIssue } from '@/lib/lab-types'
+import type { LabArticle, LabArticleInput, LabEditAccess, LabEditorOption, LabIssue } from '@/lib/lab-types'
 import { deleteImage, isOwnStorageUrl, uploadImage } from '@/lib/storage'
 import type { Block } from '@/types/blocks'
-import { deleteArticleAction, updateArticleAction } from '../actions'
+import { deleteArticleAction, updateArticleAccessAction, updateArticleAction } from '../actions'
 
 type Draft = Omit<LabArticleInput, 'content'>
 
@@ -56,19 +57,27 @@ export function ArticleEditor({
   initialArticle,
   issues,
   author,
+  viewerId,
+  editors,
 }: {
   initialArticle: LabArticle
   issues: LabIssue[]
   /** 미리보기에 보일 에디터 (나) */
   author: { name: string; image: string | null }
+  viewerId: string
+  editors: LabEditorOption[]
 }) {
   const router = useRouter()
   const toast = useToast()
   const articleId = initialArticle.id
   const [draft, setDraft] = useState<Draft>(() => toDraft(initialArticle))
   const [blocks, setBlocks] = useState<Block[]>(() => parseBlocks(initialArticle.content))
+  const [access, setAccess] = useState<LabEditAccess>(() => ({
+    edit_scope: initialArticle.edit_scope,
+    editor_ids: initialArticle.editor_ids,
+  }))
   const [saved, setSaved] = useState(() =>
-    JSON.stringify({ draft: toDraft(initialArticle), content: initialArticle.content }),
+    JSON.stringify({ draft: toDraft(initialArticle), content: initialArticle.content, access }),
   )
   const [savedSlug, setSavedSlug] = useState(initialArticle.slug)
   const [wasPublished, setWasPublished] = useState(initialArticle.published)
@@ -80,7 +89,7 @@ export function ArticleEditor({
     () => serializeBlocks(blocks.filter((block) => !(block.type === 'paragraph' && !block.text.trim()))),
     [blocks],
   )
-  const dirty = JSON.stringify({ draft, content }) !== saved
+  const dirty = JSON.stringify({ draft, content, access }) !== saved
   useUnsavedWarning(dirty)
 
   const patch = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -94,9 +103,13 @@ export function ArticleEditor({
         updateArticleAction(articleId, { ...draft, slug: draft.slug.trim(), content }),
       )
       if ('message' in result) return toast.show(result.message, 'error')
+      if (initialArticle.author_id === viewerId) {
+        const accessResult = await callAction(() => updateArticleAccessAction(articleId, access))
+        if ('message' in accessResult) return toast.show(accessResult.message, 'error')
+      }
       const next = toDraft(result.data!)
       setDraft(next)
-      setSaved(JSON.stringify({ draft: next, content: result.data!.content }))
+      setSaved(JSON.stringify({ draft: next, content: result.data!.content, access }))
       setSavedSlug(result.data!.slug)
       setWasPublished(result.data!.published)
       toast.show('저장했어요')
@@ -281,9 +294,57 @@ export function ArticleEditor({
             </Field>
           </Panel>
 
-          <button type='button' onClick={remove} className={buttonClass('danger', 'md', 'self-start')}>
-            이 글 삭제
-          </button>
+          {initialArticle.author_id === viewerId && (
+            <Panel title='편집 권한'>
+              <Field label='편집할 수 있는 멤버'>
+                <Select
+                  value={access.edit_scope}
+                  onChange={(event) =>
+                    setAccess((current) => ({
+                      edit_scope: event.target.value as LabEditAccess['edit_scope'],
+                      editor_ids: event.target.value === 'selected' ? current.editor_ids : [],
+                    }))
+                  }
+                >
+                  <option value='all'>전체 멤버</option>
+                  <option value='owner'>본인만</option>
+                  <option value='selected'>멤버 지정</option>
+                </Select>
+              </Field>
+              {access.edit_scope === 'selected' && (
+                <div className='rounded-inner max-h-48 overflow-y-auto bg-ink/4 p-2'>
+                  {editors
+                    .filter((editor) => editor.id !== viewerId)
+                    .map((editor) => (
+                      <label
+                        key={editor.id}
+                        className='flex cursor-pointer items-center gap-2 rounded px-2 py-2 text-sm hover:bg-ink/4'
+                      >
+                        <Checkbox
+                          checked={access.editor_ids.includes(editor.id)}
+                          onChange={(event) =>
+                            setAccess((current) => ({
+                              ...current,
+                              editor_ids: event.target.checked
+                                ? [...current.editor_ids, editor.id]
+                                : current.editor_ids.filter((id) => id !== editor.id),
+                            }))
+                          }
+                        />
+                        {editor.name}
+                      </label>
+                    ))}
+                </div>
+              )}
+              <p className='text-xs text-mute'>삭제와 이 권한 변경은 작성자만 할 수 있어요.</p>
+            </Panel>
+          )}
+
+          {initialArticle.author_id === viewerId && (
+            <button type='button' onClick={remove} className={buttonClass('danger', 'md', 'self-start')}>
+              이 글 삭제
+            </button>
+          )}
         </aside>
       </div>
 

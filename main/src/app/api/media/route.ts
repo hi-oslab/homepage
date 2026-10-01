@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { canEditWork, requireUser } from '@/lib/admin-auth'
 import { getAdminWork } from '@/lib/cms'
 import { getLabArticle } from '@/lib/lab'
+import { canEditLabArticle } from '@/lib/lab-types'
 import { createUploadUrl, deleteR2Object, keyFromPublicR2Url, publicR2Url } from '@/lib/r2'
 import type { AdminUser } from '@/types/cms'
 
@@ -19,7 +20,7 @@ async function ownsFolder(user: AdminUser, folderId: string) {
   // Lab 대표 이미지는 <articleId>, 본문 이미지는 lab-<articleId>를 폴더 ID로 사용한다.
   const articleId = folderId.startsWith('lab-') ? folderId.slice(4) : folderId
   const article = await getLabArticle(articleId).catch(() => null)
-  return article?.author_id === user.id
+  return Boolean(article && canEditLabArticle(article, user.id))
 }
 
 export async function POST(request: NextRequest) {

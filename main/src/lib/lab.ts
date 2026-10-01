@@ -8,6 +8,7 @@ import {
   type LabArticle,
   type LabArticleCard,
   type LabArticleInput,
+  type LabEditAccess,
   type LabIssue,
   type LabIssueInput,
   type LabSettings,
@@ -118,12 +119,12 @@ async function dateSlug() {
   return `${base}-${index}`
 }
 
-export async function createLabArticle(authorId: string, issueId: string): Promise<LabArticle> {
+export async function createLabArticle(authorId: string, issueId: string, access: LabEditAccess): Promise<LabArticle> {
   // 두 사람이 같은 순간에 만들어 slug가 겹치면 번호를 다시 골라 한 번 더 시도한다
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const { data, error } = await db()
       .from('lab_articles')
-      .insert({ author_id: authorId, issue_id: issueId, slug: await dateSlug(), title: '제목 없음' })
+      .insert({ author_id: authorId, issue_id: issueId, ...access, slug: await dateSlug(), title: '제목 없음' })
       .select('*')
       .single()
     if (error?.code === '23505') continue
@@ -131,6 +132,12 @@ export async function createLabArticle(authorId: string, issueId: string): Promi
     return data as LabArticle
   }
   throw new Error('새 글의 주소를 만들지 못했어요.')
+}
+
+export async function updateLabArticleAccess(id: string, access: LabEditAccess): Promise<LabArticle> {
+  const { data, error } = await db().from('lab_articles').update(access).eq('id', id).select('*').single()
+  if (error) throw error
+  return data as LabArticle
 }
 
 export async function updateLabArticle(id: string, input: Partial<LabArticleInput>): Promise<LabArticle> {

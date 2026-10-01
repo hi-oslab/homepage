@@ -16,6 +16,7 @@ import {
   saveLabSettings,
   setLabArticleRecommended,
   updateLabArticle,
+  updateLabArticleAccess,
   updateLabIssue,
 } from '@/lib/lab'
 import {
@@ -24,6 +25,7 @@ import {
   issuePhase,
   type LabArticle,
   type LabArticleInput,
+  type LabEditAccess,
   type LabIssue,
   type LabIssueInput,
   type LabSettings,
@@ -130,9 +132,20 @@ export async function deleteIssueAction(id: string) {
   })
 }
 
-/* ─── 글 (작성자 본인) ───────────────────────────────────────────────────── */
+/* ─── 글 (작성자 또는 공동 편집자) ───────────────────────────────────────── */
 
-/** 본인 글인지 확인하고 글을 돌려준다 (다른 사람 글은 운영자라도 고칠 수 없다) */
+/** 편집 권한을 확인한다. 삭제와 권한 변경은 별도로 작성자만 허용한다. */
+async function requireEditableArticle(id: string) {
+  const user = await requireUser()
+  const article = await getLabArticle(id)
+  if (
+    !article ||
+    !(article.author_id === user.id || article.edit_scope === 'all' || article.editor_ids.includes(user.id))
+  )
+    throw new Error('Forbidden')
+  return article
+}
+
 async function requireOwnArticle(id: string) {
   const user = await requireUser()
   const article = await getLabArticle(id)
@@ -140,21 +153,27 @@ async function requireOwnArticle(id: string) {
   return article
 }
 
+const normalizeAccess = (input: LabEditAccess, ownerId: string): LabEditAccess => ({
+  edit_scope: ['all', 'owner', 'selected'].includes(input.edit_scope) ? input.edit_scope : 'owner',
+  editor_ids:
+    input.edit_scope === 'selected' ? Array.from(new Set(input.editor_ids.filter((id) => id !== ownerId))) : [],
+})
+
 /** 이 주차에 새 글을 만들고 편집 화면으로. 작성 기간이 아니면 안내 문구를 돌려준다 */
-export async function createArticleAction(issueId: string): Promise<Result> {
+export async function createArticleAction(issueId: string, access: LabEditAccess): Promise<Result> {
   const user = await requireUser()
   const issue = await getLabIssue(issueId)
   if (!issue) return { ok: false, message: '토픽을 찾을 수 없어요.' }
   const phase = issuePhase(issue)
   if (phase !== 'open')
     return { ok: false, message: phase === 'upcoming' ? '아직 작성 기간이 아니에요.' : '작성 기간이 끝난 토픽이에요.' }
-  const article = await createLabArticle(user.id, issueId)
+  const article = await createLabArticle(user.id, issueId, normalizeAccess(access, user.id))
   redirect(`/space/lab/${article.id}`)
 }
 
 export async function updateArticleAction(id: string, input: Partial<LabArticleInput>) {
   return run<LabArticle>(async () => {
-    const previous = await requireOwnArticle(id)
+    const previous = await requireEditableArticle(id)
     if (input.slug !== undefined && !input.slug.trim()) return { ok: false, message: 'Slug를 입력해 주세요.' }
     try {
       const article = await updateLabArticle(id, input)
@@ -165,6 +184,15 @@ export async function updateArticleAction(id: string, input: Partial<LabArticleI
         return { ok: false, message: '다른 글과 slug가 겹쳐요. 다른 slug를 써 주세요.' }
       throw error
     }
+  })
+}
+
+export async function updateArticleAccessAction(id: string, access: LabEditAccess) {
+  return run<LabArticle>(async () => {
+    const article = await requireOwnArticle(id)
+    const next = await updateLabArticleAccess(id, normalizeAccess(access, article.author_id))
+    revalidateLab([next.slug])
+    return { ok: true, data: next }
   })
 }
 

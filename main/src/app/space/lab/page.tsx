@@ -1,10 +1,12 @@
 import { requirePageUser } from '@/lib/admin-auth'
 import { getAllLabArticles, getLabIssues, getLabSettings, toCards } from '@/lib/lab'
+import { getAdminUsers } from '@/lib/cms'
+import { canEditLabArticle } from '@/lib/lab-types'
 import { LabManager } from './LabManager'
 
 export const dynamic = 'force-dynamic'
 
-/** Lab Space (멤버 공간): 주차 표 + 글 표. 편집은 본인 글만, 주차 · 추천 관리는 리드 멤버(운영자) */
+/** Lab Space (멤버 공간): 주차 표 + 편집 가능한 글 표 */
 export default async function SpaceLabPage() {
   const user = await requirePageUser()
   const issues = await getLabIssues()
@@ -18,9 +20,9 @@ export default async function SpaceLabPage() {
     )
   }
 
-  const [articles, lab] = await Promise.all([getAllLabArticles(), getLabSettings()])
-  // 멤버: 직접 작성한 글만 (다른 사람 글은 공개 페이지에서) / 운영자: 모든 글
-  const visible = user.is_master ? articles : articles.filter((article) => article.author_id === user.id)
+  const [articles, lab, users] = await Promise.all([getAllLabArticles(), getLabSettings(), getAdminUsers()])
+  // 멤버는 본인 또는 공동 편집 가능한 글을 보고, 운영자는 관리 목적으로 모든 글을 본다.
+  const visible = user.is_master ? articles : articles.filter((article) => canEditLabArticle(article, user.id))
 
   return (
     <LabManager
@@ -30,6 +32,7 @@ export default async function SpaceLabPage() {
       isLead={user.is_master}
       settings={lab.settings}
       settingsReady={lab.ready}
+      editors={users.filter((account) => account.status === 'approved').map(({ id, name }) => ({ id, name }))}
     />
   )
 }
