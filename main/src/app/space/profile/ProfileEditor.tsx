@@ -99,7 +99,7 @@ export function ProfileEditor({
       {/* 상단 바: 저장 상태 · 공개 여부 · 미리보기 · 저장 (프로젝트 편집과 같은 모양) */}
       <EditorBar>
         <div className='flex min-w-0 items-baseline gap-3'>
-          <h1 className='truncate text-lg font-medium tracking-[-0.02em]'>프로필카드 설정</h1>
+          <h1 className='truncate text-lg font-medium '>프로필카드 설정</h1>
           <SaveState dirty={dirty} saving={isPending} className='hidden sm:inline-flex' />
         </div>
         <div className='flex shrink-0 items-center gap-2'>

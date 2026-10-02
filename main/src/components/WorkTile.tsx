@@ -6,7 +6,7 @@ import type { Work } from '@/types/cms'
 export const WorkTile = ({
   work,
   className,
-  aspect = 'aspect-[4/3]',
+  aspect = 'aspect-[16/9]',
 }: {
   work: Work
   className?: string
@@ -28,9 +28,7 @@ export const WorkTile = ({
     </div>
     <div className='flex flex-col gap-1 text-sm leading-snug'>
       <h3 className='break-keep font-medium text-ink'>{work.title}</h3>
-      <p className='text-mute'>
-        {[work.category, work.year].filter(Boolean).join(' · ')}
-      </p>
+      <p className='text-mute'>{[work.category, work.year].filter(Boolean).join(' · ')}</p>
     </div>
   </Link>
 )

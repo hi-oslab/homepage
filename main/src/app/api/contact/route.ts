@@ -22,7 +22,8 @@ const looksRandom = (value: string) => {
   if (value.length < 12 || /\s/.test(value) || !/^[A-Za-z]+$/.test(value)) return false
   let switches = 0
   for (let index = 1; index < value.length; index += 1) {
-    if ((value[index] === value[index].toUpperCase()) !== (value[index - 1] === value[index - 1].toUpperCase())) switches += 1
+    if ((value[index] === value[index].toUpperCase()) !== (value[index - 1] === value[index - 1].toUpperCase()))
+      switches += 1
   }
   return switches >= value.length / 3
 }
@@ -57,7 +58,12 @@ export async function POST(req: NextRequest) {
   const message = text(body.message)
 
   if (!name || !email || !message) return NextResponse.json({ error: 'missing fields' }, { status: 400 })
-  if (name.length > LIMITS.name || email.length > LIMITS.email || message.length > LIMITS.message || !EMAIL_RE.test(email))
+  if (
+    name.length > LIMITS.name ||
+    email.length > LIMITS.email ||
+    message.length > LIMITS.message ||
+    !EMAIL_RE.test(email)
+  )
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 })
 
   // 1) 숨은 칸이 채워졌거나 2) 너무 빨리 보냈거나(폼을 거치지 않은 요청 포함)
@@ -78,7 +84,7 @@ export async function POST(req: NextRequest) {
     replyTo: email,
     html: `
       <div style="font-family:monospace;max-width:560px;margin:0 auto;padding:32px;background:#ffffff;color:#171717;border:1px solid #e5e5e5;">
-        <p style="color:#a3a3a3;font-size:12px;margin:0 0 24px;letter-spacing:0.1em;">OSL TERMINAL — incoming message</p>
+        <p style="color:#a3a3a3;font-size:12px;margin:0 0 24px;">OSL TERMINAL — incoming message</p>
         <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;">
           <tr>
             <td style="color:#a3a3a3;padding:6px 0;width:80px;">name</td>

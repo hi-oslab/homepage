@@ -24,14 +24,14 @@ export function TerminalShowroom() {
           <span className='text-mute md:col-span-4'>Component / 001</span>
         </div>
         <div className='grid grid-cols-1 items-end gap-8 md:grid-cols-12'>
-          <h1 className='text-[clamp(3rem,9vw,8rem)] font-medium leading-[0.9] tracking-[-0.05em] md:col-span-8'>
+          <h1 className='text-[clamp(3rem,9vw,8rem)] font-medium leading-[0.9] md:col-span-8'>
             Terminal
             <br />
             Loading
           </h1>
           <p className='max-w-sm break-keep text-sm leading-relaxed md:col-span-4'>
-            페이지와 데이터가 준비되는 동안 보여주는 로딩 화면이에요. 사이트 곳곳의 loading에 쓰이고, 경로마다 다른 명령과 로그가
-            나타납니다.
+            페이지와 데이터가 준비되는 동안 보여주는 로딩 화면이에요. 사이트 곳곳의 loading에 쓰이고, 경로마다 다른
+            명령과 로그가 나타납니다.
           </p>
         </div>
       </section>
@@ -44,7 +44,10 @@ export function TerminalShowroom() {
               key={item.command}
               type='button'
               onClick={() => play(itemIndex)}
-              className={classNames('transition-colors', itemIndex === index ? 'text-ink' : 'text-ink/30 hover:text-ink/60')}
+              className={classNames(
+                'transition-colors',
+                itemIndex === index ? 'text-ink' : 'text-ink/30 hover:text-ink/60',
+              )}
             >
               {item.title}
             </button>
@@ -65,20 +68,37 @@ export function TerminalShowroom() {
             </button>
           ))}
         </div>
-        <button type='button' onClick={() => setRun((value) => value + 1)} className='ml-auto text-ink transition-colors hover:text-mute'>
+        <button
+          type='button'
+          onClick={() => setRun((value) => value + 1)}
+          className='ml-auto text-ink transition-colors hover:text-mute'
+        >
           ↻ Replay
         </button>
       </div>
 
       {/* 미리보기 */}
       <section className='rounded-xl bg-tile p-4 md:p-8'>
-        <TerminalLoader key={`${index}-${run}-${mode}`} variant='inline' script={script} finish={mode === 'finish'} run={run} />
+        <TerminalLoader
+          key={`${index}-${run}-${mode}`}
+          variant='inline'
+          script={script}
+          finish={mode === 'finish'}
+          run={run}
+        />
       </section>
 
       {/* 패널 단독 */}
       <section className='grid grid-cols-1 gap-3 pt-3 pb-32 md:grid-cols-3 md:pb-48'>
         {SHOWROOM_SCRIPTS.slice(0, 3).map((item) => (
-          <TerminalPanel key={item.command} script={item} visible={item.lines.length} progress={100} complete className='h-60' />
+          <TerminalPanel
+            key={item.command}
+            script={item}
+            visible={item.lines.length}
+            progress={100}
+            complete
+            className='h-60'
+          />
         ))}
       </section>
     </div>

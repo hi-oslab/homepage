@@ -64,11 +64,12 @@ export function Discussion({ articleId }: { articleId: string }) {
   }, [articleId])
 
   const replace = (comment: LabComment) =>
-    setData((current) =>
-      current && {
-        ...current,
-        comments: current.comments.map((item) => (item.id === comment.id ? comment : item)),
-      },
+    setData(
+      (current) =>
+        current && {
+          ...current,
+          comments: current.comments.map((item) => (item.id === comment.id ? comment : item)),
+        },
     )
   const remove = (id: string) =>
     setData((current) => current && { ...current, comments: current.comments.filter((item) => item.id !== id) })
@@ -84,11 +85,7 @@ export function Discussion({ articleId }: { articleId: string }) {
         <p className='border-t border-ink/10 pt-6 text-sm text-mute'>댓글을 불러오는 중…</p>
       ) : (
         <>
-          <LikeButton
-            articleId={articleId}
-            likes={data.likes}
-            onChange={(likes) => setData({ ...data, likes })}
-          />
+          <LikeButton articleId={articleId} likes={data.likes} onChange={(likes) => setData({ ...data, likes })} />
 
           <div className='flex flex-col gap-6 border-t border-ink/10 pt-6'>
             <h2 className='text-sm'>
@@ -278,7 +275,7 @@ function CommentRow({
               onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 4))}
               placeholder='비밀번호 4자리'
               aria-label='댓글 비밀번호'
-              className={classNames(FIELD, 'w-36 tracking-widest')}
+              className={classNames(FIELD, 'w-36 ')}
             />
             <button type='submit' disabled={pending} className='rounded-full bg-ink px-4 py-2 text-xs text-paper'>
               {asking === 'delete' ? '지우기' : '보기'}
@@ -393,7 +390,7 @@ function CommentForm({
             onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 4))}
             placeholder='비밀번호 (숫자 4자리)'
             aria-label='비밀번호 숫자 4자리'
-            className={classNames(FIELD, 'tracking-widest placeholder:tracking-normal')}
+            className={classNames(FIELD, ' ')}
           />
         </div>
       )}

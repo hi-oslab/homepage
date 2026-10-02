@@ -13,7 +13,7 @@ export async function PendingCard({ index, className }: HomeCardProps) {
       </span>
       {pending.length > 0 ? (
         <span className='flex flex-1 flex-col justify-end gap-1'>
-          <span className='text-2xl font-medium tracking-[-0.03em]'>{pending.length}명</span>
+          <span className='text-2xl font-medium '>{pending.length}명</span>
           <span className='truncate text-xs text-mute'>{pending.map((account) => account.name).join(', ')}</span>
         </span>
       ) : (

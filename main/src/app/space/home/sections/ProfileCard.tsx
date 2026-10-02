@@ -17,7 +17,7 @@ export async function ProfileCard({ index, className }: HomeCardProps) {
           className='size-11 shrink-0 text-base'
         />
         <span className='flex min-w-0 flex-col'>
-          <span className='truncate text-lg font-medium tracking-[-0.02em]'>{profile?.name ?? user.name}</span>
+          <span className='truncate text-lg font-medium '>{profile?.name ?? user.name}</span>
           <span className='truncate text-xs text-mute'>
             {profile
               ? [profile.role, profile.published ? '공개 중' : '비공개'].filter(Boolean).join(' · ')

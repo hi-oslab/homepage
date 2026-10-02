@@ -141,27 +141,27 @@ export default function MemberGalaxy({ members, layout }: { members: Member[]; l
             open ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          <span className='font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase'>We are OSL creators</span>
-          <h1 className='flex items-start gap-2 text-5xl leading-[0.85] font-medium tracking-[-0.05em] md:text-7xl'>
+          <span className='font-mono text-[11px] text-white/40 uppercase'>We are OSL creators</span>
+          <h1 className='flex items-start gap-2 text-5xl leading-[0.85] font-medium md:text-7xl'>
             Members
-            <sup className='mt-[0.35em] text-sm font-normal tracking-normal text-white/40 md:text-base'>
+            <sup className='mt-[0.35em] text-sm font-normal text-white/40 md:text-base'>
               ({String(members.length).padStart(2, '0')})
             </sup>
           </h1>
           <p className='max-w-xs text-sm leading-relaxed break-keep text-white/50'>
-            디자인, 개발, 사운드, 공간을 넘나드는 사람들. 같은 분야를 가진 멤버끼리 가까이, 선으로 이어져 있어요.
+            오픈소스랩은 디자인, 개발, 사운드, 공간을 비롯한 다양한 분야에서 서로 연결되며 활동을 이어가고 있습니다.
           </p>
         </header>
 
         {/* 조작 안내 (섹션이 올라오는 모바일에서는 섹션 위로 비킨다) */}
         <p
-          className={`pointer-events-none absolute left-4 font-mono text-[10px] tracking-[0.18em] text-white/35 uppercase transition-[bottom] md:bottom-8 md:left-8 ${
+          className={`pointer-events-none absolute left-4 font-mono text-[10px] text-white/35 uppercase transition-[bottom] md:bottom-8 md:left-8 ${
             open ? 'bottom-[calc(45%+1rem)]' : 'bottom-4'
           }`}
           style={transition}
         >
-          <span className='md:hidden'>Drag · Pinch · Tap</span>
-          <span className='hidden md:inline'>Drag — orbit · Scroll — zoom · Click — profile</span>
+          <span className='md:hidden'>드래그하거나 화면을 터치해 돌려 보세요. 클릭하면 프로필이 열립니다</span>
+          <span className='hidden md:inline'>드래그하거나 마우스 휠로 돌려 보세요. 클릭하면 프로필이 열립니다</span>
         </p>
         {/* 줌 (섹션이 열리면 남은 씬 칸의 오른쪽 아래로 함께 옮겨 간다) */}
         <div
@@ -237,7 +237,7 @@ function ProfilePanel({ member, onClose }: { member: Member; onClose: () => void
   return (
     <article className='relative flex min-h-full flex-col gap-4 px-4 pt-4 pb-5 md:gap-8 md:px-10 md:pt-8 md:pb-10'>
       <div className='flex items-center justify-between max-md:absolute max-md:top-3 max-md:right-3'>
-        <span className='font-mono text-[11px] tracking-[0.2em] text-white/40 uppercase max-md:hidden'>Profile</span>
+        <span className='font-mono text-[11px] text-white/40 uppercase max-md:hidden'>Profile</span>
         <button
           type='button'
           onClick={onClose}
@@ -256,11 +256,9 @@ function ProfilePanel({ member, onClose }: { member: Member; onClose: () => void
         </div>
         <div className='flex min-w-0 flex-col gap-1 md:gap-2'>
           <div className='flex flex-wrap items-baseline gap-x-3 gap-y-0.5 md:justify-between md:gap-x-4'>
-            <h2 className='text-2xl leading-none font-medium tracking-[-0.04em] md:text-5xl'>{member.name}</h2>
+            <h2 className='text-2xl leading-none font-medium md:text-5xl'>{member.name}</h2>
             {member.role && (
-              <span className='font-mono text-[10px] tracking-[0.15em] text-white/50 uppercase md:text-xs'>
-                {member.role}
-              </span>
+              <span className='font-mono text-[10px] text-white/50 uppercase md:text-xs'>{member.role}</span>
             )}
           </div>
           {member.sub_name && <p className='text-sm break-keep text-white/60 md:text-base'>{member.sub_name}</p>}
@@ -278,7 +276,7 @@ function ProfilePanel({ member, onClose }: { member: Member; onClose: () => void
           {member.fields.map((field) => (
             <li
               key={field}
-              className='rounded-full px-2.5 py-0.5 font-mono text-[10px] tracking-[0.1em] text-white/70 uppercase ring-1 ring-white/20 md:px-3 md:py-1 md:text-[11px]'
+              className='rounded-full px-2.5 py-0.5 font-mono text-[10px] text-white/70 uppercase ring-1 ring-white/20 md:px-3 md:py-1 md:text-[11px]'
             >
               {field}
             </li>
@@ -555,11 +553,9 @@ function Scene({
                   focus === index ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
                 }`}
               >
-                <span className='text-lg leading-tight font-medium tracking-[-0.02em] text-white md:text-xl'>
-                  {member.name}
-                </span>
+                <span className='text-lg leading-tight font-medium text-white md:text-xl'>{member.name}</span>
                 {member.fields.length > 0 && (
-                  <span className='font-mono text-[11px] leading-snug tracking-[0.12em] text-white/60 uppercase md:text-xs'>
+                  <span className='font-mono text-[11px] leading-snug text-white/60 uppercase md:text-xs'>
                     {member.fields.join(' · ')}
                   </span>
                 )}

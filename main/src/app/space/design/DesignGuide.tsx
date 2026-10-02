@@ -67,8 +67,16 @@ const SURFACES: { tone: Surface; note: string }[] = [
 
 /** 모달 · 떠 있는 창 목록 (공용이 아닌 것도 적어 둔다: 나중에 공용 Modal로 합칠 후보) */
 const OVERLAYS: { name: string; file: string; used: string }[] = [
-  { name: 'Modal (공용)', file: 'components/admin/Modal.tsx', used: '게시글 · 글쓰기 · 건의사항 · 멤버 상세 · 역할 · 알림 브리핑' },
-  { name: 'MemberModal', file: 'app/members/components/MemberModal.tsx', used: '프로필카드 (공개 Members 페이지 · 홈 멤버 목록)' },
+  {
+    name: 'Modal (공용)',
+    file: 'components/admin/Modal.tsx',
+    used: '게시글 · 글쓰기 · 건의사항 · 멤버 상세 · 역할 · 알림 브리핑',
+  },
+  {
+    name: 'MemberModal',
+    file: 'app/members/components/MemberModal.tsx',
+    used: '프로필카드 (공개 Members 페이지 · 홈 멤버 목록)',
+  },
   { name: 'PreviewModal', file: 'components/admin/PreviewModal.tsx', used: '프로젝트 미리보기' },
   { name: 'ImageLightbox', file: 'components/ImageLightbox.tsx', used: '이미지 크게 보기' },
   { name: 'NotificationCenter 팝오버', file: 'app/space/NotificationCenter.tsx', used: '오른쪽 아래 알림' },
@@ -106,7 +114,10 @@ export function DesignGuide() {
         <div className={cn('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6', BLOCK_GAP)}>
           {COLORS.map(({ token, note }) => (
             <div key={token} className='flex flex-col gap-1.5'>
-              <span className='h-14 rounded-inner ring-1 ring-ink/5 ring-inset' style={{ background: `var(--color-${token})` }} />
+              <span
+                className='h-14 rounded-inner ring-1 ring-ink/5 ring-inset'
+                style={{ background: `var(--color-${token})` }}
+              />
               <span className='font-mono text-xs'>{token}</span>
               <span className='text-[11px] text-mute'>{note}</span>
             </div>
@@ -117,7 +128,10 @@ export function DesignGuide() {
       <Section id='buttons' title='버튼' file='components/admin/styles.ts (buttonClass · iconButtonClass)'>
         <div className='flex flex-col gap-3'>
           {VARIANTS.map(({ variant, note }) => (
-            <div key={variant} className='grid grid-cols-[88px_minmax(0,1fr)] items-center gap-3 md:grid-cols-[88px_minmax(0,1fr)_220px]'>
+            <div
+              key={variant}
+              className='grid grid-cols-[88px_minmax(0,1fr)] items-center gap-3 md:grid-cols-[88px_minmax(0,1fr)_220px]'
+            >
               <span className='font-mono text-xs'>{variant}</span>
               <div className='flex flex-wrap items-center gap-2'>
                 {SIZES.map((size) => (
@@ -184,10 +198,14 @@ export function DesignGuide() {
         </div>
       </Section>
 
-      <Section id='surfaces' title='블록 면 · 간격' file='components/admin/styles.ts (surfaceClass · BLOCK_PAD · BLOCK_GAP)'>
+      <Section
+        id='surfaces'
+        title='블록 면 · 간격'
+        file='components/admin/styles.ts (surfaceClass · BLOCK_PAD · BLOCK_GAP)'
+      >
         <p className='text-xs text-mute'>
-          회색 바탕 위에 둥근 면(rounded-block · rounded-inner, globals.css)으로 올려요. 안쪽 여백 <code className='font-mono'>{BLOCK_PAD}</code>, 블록 사이{' '}
-          <code className='font-mono'>{BLOCK_GAP}</code>.
+          회색 바탕 위에 둥근 면(rounded-block · rounded-inner, globals.css)으로 올려요. 안쪽 여백{' '}
+          <code className='font-mono'>{BLOCK_PAD}</code>, 블록 사이 <code className='font-mono'>{BLOCK_GAP}</code>.
         </p>
         {/* 유리 면이 보이도록 강조색 빛을 깐 바탕 */}
         <div className='relative isolate overflow-hidden rounded-inner bg-paper p-4'>
@@ -236,7 +254,7 @@ export function DesignGuide() {
             <div className='h-32'>
               <BentoCard href='#frames'>
                 <span className='text-sm text-mute'>카드 제목</span>
-                <span className='mt-auto text-2xl font-medium tracking-[-0.03em]'>12개</span>
+                <span className='mt-auto text-2xl font-medium '>12개</span>
               </BentoCard>
             </div>
           </Frame>
@@ -244,7 +262,7 @@ export function DesignGuide() {
             <div className='h-32'>
               <BentoCard tone='dark'>
                 <span className='text-sm text-paper/60'>카드 제목</span>
-                <span className='mt-auto text-2xl font-medium tracking-[-0.03em]'>강조 카드</span>
+                <span className='mt-auto text-2xl font-medium '>강조 카드</span>
               </BentoCard>
             </div>
           </Frame>
@@ -288,7 +306,11 @@ export function DesignGuide() {
         </div>
       </Section>
 
-      <Section id='badges' title='배지 · 상태 · 프로필 이미지' file='components/admin/ui.tsx · components/OperatorBadge.tsx · components/ProfileImage.tsx'>
+      <Section
+        id='badges'
+        title='배지 · 상태 · 프로필 이미지'
+        file='components/admin/ui.tsx · components/OperatorBadge.tsx · components/ProfileImage.tsx'
+      >
         <div className='flex flex-wrap items-center gap-5'>
           <OperatorBadge />
           <StatusBadge published />
@@ -305,9 +327,9 @@ export function DesignGuide() {
 
       <Section id='type' title='글자' file='각 부품 안 (정리 전)'>
         <div className='flex flex-col gap-3'>
-          <span className='text-4xl font-medium tracking-[-0.04em]'>페이지 제목 text-4xl</span>
-          <span className='text-2xl font-medium tracking-[-0.03em]'>섹션 제목 text-2xl</span>
-          <span className='text-base font-medium tracking-[-0.01em]'>카드 제목 text-base</span>
+          <span className='text-4xl font-medium '>페이지 제목 text-4xl</span>
+          <span className='text-2xl font-medium '>섹션 제목 text-2xl</span>
+          <span className='text-base font-medium '>카드 제목 text-base</span>
           <span className='text-sm'>본문 text-sm</span>
           <span className='text-xs text-mute'>보조 text-xs · mute</span>
         </div>
@@ -366,11 +388,21 @@ function Toc() {
   )
 }
 
-function Section({ id, title, file, children }: { id: string; title: string; file: string; children: React.ReactNode }) {
+function Section({
+  id,
+  title,
+  file,
+  children,
+}: {
+  id: string
+  title: string
+  file: string
+  children: React.ReactNode
+}) {
   return (
     <section id={id} className={cn('flex scroll-mt-28 flex-col gap-4', surfaceClass('solid'), BLOCK_PAD, 'md:p-5')}>
       <div className='flex flex-wrap items-baseline justify-between gap-2'>
-        <h2 className='text-2xl font-medium tracking-[-0.03em]'>{title}</h2>
+        <h2 className='text-2xl font-medium '>{title}</h2>
         <span className='font-mono text-[11px] text-mute'>{file}</span>
       </div>
       {children}

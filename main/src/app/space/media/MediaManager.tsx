@@ -48,29 +48,40 @@ export function MediaManager() {
     }
   }, [])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    void load()
+  }, [load])
 
-  const visible = useMemo(() => files.filter((file) => {
-    if (filter === 'used' && file.references.length === 0) return false
-    if (filter === 'unused' && file.references.length > 0) return false
-    if (filter === 'optimizable' && (!file.optimizable || file.references.length === 0)) return false
-    return !query.trim() || file.key.toLowerCase().includes(query.trim().toLowerCase())
-  }), [files, filter, query])
+  const visible = useMemo(
+    () =>
+      files.filter((file) => {
+        if (filter === 'used' && file.references.length === 0) return false
+        if (filter === 'unused' && file.references.length > 0) return false
+        if (filter === 'optimizable' && (!file.optimizable || file.references.length === 0)) return false
+        return !query.trim() || file.key.toLowerCase().includes(query.trim().toLowerCase())
+      }),
+    [files, filter, query],
+  )
 
   const selectable = visible.filter((file) => file.optimizable && file.references.length > 0)
   const allVisibleSelected = selectable.length > 0 && selectable.every((file) => selected.has(file.key))
   const totalSize = files.reduce((sum, file) => sum + file.size, 0)
   const selectedSize = files.filter((file) => selected.has(file.key)).reduce((sum, file) => sum + file.size, 0)
 
-  const toggle = (key: string) => setSelected((current) => {
-    const next = new Set(current)
-    next.has(key) ? next.delete(key) : next.add(key)
-    return next
-  })
+  const toggle = (key: string) =>
+    setSelected((current) => {
+      const next = new Set(current)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
 
   const optimize = async () => {
     const keys = Array.from(selected)
-    if (keys.length === 0 || !confirm(`선택한 이미지 ${keys.length}개를 최적화하시겠습니까?\nDB의 이미지 주소가 자동으로 변경됩니다.`)) return
+    if (
+      keys.length === 0 ||
+      !confirm(`선택한 이미지 ${keys.length}개를 최적화하시겠습니까?\nDB의 이미지 주소가 자동으로 변경됩니다.`)
+    )
+      return
     setOptimizing(true)
     setProgress({ done: 0, total: keys.length })
     setMessage('')
@@ -125,7 +136,10 @@ export function MediaManager() {
       <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
         <Stat label='전체 파일' value={`${files.length}개`} />
         <Stat label='전체 용량' value={formatBytes(totalSize)} />
-        <Stat label='사용 중 이미지' value={`${files.filter((file) => file.optimizable && file.references.length > 0).length}개`} />
+        <Stat
+          label='사용 중 이미지'
+          value={`${files.filter((file) => file.optimizable && file.references.length > 0).length}개`}
+        />
         <Stat label='선택 용량' value={formatBytes(selectedSize)} />
       </div>
 
@@ -150,7 +164,13 @@ export function MediaManager() {
         </button>
         <div className='relative ml-auto w-full sm:w-64'>
           <GoSearch className='pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-mute' size={14} />
-          <Input type='search' value={query} onChange={(event) => setQuery(event.target.value)} placeholder='파일 경로 검색' className='bg-tile pl-9' />
+          <Input
+            type='search'
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder='파일 경로 검색'
+            className='bg-tile pl-9'
+          />
         </div>
       </div>
 
@@ -197,9 +217,14 @@ export function MediaManager() {
                   <p className={`text-[11px] ${isSelected ? 'text-paper/50' : 'text-mute'}`}>
                     {formatBytes(file.size)} · {file.mimeType.split('/')[1]}
                   </p>
-                  <p className={`truncate text-[11px] ${file.references.length ? (isSelected ? 'text-paper/70' : 'text-ink/70') : 'text-danger'}`}>
+                  <p
+                    className={`truncate text-[11px] ${file.references.length ? (isSelected ? 'text-paper/70' : 'text-ink/70') : 'text-danger'}`}
+                  >
                     {file.references.length
-                      ? file.references.map((reference) => reference.title).filter((title, index, all) => all.indexOf(title) === index).join(', ')
+                      ? file.references
+                          .map((reference) => reference.title)
+                          .filter((title, index, all) => all.indexOf(title) === index)
+                          .join(', ')
                       : '미사용 파일'}
                   </p>
                 </div>
@@ -216,7 +241,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className='rounded-block flex flex-col gap-3 bg-surface p-4'>
       <p className='text-xs text-mute'>{label}</p>
-      <p className='text-2xl font-medium tracking-[-0.03em]'>{value}</p>
+      <p className='text-2xl font-medium '>{value}</p>
     </div>
   )
 }

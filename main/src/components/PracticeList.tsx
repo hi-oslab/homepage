@@ -20,7 +20,7 @@ export const PracticeList = ({ items }: { items: Practice[] }) => {
               onFocus={() => setActive(index)}
               onClick={() => setActive(index)}
               className={classNames(
-                'text-left text-[clamp(2.5rem,7vw,6.5rem)] font-medium leading-[1.02] tracking-[-0.04em] transition-colors duration-300',
+                'text-left text-[clamp(2.5rem,7vw,6.5rem)] font-medium leading-[1.02] transition-colors duration-300',
                 active === index ? 'text-ink' : 'text-ink/15 hover:text-ink/40',
               )}
             >
@@ -30,7 +30,10 @@ export const PracticeList = ({ items }: { items: Practice[] }) => {
         ))}
       </ul>
       <div className='flex items-end md:col-span-3 md:col-start-10'>
-        <p key={active} className='max-w-xs animate-[fade-in_0.4s_ease-out] break-keep text-sm leading-relaxed text-ink'>
+        <p
+          key={active}
+          className='max-w-xs animate-[fade-in_0.4s_ease-out] break-keep text-sm leading-relaxed text-ink'
+        >
           {items[active].description}
         </p>
       </div>

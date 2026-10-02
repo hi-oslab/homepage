@@ -362,7 +362,7 @@ function PostCard({
       </span>
 
       {post.title && (
-        <span className='line-clamp-2 text-[15px] leading-snug font-medium tracking-[-0.01em] break-keep sm:line-clamp-none sm:text-[17px]'>
+        <span className='line-clamp-2 text-[15px] leading-snug font-medium break-keep sm:line-clamp-none sm:text-[17px]'>
           {post.title}
         </span>
       )}

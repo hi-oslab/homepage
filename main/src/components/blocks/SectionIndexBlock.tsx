@@ -60,7 +60,7 @@ export function SectionIndexNavigation({ sections }: { sections: SectionIndexBlo
     <nav
       ref={navigationRef}
       aria-label='Project section index'
-      className={`fixed  inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+0rem)] z-40 bg-background/90 p-2 md:p-0 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-md transition-[opacity,transform] duration-300 ease-out md:sticky md:inset-x-auto md:bottom-auto md:top-36 md:z-20 md:translate-y-0 md:bg-transparent md:opacity-100 md:shadow-none md:backdrop-blur-none ${
+      className={`fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+0rem)] z-40 bg-background/90 p-2 md:p-0 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-md transition-[opacity,transform] duration-300 ease-out md:sticky md:inset-x-auto md:bottom-auto md:top-36 md:z-20 md:translate-y-0 md:bg-transparent md:opacity-100 md:shadow-none md:backdrop-blur-none ${
         isContentVisible
           ? 'translate-y-0 opacity-100'
           : 'pointer-events-none translate-y-[calc(100%+1rem)] opacity-0 md:pointer-events-auto'
@@ -86,7 +86,7 @@ export function SectionIndexNavigation({ sections }: { sections: SectionIndexBlo
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
               className={classNames(
-                'font-pretendard text-[10px] font-medium p-0.5 md:p-1  leading-none',
+                'font-pretendard text-[10px] font-medium p-0.5 md:p-1 leading-none',
                 'flex shrink-0 flex-row justify-start items-start gap-0',
                 'md:w-fit md:justify-start md:rounded-sm md:text-xs',
                 'transition-[background-color,color,transform] hover:bg-white/70 active:scale-[0.98]',
@@ -97,7 +97,7 @@ export function SectionIndexNavigation({ sections }: { sections: SectionIndexBlo
                 className={classNames(
                   'flex flex-col justify-start items-start gap-1.5 ',
                   'text-xl md:text-2xl',
-                  'font-helvetica font-bold text-left tracking-tight capitalize leading-none',
+                  'font-helvetica font-bold text-left capitalize leading-none',
                 )}
               >
                 {section.title || 'Untitled section'}
@@ -118,8 +118,8 @@ export function SectionIndexBlock({ block, className }: { block: SectionIndexBlo
       className={classNames('pt-20 pb-2 md:pt-28 md:pb-4 flex scroll-mt-48 items-center gap-3 ', className)}
     >
       {/* {block.number && (
-        <span className='font-mono text-[9px]  leading-none text-black/40 md:text-[10px]'>{block.number}</span>
-      )} */}
+ <span className='font-mono text-[9px] leading-none text-black/40 md:text-[10px]'>{block.number}</span>
+ )} */}
       <h2 className='text-sm md:text-base font-semibold leading-none text-black/50'>
         {block.title || 'Untitled section'}
       </h2>

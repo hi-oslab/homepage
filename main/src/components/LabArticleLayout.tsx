@@ -34,9 +34,7 @@ export function LabArticleLayout({ article }: { article: LabArticleCard }) {
             {formatDate(article.created_at)} · {article.view_count.toLocaleString()} views
           </span>
         </div>
-        <h1 className='mt-6 text-4xl leading-[1.05] font-medium tracking-[-0.04em] break-keep md:text-6xl'>
-          {article.title}
-        </h1>
+        <h1 className='mt-6 text-4xl leading-[1.05] font-medium break-keep md:text-6xl'>{article.title}</h1>
         {article.subtitle && (
           <p className='mt-5 text-lg leading-snug break-keep text-mute md:text-2xl'>{article.subtitle}</p>
         )}

@@ -208,7 +208,7 @@ export function WorkEditor({
               value={draft.title}
               onChange={(event) => patch('title', event.target.value.replace(/\n/g, ''))}
               placeholder='제목을 입력하세요'
-              className='text-3xl leading-tight font-medium tracking-[-0.04em] md:text-4xl'
+              className='text-3xl leading-tight font-medium md:text-4xl'
             />
           </HeadingField>
           <HeadingField label='부제' hint='한 줄로 프로젝트를 소개해 주세요'>
@@ -235,16 +235,15 @@ export function WorkEditor({
 
         {/* 설정 */}
         {/* 썸네일 · 기본 정보
-            넓은 화면: 왼쪽에 두고 상단 바 아래에 고정 (따로 스크롤하지 않는다)
-            좁은 화면: 본문보다 위에 두고 함께 스크롤 */}
+ 넓은 화면: 왼쪽에 두고 상단 바 아래에 고정 (따로 스크롤하지 않는다)
+ 좁은 화면: 본문보다 위에 두고 함께 스크롤 */}
         <aside className='order-first flex flex-col gap-3 xl:sticky xl:top-[calc(var(--spacing-header)+5rem)] xl:self-start'>
-
           <Panel title='썸네일'>
             <ImageDrop
               url={draft.thumbnail_url}
               onUpload={uploadThumbnail}
               onRemove={() => patch('thumbnail_url', null)}
-              aspect='aspect-[4/3]'
+              aspect='aspect-16/9'
             />
           </Panel>
 

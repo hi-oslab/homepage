@@ -140,11 +140,8 @@ export const Header = () => {
           layout='position'
           className='flex h-11 items-center justify-between gap-3 pl-3 pr-1.5 md:grid md:grid-cols-[1fr_auto_1fr] md:pl-4'
         >
-          <Link
-            href='/'
-            className='flex min-w-0 items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-wide'
-          >
-            <span aria-hidden className='text-[10px] tracking-[0.15em]'>
+          <Link href='/' className='flex min-w-0 items-center gap-2 font-mono text-[11px] font-semibold uppercase '>
+            <span aria-hidden className='text-[10px] '>
               ●▲☰
             </span>
             <span className='truncate'>Open Source Lab</span>
@@ -307,12 +304,12 @@ export const Header = () => {
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         className={classNames(
-                          'flex items-baseline justify-between py-1.5 text-5xl font-medium tracking-[-0.04em]',
+                          'flex items-baseline justify-between py-1.5 text-5xl font-medium ',
                           active ? 'text-ink' : 'text-ink/25 active:text-ink',
                         )}
                       >
                         {item.label}
-                        <span className='font-mono text-xs tracking-normal text-mute'>0{index + 1}</span>
+                        <span className='font-mono text-xs text-mute'>0{index + 1}</span>
                       </Link>
                     </motion.div>
                   )
@@ -324,7 +321,7 @@ export const Header = () => {
                   <Link
                     href={SPACE.href}
                     aria-current={isActive(SPACE.href, pathname) ? 'page' : undefined}
-                    className='flex items-center justify-between rounded-xl bg-ink px-4 py-3.5 font-sans text-xl font-medium tracking-[-0.03em] text-paper'
+                    className='flex items-center justify-between rounded-xl bg-ink px-4 py-3.5 font-sans text-xl font-medium text-paper'
                   >
                     <span className='flex items-center gap-2.5'>
                       <StatusDot approved={session.status === 'approved'} />

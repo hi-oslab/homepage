@@ -48,7 +48,7 @@ export const AuthScreen = ({
       <span className='text-mute md:col-span-4'>Open Source Lab</span>
     </div>
     <div className='grid grid-cols-1 items-end gap-10 md:grid-cols-12 md:gap-8'>
-      <h1 className='text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] tracking-[-0.05em] md:sticky md:bottom-10 md:col-span-7'>
+      <h1 className='text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] md:sticky md:bottom-10 md:col-span-7'>
         {title}
       </h1>
       <div className='flex flex-col gap-3 md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9'>{children}</div>
@@ -231,7 +231,7 @@ export function JoinForm({ setup }: { setup: boolean }) {
           <span className='text-xs text-mute'>
             {stepIndex + 1} / {steps.length}
           </span>
-          <span className='text-2xl font-medium tracking-[-0.03em]'>{JOIN_STEPS[step].title}</span>
+          <span className='text-2xl font-medium '>{JOIN_STEPS[step].title}</span>
           <p className='break-keep text-sm leading-relaxed text-mute'>
             {setup && step === 'account'
               ? '아직 운영자 계정이 없습니다. 설정 비밀번호(ADMIN_PASSWORD)로 첫 운영자 계정을 만드세요.'
@@ -380,7 +380,7 @@ export function HelpRequestForm() {
     <AuthScreen title='Help'>
       {sent ? (
         <>
-          <p className='text-2xl font-medium tracking-[-0.03em]'>요청을 보냈어요.</p>
+          <p className='text-2xl font-medium '>요청을 보냈어요.</p>
           <p className='break-keep text-sm leading-relaxed text-mute'>
             {kind === 'password'
               ? '운영자가 본인 확인 후 비밀번호 재설정 링크를 전달해 드려요. 링크는 한 번만 쓸 수 있고 24시간 뒤 만료됩니다.'

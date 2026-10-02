@@ -131,7 +131,7 @@ export function PostComposer({
             maxLength={TITLE_MAX}
             placeholder='제목을 입력하세요'
             onChange={(event) => setTitle(event.target.value.replace(/\n/g, ''))}
-            className='text-2xl leading-tight font-medium tracking-[-0.03em]'
+            className='text-2xl leading-tight font-medium '
           />
         </label>
 

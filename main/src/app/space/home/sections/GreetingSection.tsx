@@ -32,7 +32,7 @@ export async function GreetingSection({ className }: { className?: string }) {
         />
         <div className='flex min-w-0 flex-col gap-1'>
           <span className='text-sm text-mute'>{today}</span>
-          <h1 className='flex min-w-0 items-center gap-2 text-2xl font-medium tracking-[-0.04em] sm:gap-3 sm:text-3xl md:text-4xl'>
+          <h1 className='flex min-w-0 items-center gap-2 text-2xl font-medium sm:gap-3 sm:text-3xl md:text-4xl'>
             <span className='truncate'>안녕하세요, {user.name}님</span>
             {user.is_master && <OperatorBadge className='shrink-0 text-xs' />}
           </h1>

@@ -39,7 +39,7 @@ export function LinkBlock({ block, className }: { block: LinkBlockType; classNam
         />
       )}
       <div className='flex min-w-0 flex-col justify-center gap-1'>
-        <strong className='truncate font-helvetica text-sm font-semibold uppercase tracking-[-0.025em] md:text-lg'>
+        <strong className='truncate font-helvetica text-sm font-semibold uppercase md:text-lg'>
           {block.title || block.url}
         </strong>
         {block.description && <p className='line-clamp-2 text-sm text-gray'>{block.description}</p>}

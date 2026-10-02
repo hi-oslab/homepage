@@ -71,13 +71,8 @@ export default async function Page() {
       {/* 첫 화면: 우리가 누구인지 한 문장으로 */}
       <InView className='flex min-h-[calc(100dvh-var(--spacing-header))] flex-col justify-between gap-16 pt-8 pb-10 md:pt-12 md:pb-12'>
         <div className='flex flex-col gap-5 md:gap-7'>
-          <h1 className='max-w-[18ch] text-[clamp(2.5rem,6.4vw,7rem)] font-medium leading-[1.02] tracking-[-0.045em]'>
-            {STATEMENT.en}
-          </h1>
-          <p
-            lang='ko'
-            className='max-w-[26ch] break-keep text-xl leading-snug tracking-[-0.02em] text-mute md:text-3xl'
-          >
+          <h1 className='max-w-[18ch] text-[clamp(2.5rem,6.4vw,7rem)] font-medium leading-[1.02] '>{STATEMENT.en}</h1>
+          <p lang='ko' className='max-w-[26ch] break-keep text-xl leading-snug text-mute md:text-3xl'>
             {STATEMENT.ko}
           </p>
         </div>
@@ -93,7 +88,7 @@ export default async function Page() {
           Origin
         </Label>
         <div className='flex flex-col gap-6 break-keep md:col-span-7'>
-          <p className='text-2xl font-medium leading-snug tracking-[-0.02em] md:text-3xl'>{ORIGIN.lead}</p>
+          <p className='text-2xl font-medium leading-snug md:text-3xl'>{ORIGIN.lead}</p>
           <p className='text-base leading-relaxed text-ink/70 md:text-lg'>{ORIGIN.body}</p>
         </div>
       </InView>
@@ -110,7 +105,7 @@ export default async function Page() {
           <Label index='03' className='md:col-span-4'>
             Open Source
           </Label>
-          <p className='break-keep text-xl leading-snug tracking-[-0.01em] md:col-span-7 md:text-2xl'>{NAME_MEANING}</p>
+          <p className='break-keep text-xl leading-snug md:col-span-7 md:text-2xl'>{NAME_MEANING}</p>
         </div>
         <ul className='grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-3'>
           {VALUES.map((value) => (
@@ -118,7 +113,7 @@ export default async function Page() {
               key={value.title}
               className='flex flex-col justify-between gap-10 rounded-md bg-tile p-5 md:aspect-[5/3] md:p-6'
             >
-              <span className='text-3xl font-medium tracking-[-0.03em] md:text-4xl'>{value.title}</span>
+              <span className='text-3xl font-medium md:text-4xl'>{value.title}</span>
               <span className='break-keep text-sm text-ink/60'>{value.description}</span>
             </li>
           ))}
@@ -139,7 +134,7 @@ export default async function Page() {
                   href={`/work/${work.slug}`}
                   className='group grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 rounded-md px-3 py-4 transition-colors hover:bg-tile md:grid-cols-[minmax(0,1fr)_12rem_4rem]'
                 >
-                  <span className='break-keep text-lg font-medium tracking-[-0.02em] md:text-xl'>{work.title}</span>
+                  <span className='break-keep text-lg font-medium md:text-xl'>{work.title}</span>
                   <span className='hidden truncate text-sm text-mute md:block'>{work.category}</span>
                   <span className='flex items-center justify-end gap-1 text-sm tabular-nums text-mute'>
                     {work.year}
@@ -186,7 +181,7 @@ export default async function Page() {
                 index === 0 ? 'bg-ink text-white' : 'bg-tile text-ink/50 hover:bg-ink hover:text-white',
               )}
             >
-              <span className='text-3xl font-medium tracking-[-0.03em] md:text-5xl'>{item.title}</span>
+              <span className='text-3xl font-medium md:text-5xl'>{item.title}</span>
               <span className='flex items-end justify-between text-sm'>
                 <span className='opacity-70'>{item.caption}</span>
                 <Arrow
@@ -219,7 +214,7 @@ const History = ({ items }: { items: HistoryItem[] }) => {
       <div className='flex flex-col gap-12 md:gap-16'>
         {years.map((year) => (
           <section key={year} className='grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-8'>
-            <h3 className='text-3xl font-medium tracking-[-0.04em] md:col-span-4 md:text-4xl'>{year}</h3>
+            <h3 className='text-3xl font-medium md:col-span-4 md:text-4xl'>{year}</h3>
             <ul className='flex flex-col gap-5 md:col-span-8'>
               {items
                 .filter((item) => item.year === year)

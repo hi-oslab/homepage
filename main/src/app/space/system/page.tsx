@@ -39,11 +39,17 @@ export default async function AdminSystemPage() {
       >
         <div className='flex items-center gap-3'>
           <span className={classNames('size-2.5 rounded-full', HEALTH[overall].dot)} />
-          <span className='text-2xl font-medium tracking-[-0.03em]'>
-            {overall === 'ok' ? '모두 정상이에요' : overall === 'warn' ? '확인이 필요한 항목이 있어요' : '문제가 있는 항목이 있어요'}
+          <span className='text-2xl font-medium '>
+            {overall === 'ok'
+              ? '모두 정상이에요'
+              : overall === 'warn'
+                ? '확인이 필요한 항목이 있어요'
+                : '문제가 있는 항목이 있어요'}
           </span>
         </div>
-        <div className={classNames('flex items-center gap-3 text-sm', overall === 'ok' ? 'text-paper/60' : 'text-ink/60')}>
+        <div
+          className={classNames('flex items-center gap-3 text-sm', overall === 'ok' ? 'text-paper/60' : 'text-ink/60')}
+        >
           <span>
             정상 {counts.ok} · 주의 {counts.warn} · 오류 {counts.error + missingRequired.length}
           </span>
@@ -65,7 +71,10 @@ export default async function AdminSystemPage() {
       <Panel title='환경변수 (값은 표시하지 않아요)'>
         <ul className='-mx-2 flex flex-col'>
           {env.map((item) => (
-            <li key={item.name} className='flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg px-2 py-1.5 text-sm hover:bg-field'>
+            <li
+              key={item.name}
+              className='flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg px-2 py-1.5 text-sm hover:bg-field'
+            >
               <span
                 className={classNames(
                   'size-1.5 shrink-0 rounded-full',
@@ -85,7 +94,8 @@ export default async function AdminSystemPage() {
         </ul>
         {missingRequired.length > 0 && (
           <p className='text-sm text-danger'>
-            필수 환경변수 {missingRequired.length}개가 없어요. Vercel 프로젝트 설정의 Environment Variables에서 추가해 주세요.
+            필수 환경변수 {missingRequired.length}개가 없어요. Vercel 프로젝트 설정의 Environment Variables에서 추가해
+            주세요.
           </p>
         )}
       </Panel>
@@ -100,10 +110,15 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
     <Panel className='gap-5'>
       <div className='flex items-start justify-between gap-3'>
         <div className='flex flex-col gap-0.5'>
-          <span className='text-xl font-medium tracking-[-0.03em]'>{service.name}</span>
+          <span className='text-xl font-medium '>{service.name}</span>
           <span className='text-xs text-mute'>{service.role}</span>
         </div>
-        <span className={classNames('flex shrink-0 items-center gap-1.5 rounded-full bg-field px-2.5 py-1 text-xs', health.text)}>
+        <span
+          className={classNames(
+            'flex shrink-0 items-center gap-1.5 rounded-full bg-field px-2.5 py-1 text-xs',
+            health.text,
+          )}
+        >
           <span className={classNames('size-1.5 rounded-full', health.dot)} />
           {health.label}
         </span>
@@ -121,7 +136,7 @@ function ServiceCard({ service }: { service: ServiceStatus }) {
           {service.metrics.map((metric) => (
             <div key={metric.label} className='rounded-inner flex flex-col gap-0.5 bg-field px-3 py-2'>
               <dt className='truncate text-[11px] text-mute'>{metric.label}</dt>
-              <dd className='truncate text-base font-medium tracking-[-0.02em]'>{metric.value}</dd>
+              <dd className='truncate text-base font-medium '>{metric.value}</dd>
               {metric.hint && <span className='truncate text-[11px] text-mute'>{metric.hint}</span>}
             </div>
           ))}

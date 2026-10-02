@@ -28,9 +28,9 @@ export default async function Page() {
           <span className='md:col-span-4'>Works</span>
           <span className='text-mute md:col-span-4'>Exhibitions, performances & projects</span>
         </div>
-        <h1 className='flex items-start gap-3 text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] tracking-[-0.05em]'>
+        <h1 className='flex items-start gap-3 text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] '>
           Works
-          <sup className='mt-[0.4em] text-base font-normal tracking-normal text-mute md:text-xl'>
+          <sup className='mt-[0.4em] text-base font-normal text-mute md:text-xl'>
             ({String(works.length).padStart(2, '0')})
           </sup>
         </h1>

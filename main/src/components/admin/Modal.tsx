@@ -81,7 +81,7 @@ export function Modal({
           >
             <div className='flex shrink-0 items-start justify-between gap-3 px-5 pt-5 pb-4 sm:px-7 sm:pt-7'>
               <div className='flex min-w-0 flex-col gap-0.5'>
-                <span className='truncate text-xl font-medium tracking-[-0.03em]'>{title}</span>
+                <span className='truncate text-xl font-medium '>{title}</span>
                 {meta && <span className='truncate text-xs text-mute'>{meta}</span>}
               </div>
               {dismissible && (

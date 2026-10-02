@@ -93,7 +93,9 @@ export function getLoadingScript(pathname: string): LoadingScript {
   const [first, second, third] = pathname.split('/').filter(Boolean)
   if (!first) return SCRIPTS.home
   if (first === 'work') {
-    return second ? { ...SCRIPTS.work, command: `${SCRIPTS.work.command} ${decodeURIComponent(second)}` } : SCRIPTS.works
+    return second
+      ? { ...SCRIPTS.work, command: `${SCRIPTS.work.command} ${decodeURIComponent(second)}` }
+      : SCRIPTS.works
   }
   if (first === 'space') {
     if (second === 'works') return third ? SCRIPTS.adminEdit : SCRIPTS.adminWorks
@@ -187,7 +189,12 @@ export function TerminalPanel({
 
   return (
     // 터미널 창은 테마와 상관없이 항상 검은 창 (bg-ink는 다크모드에서 밝아지므로 고정색 black)
-    <div className={classNames('flex min-h-0 flex-col overflow-hidden rounded-xl bg-black font-mono text-[11px] leading-relaxed text-white', className)}>
+    <div
+      className={classNames(
+        'flex min-h-0 flex-col overflow-hidden rounded-xl bg-black font-mono text-[11px] leading-relaxed text-white',
+        className,
+      )}
+    >
       {/* 창 상단 */}
       <div className='flex h-9 shrink-0 items-center justify-between px-4 text-[10px] text-white/30'>
         <span className='flex gap-1.5'>
@@ -195,7 +202,7 @@ export function TerminalPanel({
           <span className='size-2 rounded-full bg-white/15' />
           <span className='size-2 rounded-full bg-white/15' />
         </span>
-        <span className='tracking-[0.2em] uppercase'>osl — zsh</span>
+        <span className=' uppercase'>osl — zsh</span>
         <span className='tabular-nums'>{String(progress).padStart(3, '0')}</span>
       </div>
 
@@ -268,12 +275,12 @@ export function TerminalLoader({
     <div className='flex flex-col gap-3'>
       <p
         className={classNames(
-          'flex items-start font-medium leading-[0.85] tracking-[-0.05em] tabular-nums',
+          'flex items-start font-medium leading-[0.85] tabular-nums',
           variant === 'overlay' ? 'text-[clamp(4.5rem,15vw,13rem)]' : 'text-[clamp(3.5rem,8vw,6rem)]',
         )}
       >
         {progress}
-        <span className='mt-[0.12em] text-[0.3em] tracking-normal text-mute'>%</span>
+        <span className='mt-[0.12em] text-[0.3em] text-mute'>%</span>
       </p>
       <p className='font-mono text-xs text-mute'>
         {script.title.toLowerCase()} — {currentLine}
@@ -283,7 +290,11 @@ export function TerminalLoader({
 
   if (variant === 'inline') {
     return (
-      <div role='status' aria-live='polite' className='flex min-h-[70dvh] animate-[loader-in_0.3s_ease-out_0.15s_both] items-end'>
+      <div
+        role='status'
+        aria-live='polite'
+        className='flex min-h-[70dvh] animate-[loader-in_0.3s_ease-out_0.15s_both] items-end'
+      >
         <span className='sr-only'>{script.title} 불러오는 중</span>
         <div className='grid w-full grid-cols-1 items-end gap-8 lg:grid-cols-2'>
           {percent}

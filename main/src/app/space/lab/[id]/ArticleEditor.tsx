@@ -213,7 +213,7 @@ export function ArticleEditor({
               value={draft.title}
               onChange={(event) => patch('title', event.target.value.replace(/\n/g, ''))}
               placeholder='제목을 입력하세요'
-              className='text-3xl leading-tight font-medium tracking-[-0.04em] md:text-4xl'
+              className='text-3xl leading-tight font-medium md:text-4xl'
             />
           </HeadingField>
           <HeadingField label='부제' hint='한 줄로 글을 소개해 주세요'>

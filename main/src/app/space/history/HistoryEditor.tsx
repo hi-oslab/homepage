@@ -3,7 +3,18 @@
 import classNames from 'classnames'
 import { useMemo, useState, useTransition } from 'react'
 import { GoLinkExternal, GoTrash } from 'react-icons/go'
-import { Input, PageHeader, Panel, Select, Switch, buttonClass, iconButtonClass, useRefreshOnFocus, useServerState, useToast } from '@/components/admin/ui'
+import {
+  Input,
+  PageHeader,
+  Panel,
+  Select,
+  Switch,
+  buttonClass,
+  iconButtonClass,
+  useRefreshOnFocus,
+  useServerState,
+  useToast,
+} from '@/components/admin/ui'
 import type { HistoryInput, HistoryItem } from '@/types/cms'
 import { createHistoryAction, deleteHistoryAction, updateHistoryAction } from './actions'
 
@@ -22,7 +33,9 @@ const emptyInput = (): HistoryInput => ({
 
 // 날짜순 정렬 (최신이 위)
 const sortItems = (items: HistoryItem[]) =>
-  items.slice().sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0) || b.created_at.localeCompare(a.created_at))
+  items
+    .slice()
+    .sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0) || b.created_at.localeCompare(a.created_at))
 
 export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] }) {
   const [items, setItems] = useServerState(initialItems)
@@ -94,7 +107,9 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
           <Select
             aria-label='월'
             value={draft.month ?? ''}
-            onChange={(event) => setDraft((current) => ({ ...current, month: event.target.value ? Number(event.target.value) : null }))}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, month: event.target.value ? Number(event.target.value) : null }))
+            }
           >
             <option value=''>월 없음</option>
             {MONTHS.map((month) => (
@@ -133,7 +148,11 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
               value={draft.link}
               onChange={(event) => setDraft((current) => ({ ...current, link: event.target.value }))}
             />
-            <button type='submit' disabled={isPending || !draft.title.trim()} className={buttonClass('primary', 'md', 'shrink-0')}>
+            <button
+              type='submit'
+              disabled={isPending || !draft.title.trim()}
+              className={buttonClass('primary', 'md', 'shrink-0')}
+            >
               추가
             </button>
           </div>
@@ -148,12 +167,17 @@ export function HistoryEditor({ initialItems }: { initialItems: HistoryItem[] })
       {/* 연도별 목록 */}
       {years.map((year) => (
         <section key={year} className='grid grid-cols-1 gap-3 md:grid-cols-[120px_minmax(0,1fr)]'>
-          <h2 className='text-3xl font-medium tracking-[-0.04em] md:sticky md:top-12 md:self-start'>{year}</h2>
+          <h2 className='text-3xl font-medium md:sticky md:top-12 md:self-start'>{year}</h2>
           <ul className='flex flex-col gap-1'>
             {items
               .filter((item) => item.year === year)
               .map((item) => (
-                <HistoryRow key={item.id} item={item} onUpdate={(patch) => update(item, patch)} onRemove={() => remove(item)} />
+                <HistoryRow
+                  key={item.id}
+                  item={item}
+                  onUpdate={(patch) => update(item, patch)}
+                  onRemove={() => remove(item)}
+                />
               ))}
           </ul>
         </section>
@@ -245,7 +269,12 @@ function HistoryRow({
         />
       </div>
       <div className='flex items-center gap-1 pt-1'>
-        <Switch checked={item.published} onChange={(value) => onUpdate({ published: value })} label={item.published ? '공개' : '숨김'} labelClassName='hidden sm:inline text-xs' />
+        <Switch
+          checked={item.published}
+          onChange={(value) => onUpdate({ published: value })}
+          label={item.published ? '공개' : '숨김'}
+          labelClassName='hidden sm:inline text-xs'
+        />
         {item.link && (
           <a href={item.link} target='_blank' rel='noopener noreferrer' className={iconButtonClass()} title='링크 열기'>
             <GoLinkExternal size={13} />

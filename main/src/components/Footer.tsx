@@ -71,10 +71,7 @@ export const Footer = () => {
         ))}
       </div>
 
-      <p
-        aria-hidden
-        className='select-none whitespace-nowrap text-[13.2vw] font-semibold leading-[0.8] tracking-[-0.05em]'
-      >
+      <p aria-hidden className='select-none whitespace-nowrap text-[13.2vw] font-semibold leading-[0.8] '>
         Open Source Lab
       </p>
     </footer>

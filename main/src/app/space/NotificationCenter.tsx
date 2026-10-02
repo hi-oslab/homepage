@@ -114,7 +114,10 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
   const decide = (item: NotificationItem, decision: 'approve' | 'operator' | 'reject') => {
     if (!item.userId) return
     const name = item.title.split('님')[0]
-    if (decision === 'operator' && !confirm(`${name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`))
+    if (
+      decision === 'operator' &&
+      !confirm(`${name}님을 운영자로 승인할까요?\n모든 프로젝트·프로필·멤버를 함께 관리할 수 있게 됩니다.`)
+    )
       return
     if (decision === 'reject' && !confirm(`${name}님의 가입 신청을 거절할까요?`)) return
     const userId = item.userId
@@ -129,15 +132,19 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
       if ('message' in result) return toast.show(result.message, 'error')
       setItems((current) => current.filter((entry) => entry.id !== item.id))
       toast.show(
-        decision === 'reject' ? `${name}님의 가입을 거절했습니다` : `${name}님을 ${decision === 'operator' ? '운영자로 ' : ''}승인했습니다`,
+        decision === 'reject'
+          ? `${name}님의 가입을 거절했습니다`
+          : `${name}님을 ${decision === 'operator' ? '운영자로 ' : ''}승인했습니다`,
       )
       router.refresh()
     })
   }
 
   return (
-    <div ref={panelRef} // 모바일에서는 바텀탭 위에
-    className='fixed right-4 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+0.75rem)] z-40 flex flex-col items-end gap-3 md:right-8 md:bottom-8'>
+    <div
+      ref={panelRef} // 모바일에서는 바텀탭 위에
+      className='fixed right-4 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+0.75rem)] z-40 flex flex-col items-end gap-3 md:right-8 md:bottom-8'
+    >
       <AnimatePresence>
         {open && (
           <motion.div
@@ -150,8 +157,13 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
             className='rounded-block flex max-h-[min(70dvh,560px)] w-[min(calc(100vw-2rem),380px)] flex-col overflow-hidden bg-paper shadow-[0_12px_40px_rgb(var(--shadow-rgb)/0.18)]'
           >
             <div className='flex shrink-0 items-center justify-between px-4 pt-4 pb-2'>
-              <span className='text-base font-medium tracking-[-0.02em]'>알림</span>
-              <button type='button' onClick={toggle} aria-label='닫기' className='rounded-md p-1 text-mute hover:bg-tile hover:text-ink'>
+              <span className='text-base font-medium '>알림</span>
+              <button
+                type='button'
+                onClick={toggle}
+                aria-label='닫기'
+                className='rounded-md p-1 text-mute hover:bg-tile hover:text-ink'
+              >
                 <GoX size={16} />
               </button>
             </div>
@@ -164,7 +176,10 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
                   {signups.map((item) => (
                     <div
                       key={item.id}
-                      className={classNames('rounded-inner flex flex-col gap-2 bg-surface p-3', busyId === item.id && 'opacity-50')}
+                      className={classNames(
+                        'rounded-inner flex flex-col gap-2 bg-surface p-3',
+                        busyId === item.id && 'opacity-50',
+                      )}
                     >
                       <Row item={item} highlight={false} />
                       <div className='flex flex-wrap gap-1 pl-8'>
@@ -277,7 +292,12 @@ export function NotificationCenter({ items: initialItems, userId }: { items: Not
           )}
           {fresh.slice(0, BRIEFING_LIMIT).map((item) =>
             item.href ? (
-              <Link key={item.id} href={item.href} onClick={() => closeBriefing()} className='rounded-xl p-2 transition-colors hover:bg-tile'>
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={() => closeBriefing()}
+                className='rounded-xl p-2 transition-colors hover:bg-tile'
+              >
                 <Row item={item} highlight />
               </Link>
             ) : (

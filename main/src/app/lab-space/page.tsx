@@ -47,9 +47,9 @@ export default async function Page() {
           <span className='md:col-span-4'>Lab Space</span>
           <span className='text-mute md:col-span-6 lg:col-span-4'>Articles, essays & discussions by OSL members</span>
         </div>
-        <h1 className='flex items-start gap-3 text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] tracking-[-0.05em]'>
+        <h1 className='flex items-start gap-3 text-[clamp(3.5rem,11vw,11rem)] font-medium leading-[0.85] '>
           Lab Space
-          <sup className='mt-[0.4em] text-base font-normal tracking-normal text-mute md:text-xl'>
+          <sup className='mt-[0.4em] text-base font-normal text-mute md:text-xl'>
             ({String(articles.length).padStart(2, '0')})
           </sup>
         </h1>
@@ -96,7 +96,7 @@ export default async function Page() {
                 <div className='flex items-baseline justify-between gap-4'>
                   <Label>{periodLabel(issue)}</Label>
                 </div>
-                <h2 className='text-4xl leading-none tracking-[-0.04em] font-semibold break-keep md:text-5xl lg:text-6xl'>
+                <h2 className='text-4xl leading-none font-semibold break-keep md:text-5xl lg:text-6xl'>
                   {issue.title}
                 </h2>
                 {issue.description && (
@@ -145,7 +145,7 @@ function periodLabel(issue: LabIssue) {
 function RowHeader({ label }: { label: string }) {
   return (
     <header className='grid grid-cols-2 items-baseline gap-4 pt-3 pr-20 md:grid-cols-12 md:gap-8'>
-      <h2 className='text-4xl leading-none tracking-[-0.04em] font-semibold md:text-5xl lg:text-6xl'>{label}</h2>
+      <h2 className='text-4xl leading-none font-semibold md:text-5xl lg:text-6xl'>{label}</h2>
     </header>
   )
 }
@@ -209,7 +209,7 @@ function RowCard({ article }: { article: LabArticleCard }) {
             <Label className='truncate'>{fullDate(article.created_at)}</Label>
             <Label className='shrink-0 tabular-nums'>{article.view_count.toLocaleString()} views</Label>
           </span>
-          <span className='line-clamp-2 text-base sm:text-lg lg:text-xl leading-snug font-medium tracking-[-0.01em] break-keep transition-colors group-hover:text-mute'>
+          <span className='line-clamp-2 text-base sm:text-lg lg:text-xl leading-snug font-medium break-keep transition-colors group-hover:text-mute'>
             {article.title}
           </span>
           {article.subtitle && (

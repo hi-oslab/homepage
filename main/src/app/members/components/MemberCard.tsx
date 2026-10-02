@@ -31,7 +31,7 @@ export const MemberCard = ({ member }: MemberCardProps) => {
       {/* 이름 + 한 줄 소개 */}
       <div className='flex flex-col gap-1'>
         <div className='flex items-baseline justify-between gap-3'>
-          <h3 className='text-xl font-medium tracking-[-0.02em]'>{name}</h3>
+          <h3 className='text-xl font-medium '>{name}</h3>
           {role && <span className='shrink-0 text-xs text-mute'>{role}</span>}
         </div>
         {subName && <p className='break-keep text-sm leading-snug text-mute'>{subName}</p>}

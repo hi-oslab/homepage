@@ -47,7 +47,7 @@ export function ProjectMosaic({ works }: { works: Work[] }) {
             className='block h-auto w-full transition-transform duration-700 ease-out group-hover:scale-[1.025]'
           />
           <div className='absolute inset-0 flex flex-col justify-between bg-black/0 p-3 text-white opacity-0 transition-[background-color,opacity] duration-300 group-hover:bg-black/35 group-hover:opacity-100'>
-            <span className='font-mono text-[8px] uppercase tracking-[0.14em]'>
+            <span className='font-mono text-[8px] uppercase '>
               {work.category || 'Project'} / {work.year}
             </span>
             <div>

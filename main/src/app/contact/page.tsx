@@ -42,7 +42,7 @@ export default function Contact() {
         {/* 좌측: 큰 문장 */}
         <div className='flex flex-col gap-8 md:col-span-6'>
           <span className='text-sm'>Contact</span>
-          <h1 className='max-w-[12ch] break-keep text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.08] tracking-[-0.04em]'>
+          <h1 className='max-w-[12ch] break-keep text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[1.08] '>
             함께 만들고 싶은 이야기가 있다면.
           </h1>
         </div>
@@ -68,7 +68,7 @@ export default function Contact() {
           <Row label='Message'>
             {status === 'sent' ? (
               <div className='flex flex-col gap-2 rounded-md bg-ink p-6 text-white'>
-                <span className='text-2xl font-medium tracking-[-0.03em]'>Thank you.</span>
+                <span className='text-2xl font-medium '>Thank you.</span>
                 <span className='text-sm text-white/60'>메시지가 전송되었습니다. 곧 연락드릴게요.</span>
               </div>
             ) : (
@@ -116,9 +116,7 @@ export default function Contact() {
                   className={`${inputClassName} resize-none`}
                   placeholder='프로젝트, 전시, 협업 등 무엇이든 적어주세요.'
                 />
-                {status === 'error' && (
-                  <p className='text-sm text-red-600'>전송에 실패했습니다. 다시 시도해주세요.</p>
-                )}
+                {status === 'error' && <p className='text-sm text-red-600'>전송에 실패했습니다. 다시 시도해주세요.</p>}
                 <button
                   type='submit'
                   disabled={status === 'sending'}

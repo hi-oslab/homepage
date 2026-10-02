@@ -236,7 +236,7 @@ export function LabManager({
       {/* 제목 · 내 기록 */}
       <header className='flex flex-wrap items-end justify-between gap-x-6 gap-y-2'>
         <div className='flex flex-col gap-1'>
-          <h1 className='text-3xl font-medium tracking-[-0.04em] md:text-4xl'>Lab Space</h1>
+          <h1 className='text-3xl font-medium md:text-4xl'>Lab Space</h1>
           <p className='text-sm text-mute tabular-nums'>
             작성한 글 {mine.length} · 공개 {published.length} · 조회 {views.toLocaleString()}
             {mine.some((article) => article.recommended_at) && (
@@ -521,7 +521,7 @@ function TopicCover({
     <div className='rounded-block flex flex-wrap items-end justify-between gap-4 bg-surface p-4'>
       <div className='flex min-w-0 flex-col gap-1'>
         <span className='flex items-center gap-2'>
-          <h2 className='truncate text-xl font-medium tracking-[-0.03em]'>{topic ? topic.title : '전체 글'}</h2>
+          <h2 className='truncate text-xl font-medium '>{topic ? topic.title : '전체 글'}</h2>
           {topic && isLead && (
             <button type='button' aria-label='토픽 고치기' onClick={onEdit} className={iconButtonClass({ size: 'sm' })}>
               <GoPencil size={12} />

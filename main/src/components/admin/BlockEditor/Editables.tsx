@@ -2,7 +2,14 @@
 
 import classNames from 'classnames'
 import { useCallback, useRef } from 'react'
-import type { CalloutBlock, HeadingBlock, ListBlock, ParagraphBlock, QuoteBlock, SectionIndexBlock } from '@/types/blocks'
+import type {
+  CalloutBlock,
+  HeadingBlock,
+  ListBlock,
+  ParagraphBlock,
+  QuoteBlock,
+  SectionIndexBlock,
+} from '@/types/blocks'
 import { useMentionInput } from '@/components/mentions/MentionProvider'
 import { MentionTextarea } from '@/components/mentions/MentionTextarea'
 import { AutoTextarea } from './AutoTextarea'
@@ -89,7 +96,7 @@ export function QuoteEditable({ block }: { block: QuoteBlock }) {
         placeholder='인용할 문장'
         onChange={(event) => onTextChange(block, 'text', event.target.value)}
         onKeyDown={(event) => onTextKeyDown(event, block, 'text')}
-        className='text-[clamp(1.25rem,2.6vw,2rem)] font-medium leading-[1.2] tracking-[-0.025em] text-ink/80'
+        className='text-[clamp(1.25rem,2.6vw,2rem)] font-medium leading-[1.2] text-ink/80'
       />
       <input
         value={block.cite ?? ''}

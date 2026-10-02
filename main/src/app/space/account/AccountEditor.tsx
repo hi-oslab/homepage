@@ -76,7 +76,7 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
         <ProfileImage src={profileImage} name={saved.name} size='sm' className='size-16 shrink-0 text-xl md:size-20' />
         <div className='flex min-w-0 flex-col gap-1'>
           <span className='flex items-center gap-2'>
-            <span className='truncate text-2xl font-medium tracking-[-0.03em]'>{saved.name}</span>
+            <span className='truncate text-2xl font-medium '>{saved.name}</span>
             {user.is_master && <OperatorBadge />}
           </span>
           <span className='truncate text-sm text-mute'>
@@ -87,7 +87,10 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
         </div>
       </section>
 
-      <SectionCard title='본인 정보' description='비밀번호를 잊었을 때 운영자가 본인인지 확인하는 데 써요. 사이트에는 보이지 않아요.'>
+      <SectionCard
+        title='본인 정보'
+        description='비밀번호를 잊었을 때 운영자가 본인인지 확인하는 데 써요. 사이트에는 보이지 않아요.'
+      >
         <IdentityFields value={profile} onChange={setProfile} />
       </SectionCard>
 
@@ -166,7 +169,11 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
         description='계정과 가입 정보가 삭제되고 되돌릴 수 없어요.'
         actions={
           !withdrawOpen && (
-            <button type='button' onClick={() => setWithdrawOpen(true)} className={buttonClass('ghost', 'sm', 'text-danger')}>
+            <button
+              type='button'
+              onClick={() => setWithdrawOpen(true)}
+              className={buttonClass('ghost', 'sm', 'text-danger')}
+            >
               탈퇴하기
             </button>
           )
@@ -177,7 +184,9 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
             <ul className='flex list-disc flex-col gap-1 pl-4 text-sm text-ink/70'>
               <li>작성한 프로젝트는 사이트에 그대로 남고, 이후에는 운영자만 삭제할 수 있어요.</li>
               <li>Members 페이지의 프로필카드도 함께 삭제돼요.</li>
-              {user.is_master && <li>마지막 운영자 계정은 탈퇴할 수 없어요. 먼저 다른 사람을 운영자로 지정해 주세요.</li>}
+              {user.is_master && (
+                <li>마지막 운영자 계정은 탈퇴할 수 없어요. 먼저 다른 사람을 운영자로 지정해 주세요.</li>
+              )}
             </ul>
             <div className='flex flex-col gap-2 sm:flex-row'>
               <PasswordInput
@@ -189,7 +198,11 @@ export function AccountEditor({ user, profileImage }: { user: AdminUser; profile
                 onChange={(event) => setWithdrawPassword(event.target.value)}
                 className='bg-surface sm:max-w-64'
               />
-              <button type='submit' disabled={isPending} className={buttonClass('plain', 'md', 'bg-danger text-white hover:opacity-85')}>
+              <button
+                type='submit'
+                disabled={isPending}
+                className={buttonClass('plain', 'md', 'bg-danger text-white hover:opacity-85')}
+              >
                 탈퇴하기
               </button>
               <button type='button' onClick={() => setWithdrawOpen(false)} className={buttonClass('ghost')}>

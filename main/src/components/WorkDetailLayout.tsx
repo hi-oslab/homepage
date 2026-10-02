@@ -74,7 +74,7 @@ export function WorkDetailLayout({ work }: { work: Work }) {
             <span>{work.category || 'Selected Work'}</span>
             <span>{work.year}</span>
           </div>
-          <h1 className='mt-6 w-full break-keep text-4xl font-medium leading-[1.05] tracking-[-0.04em] md:text-6xl xl:text-7xl'>
+          <h1 className='mt-6 w-full break-keep text-4xl font-medium leading-[1.05] md:text-6xl xl:text-7xl'>
             {work.title}
           </h1>
           {work.subtitle && (

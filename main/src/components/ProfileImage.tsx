@@ -35,7 +35,7 @@ export function ProfileImage({
         className={cn(
           'flex items-center justify-center font-medium',
           // 작은 아바타는 동그라미, 카드는 바탕 위에 큰 글자
-          size === 'sm' ? 'rounded-full bg-field text-xs text-ink/60' : 'text-7xl tracking-tight text-ink/15',
+          size === 'sm' ? 'rounded-full bg-field text-xs text-ink/60' : 'text-7xl text-ink/15',
           className,
         )}
       >
@@ -46,7 +46,12 @@ export function ProfileImage({
   return (
     <span className={cn('flex items-center justify-center', className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={name} loading='lazy' className={cn('size-full object-contain', SHADOW[size], imageClassName)} />
+      <img
+        src={src}
+        alt={name}
+        loading='lazy'
+        className={cn('size-full object-contain', SHADOW[size], imageClassName)}
+      />
     </span>
   )
 }

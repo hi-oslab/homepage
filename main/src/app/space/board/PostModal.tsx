@@ -197,11 +197,7 @@ export function PostModal({
               </span>
             </span>
           </span>
-          {post.title && (
-            <h2 className='text-2xl leading-tight font-medium tracking-[-0.03em] break-keep md:text-3xl'>
-              {post.title}
-            </h2>
-          )}
+          {post.title && <h2 className='text-2xl leading-tight font-medium break-keep md:text-3xl'>{post.title}</h2>}
         </header>
 
         {/* 본문: 블록(새 글) 또는 글자(예전 글) */}

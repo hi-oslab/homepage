@@ -184,7 +184,7 @@ export function MemberVoronoi({ members }: { members: Member[] }) {
                 >
                   <span
                     className={classNames(
-                      'whitespace-nowrap font-medium leading-none tracking-[-0.03em] transition-colors',
+                      'whitespace-nowrap font-medium leading-none transition-colors',
                       mobile ? 'text-xl' : 'text-3xl',
                       active ? 'text-ink' : 'text-ink/85',
                     )}

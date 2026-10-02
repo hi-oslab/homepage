@@ -49,11 +49,11 @@ export function HomeSection({
               <h2
                 className={classNames(
                   'flex items-baseline gap-2',
-                  size === 'sm' ? 'text-sm font-semibold' : 'text-2xl font-semibold tracking-[-0.03em]',
+                  size === 'sm' ? 'text-sm font-semibold' : 'text-2xl font-semibold ',
                 )}
               >
                 {title}
-                {meta && <span className='text-xs font-normal tracking-normal text-mute tabular-nums'>{meta}</span>}
+                {meta && <span className='text-xs font-normal text-mute tabular-nums'>{meta}</span>}
               </h2>
             )}
             {description && <p className='text-sm text-mute'>{description}</p>}

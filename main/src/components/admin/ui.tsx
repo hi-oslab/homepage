@@ -86,7 +86,12 @@ Textarea.displayName = 'Textarea'
 
 export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, style, ...props }, ref) => (
-    <select ref={ref} className={selectClass(className)} style={{ backgroundImage: SELECT_CHEVRON, ...style }} {...props} />
+    <select
+      ref={ref}
+      className={selectClass(className)}
+      style={{ backgroundImage: SELECT_CHEVRON, ...style }}
+      {...props}
+    />
   ),
 )
 Select.displayName = 'Select'
@@ -104,7 +109,7 @@ export const PageHeader = ({
 }) => (
   <header className='flex flex-wrap items-end justify-between gap-4 pb-8'>
     <div className='flex flex-col gap-2'>
-      <h1 className='text-4xl font-medium tracking-[-0.04em]'>{title}</h1>
+      <h1 className='text-4xl font-medium '>{title}</h1>
       {description && <p className='text-sm text-mute'>{description}</p>}
     </div>
     {actions && <div className='flex flex-wrap items-center gap-2'>{actions}</div>}
@@ -145,7 +150,7 @@ export const SectionCard = ({
     {(title || actions) && (
       <div className='flex items-start justify-between gap-3'>
         <div className='flex flex-col gap-1'>
-          {title && <h2 className='text-base font-medium tracking-[-0.01em]'>{title}</h2>}
+          {title && <h2 className='text-base font-medium '>{title}</h2>}
           {description && <p className='text-xs leading-relaxed break-keep text-mute'>{description}</p>}
         </div>
         {actions && <div className='flex shrink-0 items-center gap-2'>{actions}</div>}
