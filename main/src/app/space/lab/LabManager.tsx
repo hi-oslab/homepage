@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState, useTransition } from 'react'
 import {
   GoArrowUpRight,
+  GoChevronRight,
+  GoFileDirectoryFill,
   GoGear,
   GoGrabber,
-  GoListUnordered,
   GoPencil,
   GoPlus,
   GoStarFill,
@@ -56,9 +57,8 @@ import {
 
 /**
  * 멤버 공간 Lab Space: 토픽(DB의 issue)마다 글을 모아 관리한다
- * 왼쪽: 토픽 목록 (하나만 고른다, 처음에는 전체)
- * 오른쪽: 고른 토픽의 표지(기간 · 글 쓰기) + 글 목록. 전체일 때는 토픽 순서대로 묶는다
- * 리드 멤버(운영자)의 토픽 만들기 · 순서 · 고치기 · 지우기와 공개 페이지 설정은 모달로 뺐다
+ * 첫 화면에는 토픽 폴더만 보여주고, 토픽을 열면 그 안의 글 목록으로 한 단계 들어간다
+ * 리드 멤버(운영자)는 토픽 목록에서 바로 순서 · 고치기 · 지우기를 관리한다
  */
 export function LabManager({
   issues: initialIssues,
@@ -85,11 +85,14 @@ export function LabManager({
   const [issues, setIssues] = useServerState(initialIssues)
   const [articles, setArticles] = useServerState(initialArticles)
   const [settings, setSettings] = useServerState(initialSettings)
-  /** 고른 토픽. null이면 전체 */
+  /** null은 토픽 루트, id는 열린 토픽이다. */
   const [topicId, setTopicId] = useState<string | null>(null)
-  const [mineOnly, setMineOnly] = useState(false)
+  const openLocation = (id: string | null) => {
+    if (id === topicId) return
+    setTopicId(id)
+    setSelected(new Set())
+  }
   const [form, setForm] = useState<IssueForm | null>(null)
-  const [managing, setManaging] = useState(false)
   const [configuring, setConfiguring] = useState(false)
   const [creating, startCreating] = useTransition()
   const [createFor, setCreateFor] = useState<LabIssue | null>(null)
@@ -116,9 +119,6 @@ export function LabManager({
     (latest, issue) => (!latest || issue.created_at > latest.created_at ? issue : latest),
     null,
   )?.id
-  // 전체에서 글 쓰기를 누르면 어느 토픽에 쓸지 고른다
-  const [picking, setPicking] = useState(false)
-  const anyOpen = issues.some((issue) => issuePhase(issue) === 'open')
   // 추천 스위치는 '직접 선택'일 때만 의미가 있다
   const manualRecommend = isLead && settings.recommend_enabled && settings.recommend_mode === 'manual'
 
@@ -149,7 +149,7 @@ export function LabManager({
       setIssues((current) =>
         form.id ? current.map((item) => (item.id === issue.id ? issue : item)) : [issue, ...current],
       )
-      setTopicId(issue.id)
+      openLocation(issue.id)
       setForm(null)
       toast.show(form.id ? '토픽을 고쳤어요' : '토픽을 만들었어요')
     })
@@ -157,12 +157,12 @@ export function LabManager({
 
   const removeIssue = (issue: LabIssue) => {
     if (countOf(issue.id) > 0) return toast.show('글이 있는 토픽은 지울 수 없어요', 'error')
-    if (!confirm(`'${issue.title}' 토픽을 지울까요?`)) return
+    if (!confirm(`'${issue.title}' 토픽을 정말 지울까요?\n\n삭제한 토픽은 복구할 수 없어요.`)) return
     startSaving(async () => {
       const result = await callAction(() => deleteIssueAction(issue.id))
       if ('message' in result) return toast.show(result.message, 'error')
       setIssues((current) => current.filter((item) => item.id !== issue.id))
-      if (topicId === issue.id) setTopicId(null)
+      if (topicId === issue.id) openLocation(null)
       toast.show('토픽을 지웠어요')
     })
   }
@@ -187,7 +187,7 @@ export function LabManager({
     .map((issue) => ({
       issue,
       rows: articles
-        .filter((article) => article.issue_id === issue.id && (!mineOnly || article.author_id === userId))
+        .filter((article) => article.issue_id === issue.id)
         .sort((a, b) => b.created_at.localeCompare(a.created_at)),
     }))
     .filter((group) => group.rows.length > 0)
@@ -258,69 +258,96 @@ export function LabManager({
         </div>
       </header>
 
-      <div className='grid grid-cols-1 items-start gap-4 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]'>
-        {/* 왼쪽: 토픽 목록 */}
-        <nav aria-label='토픽' className='rounded-block flex min-w-0 flex-col gap-1 bg-surface p-2 lg:sticky lg:top-4'>
-          <span className='px-2 pt-1 pb-1.5 text-xs text-mute'>토픽</span>
-          {/* 좁은 화면에서는 가로로 넘긴다 */}
-          <div className='-mx-2 flex gap-1 overflow-x-auto px-2 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0'>
-            <TopicButton active={!topicId} title='전체 글' count={articles.length} onClick={() => setTopicId(null)} />
-            {issues.map((issue) => (
-              <TopicButton
-                key={issue.id}
-                active={topicId === issue.id}
-                title={issue.title}
-                latest={issue.id === latestId}
-                period={issue}
-                color={colorOf(issue.id)}
-                count={countOf(issue.id)}
-                onClick={() => setTopicId(issue.id)}
-              />
-            ))}
-          </div>
-          {issues.length === 0 && (
-            <p className='px-2 py-4 text-xs text-mute'>
-              {isLead ? '첫 토픽을 만들어 보세요.' : '운영자가 토픽을 만들면 글을 쓸 수 있어요.'}
-            </p>
-          )}
-          {isLead && (
-            <div className='mt-1 flex gap-1 border-t border-ink/5 pt-2'>
-              <button
-                type='button'
-                onClick={() => setForm(emptyForm())}
-                className={buttonClass('ghost', 'sm', 'flex-1 justify-start')}
-              >
+      <nav
+        aria-label='Lab Space 위치'
+        className='rounded-block sticky top-header z-20 flex min-w-0 items-center gap-1.5 bg-surface/95 p-2 shadow-[0_8px_24px_rgb(var(--shadow-rgb)/0.06)] backdrop-blur-xl'
+      >
+        <button
+          type='button'
+          onClick={() => openLocation(null)}
+          aria-current={!topic ? 'page' : undefined}
+          className={buttonClass(topic ? 'ghost' : 'secondary', 'sm')}
+        >
+          토픽
+        </button>
+        {topic && (
+          <>
+            <GoChevronRight className='shrink-0 text-mute' size={13} />
+            <button type='button' aria-current='page' className={buttonClass('secondary', 'sm', 'min-w-0 max-w-full')}>
+              <span className='truncate'>{topic.title}</span>
+            </button>
+          </>
+        )}
+      </nav>
+
+      {!topic ? (
+        <section className='flex min-w-0 flex-col gap-3'>
+          <div className='flex flex-wrap items-end justify-between gap-3 px-1'>
+            <div>
+              <h2 className='text-xl font-medium'>토픽</h2>
+              <p className='mt-1 text-xs text-mute'>토픽을 열어 글을 확인하세요.</p>
+            </div>
+            {isLead && (
+              <button type='button' onClick={() => setForm(emptyForm())} className={buttonClass('primary', 'sm')}>
                 <GoPlus size={13} />새 토픽
               </button>
-              {issues.length > 0 && (
-                <button type='button' onClick={() => setManaging(true)} className={buttonClass('ghost', 'sm')}>
-                  <GoListUnordered size={13} />
-                  관리
-                </button>
-              )}
-            </div>
-          )}
-        </nav>
+            )}
+          </div>
 
-        {/* 오른쪽: 표지 + 글 */}
+          <div className='rounded-block flex min-w-0 flex-col gap-1 bg-surface p-2'>
+            {isLead && issues.length > 1 && (
+              <p className='px-2 py-1 text-xs text-mute'>손잡이를 끌어 공개 페이지의 토픽 순서를 바꿀 수 있어요.</p>
+            )}
+            {isLead ? (
+              <Reorder.Group axis='y' values={issues} onReorder={setIssues} className='flex flex-col gap-1'>
+                {issues.map((issue) => (
+                  <TopicManageRow
+                    key={issue.id}
+                    issue={issue}
+                    active={false}
+                    latest={issue.id === latestId}
+                    color={colorOf(issue.id)}
+                    count={countOf(issue.id)}
+                    saving={saving}
+                    onSelect={() => openLocation(issue.id)}
+                    onDragEnd={saveOrder}
+                    onEdit={() => setForm(formOf(issue))}
+                    onRemove={() => removeIssue(issue)}
+                  />
+                ))}
+              </Reorder.Group>
+            ) : (
+              <div className='flex flex-col gap-1'>
+                {issues.map((issue) => (
+                  <TopicButton
+                    key={issue.id}
+                    active={false}
+                    title={issue.title}
+                    latest={issue.id === latestId}
+                    period={issue}
+                    color={colorOf(issue.id)}
+                    count={countOf(issue.id)}
+                    onClick={() => openLocation(issue.id)}
+                  />
+                ))}
+              </div>
+            )}
+            {issues.length === 0 && (
+              <p className='px-3 py-12 text-center text-sm text-mute'>
+                {isLead ? '첫 토픽을 만들어 보세요.' : '아직 열린 토픽이 없어요.'}
+              </p>
+            )}
+          </div>
+        </section>
+      ) : (
         <section className='flex min-w-0 flex-col gap-3'>
-          <TopicCover
-            topic={topic}
-            total={topic ? countOf(topic.id) : articles.length}
-            anyOpen={anyOpen}
-            onPick={() => setPicking(true)}
-            creating={creating}
-            isLead={isLead}
-            onWrite={setCreateFor}
-            onEdit={() => topic && setForm(formOf(topic))}
-          />
+          <TopicCover topic={topic} total={countOf(topic.id)} creating={creating} onWrite={setCreateFor} />
 
-          <div className='flex min-h-8 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-1'>
-            <span className='flex items-center gap-2'>
+          <div className='flex min-h-8 flex-wrap items-center gap-2 px-1'>
+            <span className='flex flex-wrap items-center gap-2'>
               <span className='text-xs text-mute tabular-nums'>
-                {mineOnly ? '작성한 글' : !isLead ? '편집 가능한 글' : '글'} {total}
+                {!isLead ? '편집 가능한 글' : '글'} {total}
               </span>
-              {/* 선택 막대: 고르면 지우기 버튼이 나온다 */}
               {chosen.length > 0 && (
                 <>
                   <span className='text-xs tabular-nums'>· {chosen.length}개 선택됨</span>
@@ -339,23 +366,15 @@ export function LabManager({
                 </>
               )}
             </span>
-            {/* 운영자는 전체 글 중 본인 작성 글만 따로 볼 수 있다. */}
-            {isLead && (
-              <label className='flex cursor-pointer items-center gap-1.5 text-sm text-mute'>
-                <Checkbox checked={mineOnly} onChange={(event) => setMineOnly(event.target.checked)} />
-                직접 작성한 것만
-              </label>
-            )}
           </div>
 
           {groups.length === 0 ? (
             <p className='rounded-block bg-surface py-14 text-center text-sm text-mute'>
-              {mineOnly ? '아직 작성한 글이 없어요.' : !isLead ? '아직 편집 가능한 글이 없어요.' : '아직 글이 없어요.'}
+              {!isLead ? '아직 편집 가능한 글이 없어요.' : '아직 글이 없어요.'}
             </p>
           ) : (
             <ArticleTable
               groups={groups}
-              grouped={!topicId}
               userId={userId}
               recommendSwitch={manualRecommend}
               showAuthor
@@ -364,24 +383,13 @@ export function LabManager({
               selected={selected}
               deleting={deleting}
               onSelect={select}
-              onPickTopic={setTopicId}
               onArticles={setArticles}
               onMessage={toast.show}
             />
           )}
         </section>
-      </div>
+      )}
 
-      <TopicPickModal
-        open={picking}
-        issues={issues}
-        creating={creating}
-        onWrite={(issue) => {
-          setPicking(false)
-          setCreateFor(issue)
-        }}
-        onClose={() => setPicking(false)}
-      />
       <EditAccessModal
         open={Boolean(createFor)}
         editors={editors}
@@ -390,20 +398,6 @@ export function LabManager({
         title={createFor ? `'${createFor.title}'에 새 글` : '새 글'}
         onSave={write}
         onClose={() => setCreateFor(null)}
-      />
-      <TopicManageModal
-        open={managing}
-        issues={issues}
-        countOf={countOf}
-        saving={saving}
-        onReorder={setIssues}
-        onDragEnd={saveOrder}
-        onEdit={(issue) => {
-          setManaging(false)
-          setForm(formOf(issue))
-        }}
-        onRemove={removeIssue}
-        onClose={() => setManaging(false)}
       />
       <IssueFormModal form={form} saving={saving} onChange={setForm} onClose={() => setForm(null)} onSave={saveIssue} />
       {isLead && (
@@ -443,7 +437,7 @@ function periodText(issue: LabIssue) {
   return issue.closes_at ? `${formatDate(issue.closes_at)} 마감` : '마감 없음'
 }
 
-/* ─── 왼쪽 토픽 한 줄 ─────────────────────────────────────────────────── */
+/* ─── 토픽 폴더 한 줄 ─────────────────────────────────────────────────── */
 
 function TopicButton({
   active,
@@ -471,11 +465,11 @@ function TopicButton({
       onClick={onClick}
       aria-current={active ? 'true' : undefined}
       className={classNames(
-        'rounded-inner flex min-w-40 shrink-0 items-center gap-3 px-2.5 py-2 text-left transition-colors lg:min-w-0',
+        'rounded-inner flex w-full min-w-0 items-center gap-3 px-2.5 py-2 text-left transition-colors',
         active ? 'bg-accent-soft text-accent' : 'hover:bg-ink/4',
       )}
     >
-      {color && <span className='size-2 shrink-0 self-start rounded-full mt-1.5' style={{ background: color }} />}
+      {color && <GoFileDirectoryFill className='size-5 shrink-0 self-start mt-0.5' style={{ color }} />}
       <span className='flex min-w-0 flex-1 flex-col'>
         <span className='flex min-w-0 items-center gap-1.5 text-sm'>
           <span className={classNames('truncate', !active && closed && 'text-mute')}>{title}</span>
@@ -488,58 +482,42 @@ function TopicButton({
         )}
       </span>
       <span className={classNames('shrink-0 text-xs tabular-nums', active ? 'text-accent' : 'text-mute')}>{count}</span>
+      <GoChevronRight className='shrink-0 text-mute' size={13} />
     </button>
   )
 }
 
-/* ─── 오른쪽 표지: 고른 토픽의 이름 · 설명 · 기간 · 글 쓰기 ────────────── */
+/* ─── 연 토픽의 이름 · 설명 · 기간 · 글 쓰기 ───────────────────────────── */
 
 function TopicCover({
   topic,
   total,
-  anyOpen,
   creating,
-  isLead,
   onWrite,
-  onPick,
-  onEdit,
 }: {
-  topic: LabIssue | null
+  topic: LabIssue
   total: number
-  /** 지금 쓸 수 있는 토픽이 하나라도 있는지 (전체 글일 때) */
-  anyOpen: boolean
   creating: boolean
-  isLead: boolean
   onWrite: (issue: LabIssue) => void
-  /** 전체 글일 때: 어느 토픽에 쓸지 고르는 창 */
-  onPick: () => void
-  onEdit: () => void
 }) {
-  const open = topic ? issuePhase(topic) === 'open' : anyOpen
+  const open = issuePhase(topic) === 'open'
 
   return (
     <div className='rounded-block flex flex-wrap items-end justify-between gap-4 bg-surface p-4'>
       <div className='flex min-w-0 flex-col gap-1'>
-        <span className='flex items-center gap-2'>
-          <h2 className='truncate text-xl font-medium '>{topic ? topic.title : '전체 글'}</h2>
-          {topic && isLead && (
-            <button type='button' aria-label='토픽 고치기' onClick={onEdit} className={iconButtonClass({ size: 'sm' })}>
-              <GoPencil size={12} />
-            </button>
-          )}
-        </span>
-        {topic?.description && <p className='text-sm break-keep text-mute'>{topic.description}</p>}
+        <h2 className='truncate text-xl font-medium'>{topic.title}</h2>
+        {topic.description && <p className='text-sm break-keep text-mute'>{topic.description}</p>}
         <p className='text-xs text-mute tabular-nums'>
-          {topic ? `${periodText(topic)} · 글 ${total}` : `모든 토픽의 글 ${total}`}
+          {periodText(topic)} · 글 {total}
         </p>
       </div>
 
-      {/* 글 쓰기: 고른 토픽에 바로, 전체일 때는 토픽을 고르는 창 */}
+      {/* 열린 토픽에 바로 글을 쓴다 */}
       {open ? (
         <button
           type='button'
           disabled={creating}
-          onClick={() => (topic ? onWrite(topic) : onPick())}
+          onClick={() => onWrite(topic)}
           className={buttonClass('primary', 'md')}
         >
           <GoPencil size={14} />
@@ -547,122 +525,34 @@ function TopicCover({
         </button>
       ) : (
         <span className='text-xs text-mute'>
-          {topic
-            ? issuePhase(topic) === 'upcoming'
-              ? '작성 기간이 시작되면 쓸 수 있어요'
-              : '작성 기간이 끝났어요'
-            : '지금 쓸 수 있는 토픽이 없어요'}
+          {issuePhase(topic) === 'upcoming' ? '작성 기간이 시작되면 쓸 수 있어요' : '작성 기간이 끝났어요'}
         </span>
       )}
     </div>
   )
 }
 
-/* ─── 글 쓸 토픽 고르기 (전체 글에서 글 쓰기) ──────────────────────────── */
+/* ─── 토픽 목록 관리 (리드 멤버): 순서 · 고치기 · 지우기 ────────────────── */
 
-function TopicPickModal({
-  open,
-  issues,
-  creating,
-  onWrite,
-  onClose,
-}: {
-  open: boolean
-  issues: LabIssue[]
-  creating: boolean
-  onWrite: (issue: LabIssue) => void
-  onClose: () => void
-}) {
-  // 쓸 수 있는 토픽을 위로, 나머지는 흐리게 (왜 안 되는지 기간으로 보여 준다)
-  const sorted = issues
-    .filter((issue) => issuePhase(issue) === 'open')
-    .concat(issues.filter((issue) => issuePhase(issue) !== 'open'))
-  return (
-    <Modal open={open} onClose={onClose} title='어떤 토픽에 쓸까요?'>
-      <div className='flex flex-col gap-1'>
-        {sorted.map((issue) => {
-          const writable = issuePhase(issue) === 'open'
-          return (
-            <button
-              key={issue.id}
-              type='button'
-              disabled={!writable || creating}
-              onClick={() => onWrite(issue)}
-              className='rounded-inner flex items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors enabled:hover:bg-ink/4 disabled:cursor-default'
-            >
-              <span className='flex min-w-0 flex-col'>
-                <span className={classNames('truncate text-sm', !writable && 'text-mute')}>{issue.title}</span>
-                {issue.description && writable && (
-                  <span className='truncate text-xs text-mute'>{issue.description}</span>
-                )}
-              </span>
-              <span className='shrink-0 text-xs text-mute tabular-nums'>
-                {creating && writable ? '여는 중…' : periodText(issue)}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-    </Modal>
-  )
-}
-
-/* ─── 토픽 관리 (리드 멤버): 순서 · 고치기 · 지우기 ─────────────────────── */
-
-function TopicManageModal({
-  open,
-  issues,
-  countOf,
-  saving,
-  onReorder,
-  onDragEnd,
-  onEdit,
-  onRemove,
-  onClose,
-}: {
-  open: boolean
-  issues: LabIssue[]
-  countOf: (id: string) => number
-  saving: boolean
-  onReorder: (issues: LabIssue[]) => void
-  onDragEnd: () => void
-  onEdit: (issue: LabIssue) => void
-  onRemove: (issue: LabIssue) => void
-  onClose: () => void
-}) {
-  return (
-    <Modal open={open} onClose={onClose} title='토픽 관리' meta='끌어서 순서를 바꾸면 공개 페이지 순서도 바뀌어요'>
-      <Reorder.Group axis='y' values={issues} onReorder={onReorder} className='flex flex-col'>
-        {issues.map((issue, index) => (
-          <ManageRow
-            key={issue.id}
-            issue={issue}
-            order={index + 1}
-            count={countOf(issue.id)}
-            saving={saving}
-            onDragEnd={onDragEnd}
-            onEdit={() => onEdit(issue)}
-            onRemove={() => onRemove(issue)}
-          />
-        ))}
-      </Reorder.Group>
-    </Modal>
-  )
-}
-
-function ManageRow({
+function TopicManageRow({
   issue,
-  order,
+  active,
+  latest,
+  color,
   count,
   saving,
+  onSelect,
   onDragEnd,
   onEdit,
   onRemove,
 }: {
   issue: LabIssue
-  order: number
+  active: boolean
+  latest: boolean
+  color: string
   count: number
   saving: boolean
+  onSelect: () => void
   onDragEnd: () => void
   onEdit: () => void
   onRemove: () => void
@@ -675,7 +565,10 @@ function ManageRow({
       dragListener={false}
       dragControls={controls}
       onDragEnd={onDragEnd}
-      className='flex items-center gap-2 border-t border-ink/5 bg-surface py-2 first:border-t-0'
+      className={classNames(
+        'rounded-inner flex min-w-0 items-center gap-1 bg-surface p-1 transition-colors',
+        active ? 'bg-accent-soft text-accent' : 'hover:bg-ink/4',
+      )}
     >
       <span
         onPointerDown={(event) => controls.start(event)}
@@ -685,23 +578,34 @@ function ManageRow({
       >
         <GoGrabber size={16} />
       </span>
-      <span className='w-5 shrink-0 text-center text-xs text-mute tabular-nums'>{order}</span>
-      <span className='flex min-w-0 flex-1 flex-col'>
-        <span className='truncate text-sm'>{issue.title}</span>
-        <span className='truncate text-xs text-mute tabular-nums'>
-          {periodText(issue)} · 글 {count}
+      <button type='button' onClick={onSelect} className='flex min-w-0 flex-1 items-center gap-2 p-1 text-left'>
+        <GoFileDirectoryFill className='size-5 shrink-0' style={{ color }} />
+        <span className='flex min-w-0 flex-1 flex-col'>
+          <span className='flex min-w-0 items-center gap-1.5 text-sm'>
+            <span className='truncate'>{issue.title}</span>
+            {latest && <Badge className='bg-ink text-paper'>최신</Badge>}
+          </span>
+          <span className={classNames('truncate text-xs tabular-nums', active ? 'text-accent/70' : 'text-mute')}>
+            {periodText(issue)} · 글 {count}
+          </span>
         </span>
-      </span>
-      <button type='button' aria-label='토픽 고치기' onClick={onEdit} className={iconButtonClass()}>
+      </button>
+      <button
+        type='button'
+        aria-label={`${issue.title} 토픽 편집`}
+        title='토픽 편집'
+        onClick={onEdit}
+        className={iconButtonClass({ size: 'sm' })}
+      >
         <GoPencil size={13} />
       </button>
       <button
         type='button'
-        aria-label='토픽 지우기'
-        title={count > 0 ? '글이 있는 토픽은 지울 수 없어요' : undefined}
+        aria-label={`${issue.title} 토픽 삭제`}
+        title={count > 0 ? '글이 있는 토픽은 지울 수 없어요' : '토픽 삭제'}
         disabled={saving || count > 0}
         onClick={onRemove}
-        className={iconButtonClass({ danger: true })}
+        className={iconButtonClass({ danger: true, size: 'sm' })}
       >
         <GoTrash size={13} />
       </button>
@@ -1009,9 +913,6 @@ const limitOptions = (current: number) =>
 
 /* ─── 글 목록 ─────────────────────────────────────────────────────────── */
 
-const TH = 'px-3 py-2.5 text-left text-xs font-normal text-mute whitespace-nowrap'
-const TD = 'px-3 py-2.5 align-middle'
-
 /** 작은 배지 */
 function Badge({ className, children, title }: { className?: string; children: React.ReactNode; title?: string }) {
   return (
@@ -1032,7 +933,6 @@ const isNew = (iso: string) => Date.now() - new Date(iso).getTime() < 3 * 864e5
 
 function ArticleTable({
   groups,
-  grouped,
   userId,
   recommendSwitch,
   showAuthor,
@@ -1041,14 +941,11 @@ function ArticleTable({
   selected,
   deleting,
   onSelect,
-  onPickTopic,
   onArticles,
   onMessage,
 }: {
   /** 토픽별 묶음 (토픽 순서) */
   groups: { issue: LabIssue; rows: LabArticleCard[] }[]
-  /** 전체 글일 때: 토픽 칸 + 토픽 색 줄로 묶는다 */
-  grouped: boolean
   userId: string
   /** 운영자 + 추천 방식이 '직접 선택'일 때만 추천 스위치 */
   recommendSwitch: boolean
@@ -1062,7 +959,6 @@ function ArticleTable({
   /** 지우는 중인 글은 흐리게 */
   deleting: boolean
   onSelect: (ids: string[], checked: boolean) => void
-  onPickTopic: (id: string) => void
   onArticles: (update: (current: LabArticleCard[]) => LabArticleCard[]) => void
   onMessage: (message: string, tone?: 'success' | 'error') => void
 }) {
@@ -1082,67 +978,50 @@ function ArticleTable({
   const selectedCount = selectable.filter((article) => selected.has(article.id)).length
   const allSelected = selectable.length > 0 && selectedCount === selectable.length
 
-  // 공동 편집 권한이 있으면 편집 화면, 아니면 공개 글만 공개 페이지로 연다.
+  // 목록에서는 편집 가능한 글만 편집 화면으로 연다. 공개 페이지 이동은 상세 편집 화면에서 한다.
   const open = (article: LabArticleCard) => {
     if (canEditLabArticle(article, userId)) router.push(`/space/lab/${article.id}`)
-    else if (article.published) window.open(`/lab-space/${article.slug}`, '_blank', 'noopener')
   }
 
   return (
-    <div className='rounded-block w-full overflow-x-auto bg-surface'>
-      <table className='w-full min-w-160 text-sm'>
-        <thead className='border-b border-ink/5'>
-          <tr>
-            <th className={classNames(TH, 'w-0 pr-0')}>
-              <Checkbox
-                aria-label='보이는 글 전체 선택'
-                checked={allSelected}
-                indeterminate={selectedCount > 0 && !allSelected}
-                disabled={selectable.length === 0}
-                onChange={(event) =>
-                  onSelect(
-                    selectable.map((article) => article.id),
-                    event.target.checked,
-                  )
-                }
-              />
-            </th>
-            <th className={TH}>제목</th>
-            {grouped && <th className={TH}>토픽</th>}
-            {showAuthor && <th className={TH}>작성자</th>}
-            <th className={TH}>상태</th>
-            <th className={classNames(TH, 'text-right')}>조회</th>
-            {recommendSwitch && (
-              <th className={classNames(TH, 'text-center')} title='켠 글이 공개 페이지 Recommend에 보여요'>
-                추천
-              </th>
-            )}
-            <th className={classNames(TH, 'text-right')}>작성</th>
-            <th className={TH}>
-              <span className='sr-only'>열기</span>
-            </th>
-          </tr>
-        </thead>
-        {groups.map(({ issue, rows }) => (
-          <tbody key={issue.id} className='border-t border-ink/10 first-of-type:border-t-0'>
+    <div className='flex w-full flex-col gap-5 text-sm'>
+      <label className='flex w-fit cursor-pointer items-center gap-2 px-1 text-xs text-mute'>
+        <Checkbox
+          aria-label='보이는 글 전체 선택'
+          checked={allSelected}
+          indeterminate={selectedCount > 0 && !allSelected}
+          disabled={selectable.length === 0}
+          onChange={(event) =>
+            onSelect(
+              selectable.map((article) => article.id),
+              event.target.checked,
+            )
+          }
+        />
+        {selectedCount > 0
+          ? `${selectedCount}개 선택됨`
+          : `전체 ${groups.reduce((sum, group) => sum + group.rows.length, 0)}개 선택`}
+      </label>
+
+      {groups.map(({ issue, rows }) => (
+        <section key={issue.id} className='rounded-block min-w-0 bg-surface p-2'>
+          <div className='flex min-w-0 flex-col gap-1'>
             {rows.map((article) => {
               const editable = canEditLabArticle(article, userId)
               const checked = selected.has(article.id)
               return (
-                <tr
+                <article
                   key={article.id}
-                  onClick={() => open(article)}
+                  onClick={editable ? () => open(article) : undefined}
                   className={classNames(
-                    'border-t border-ink/5 transition-colors first:border-t-0',
-                    (editable || article.published) && 'cursor-pointer hover:bg-ink/3',
-                    checked && 'bg-ink/3',
+                    'rounded-inner grid w-full min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 p-2 transition-colors sm:grid-cols-[auto_auto_minmax(0,1fr)_max-content]',
+                    editable && 'cursor-pointer hover:bg-ink/4',
+                    checked && 'bg-accent-soft',
                     (busyId === article.id || (deleting && checked)) && 'opacity-50',
                   )}
                 >
-                  {/* 전체 글일 때 왼쪽 색 줄로 토픽을 묶는다 */}
-                  <td
-                    className={classNames(TD, 'w-0 pr-0')}
-                    style={grouped ? { boxShadow: `inset 3px 0 0 ${colorOf(issue.id)}` } : undefined}
+                  <div
+                    className='row-span-2 flex size-7 items-center justify-center sm:row-span-1'
                     onClick={(event) => event.stopPropagation()}
                   >
                     {canDelete(article) && (
@@ -1152,84 +1031,93 @@ function ArticleTable({
                         onChange={(event) => onSelect([article.id], event.target.checked)}
                       />
                     )}
-                  </td>
-                  <td className={classNames(TD, 'max-w-72')}>
-                    <span className='flex min-w-0 items-center gap-3'>
-                      <span className='rounded-inner h-9 w-12 shrink-0 overflow-hidden bg-ink/6'>
-                        {article.thumbnail_url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={article.thumbnail_url} alt='' className='size-full object-cover' />
-                        )}
+                  </div>
+
+                  <div className='rounded-inner row-span-2 h-9 w-12 overflow-hidden bg-ink/6 sm:row-span-1 sm:h-10 sm:w-14'>
+                    {article.thumbnail_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={article.thumbnail_url} alt='' className='size-full object-cover' />
+                    ) : (
+                      <div
+                        className='size-full opacity-20'
+                        style={{ background: `linear-gradient(135deg, ${colorOf(issue.id)}, transparent 70%)` }}
+                      />
+                    )}
+                  </div>
+
+                  <div className='col-start-3 flex min-w-0 w-full flex-col gap-1 sm:row-start-1'>
+                    <div className='flex min-w-0 items-center gap-1.5'>
+                      <h3 className='truncate font-medium'>{article.title || '제목 없음'}</h3>
+                      {isNew(article.created_at) && <Badge className='bg-ink text-paper'>NEW</Badge>}
+                      {!recommendSwitch && article.recommended_at && (
+                        <Badge className='bg-accent-soft text-accent' title='운영자가 추천한 글'>
+                          <GoStarFill size={8} />
+                          추천
+                        </Badge>
+                      )}
+                    </div>
+                    <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-mute'>
+                      {showAuthor && <span>{article.author_name}</span>}
+                      {showAuthor && <span aria-hidden='true'>·</span>}
+                      <span>
+                        <RelativeTime iso={article.created_at} />
                       </span>
-                      <span className='flex min-w-0 items-center gap-1.5'>
-                        <span className='truncate'>{article.title || '제목 없음'}</span>
-                        {isNew(article.created_at) && <Badge className='bg-ink text-paper'>NEW</Badge>}
-                        {!recommendSwitch && article.recommended_at && (
-                          <Badge className='bg-accent-soft text-accent' title='운영자가 추천한 글'>
-                            <GoStarFill size={8} />
-                            추천
-                          </Badge>
-                        )}
+                      <span aria-hidden='true'>·</span>
+                      <span className='tabular-nums'>
+                        조회 {article.published ? article.view_count.toLocaleString() : '—'}
                       </span>
-                    </span>
-                  </td>
-                  {grouped && (
-                    <td className={classNames(TD, 'max-w-36')} onClick={(event) => event.stopPropagation()}>
-                      <button
-                        type='button'
-                        onClick={() => onPickTopic(issue.id)}
-                        title={`${issue.title}만 보기`}
-                        className='flex max-w-full items-center gap-1.5 text-xs text-mute hover:text-ink'
-                      >
-                        <span className='size-2 shrink-0 rounded-full' style={{ background: colorOf(issue.id) }} />
-                        <span className='truncate'>{issue.title}</span>
-                      </button>
-                    </td>
-                  )}
-                  {showAuthor && <td className={classNames(TD, 'whitespace-nowrap')}>{article.author_name}</td>}
-                  <td className={TD}>
+                    </div>
+                  </div>
+
+                  <div className='col-start-3 flex flex-wrap items-center gap-2 sm:col-start-4 sm:row-start-1 sm:flex-nowrap sm:justify-self-end'>
                     <StatusBadge published={article.published} />
-                  </td>
-                  <td className={classNames(TD, 'text-right text-mute tabular-nums')}>
-                    {article.published ? article.view_count.toLocaleString() : '—'}
-                  </td>
-                  {recommendSwitch && (
-                    <td className={classNames(TD, 'text-center')} onClick={(event) => event.stopPropagation()}>
-                      <span
-                        className='inline-flex'
-                        title={article.published ? undefined : '공개된 글만 추천할 수 있어요'}
+                    <Badge className={editable ? 'bg-ink/6 text-ink' : 'bg-danger-soft text-danger'}>
+                      {editable ? '편집 가능' : '편집 불가'}
+                    </Badge>
+                    {recommendSwitch && (
+                      <div
+                        className='flex items-center gap-1.5 text-xs text-mute'
+                        onClick={(event) => event.stopPropagation()}
                       >
-                        <Switch
-                          checked={Boolean(article.recommended_at)}
-                          disabled={busyId === article.id || !article.published}
-                          onChange={(value) => toggle(article, value)}
-                        />
-                      </span>
-                    </td>
-                  )}
-                  <td className={classNames(TD, 'text-right whitespace-nowrap text-mute')}>
-                    <RelativeTime iso={article.created_at} />
-                  </td>
-                  {/* 누르면 어디로 가는지 버튼으로 보여 준다 */}
-                  <td className={classNames(TD, 'w-0 text-right whitespace-nowrap')}>
-                    {editable ? (
+                        <span>추천</span>
+                        <span
+                          className='inline-flex'
+                          title={article.published ? undefined : '공개된 글만 추천할 수 있어요'}
+                        >
+                          <Switch
+                            checked={Boolean(article.recommended_at)}
+                            disabled={busyId === article.id || !article.published}
+                            onChange={(value) => toggle(article, value)}
+                          />
+                        </span>
+                      </div>
+                    )}
+
+                    {editable && (
                       <span className={buttonClass('secondary', 'sm')}>
                         <GoPencil size={12} />
                         편집
                       </span>
-                    ) : article.published ? (
-                      <span className={buttonClass('ghost', 'sm')}>
-                        보기
+                    )}
+                    {article.published && (
+                      <a
+                        href={`/lab-space/${article.slug}`}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        onClick={(event) => event.stopPropagation()}
+                        className={buttonClass('ghost', 'sm')}
+                      >
+                        글 보기
                         <GoArrowUpRight size={12} />
-                      </span>
-                    ) : null}
-                  </td>
-                </tr>
+                      </a>
+                    )}
+                  </div>
+                </article>
               )
             })}
-          </tbody>
-        ))}
-      </table>
+          </div>
+        </section>
+      ))}
     </div>
   )
 }

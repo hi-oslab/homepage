@@ -35,7 +35,7 @@ export const Layout = (props: LayoutProps) => {
   const isMemberSpace = pathname.startsWith('/space') || pathname === '/members'
 
   return (
-    <div className={classNames('w-screen h-fit')}>
+    <div className={classNames('h-fit w-full min-w-0 overflow-x-clip')}>
       <ScrollReset />
       <Header />
       <div className='w-full min-h-dvh h-fit bg-paper pt-header'>{children}</div>

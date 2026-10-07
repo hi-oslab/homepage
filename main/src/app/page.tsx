@@ -67,11 +67,13 @@ export default async function Page() {
   ]
 
   return (
-    <div className='flex w-full flex-col px-4 md:px-8'>
+    <div className='flex w-full min-w-0 flex-col px-4 md:px-8'>
       {/* 첫 화면: 우리가 누구인지 한 문장으로 */}
       <InView className='flex min-h-[calc(100dvh-var(--spacing-header))] flex-col justify-between gap-16 pt-8 pb-10 md:pt-12 md:pb-12'>
         <div className='flex flex-col gap-5 md:gap-7'>
-          <h1 className='max-w-[18ch] text-[clamp(2.5rem,6.4vw,7rem)] font-medium leading-[1.02] '>{STATEMENT.en}</h1>
+          <h1 className='max-w-[min(18ch,100%)] text-[clamp(2.5rem,6.4vw,7rem)] font-medium leading-[1.02]'>
+            {STATEMENT.en}
+          </h1>
           <p lang='ko' className='max-w-[26ch] break-keep text-xl leading-snug text-mute md:text-3xl'>
             {STATEMENT.ko}
           </p>
