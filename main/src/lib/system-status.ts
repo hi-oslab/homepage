@@ -26,12 +26,15 @@ export type ServiceStatus = {
 
 const TIMEOUT_MS = 8000
 const R2_FREE_BYTES = 10 * 1024 ** 3
+const SUPABASE_FREE_DB_BYTES = 500 * 1024 ** 2
 
 async function timed<T>(task: () => Promise<T>): Promise<{ value: T; ms: number }> {
   const started = Date.now()
   const value = await Promise.race([
     task(),
-    new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`시간 초과 (${TIMEOUT_MS / 1000}초)`)), TIMEOUT_MS)),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`시간 초과 (${TIMEOUT_MS / 1000}초)`)), TIMEOUT_MS),
+    ),
   ])
   return { value, ms: Date.now() - started }
 }
@@ -57,7 +60,11 @@ async function checkSupabase(): Promise<ServiceStatus> {
     health: 'ok',
     summary: '',
     metrics: [],
-    notes: ['무료 플랜은 7일 동안 요청이 없으면 프로젝트가 일시정지돼요.'],
+    notes: [
+      '무료 한도: DB 500MB, Realtime 월 200만 메시지, 최대 동시 연결 200개.',
+      'Realtime 메시지와 최대 동시 연결의 실제 사용량은 Supabase 사용량 페이지에서 확인해 주세요.',
+      '무료 플랜은 7일 동안 요청이 없으면 프로젝트가 일시정지돼요.',
+    ],
     links: [
       ...(ref ? [{ label: '대시보드', href: `https://supabase.com/dashboard/project/${ref}` }] : []),
       ...(ref ? [{ label: '사용량', href: `https://supabase.com/dashboard/project/${ref}/settings/usage` }] : []),
@@ -67,13 +74,29 @@ async function checkSupabase(): Promise<ServiceStatus> {
 
   try {
     const supabase = createAdminSupabaseClient()
-    const count = async (table: string, column?: string, value?: string | boolean) => {
-      let query = supabase.from(table).select('id', { count: 'exact', head: true })
+    const count = async (table: string, column?: string, value?: string | boolean, select = 'id') => {
+      let query = supabase.from(table).select(select, { count: 'exact', head: true })
       if (column) query = query.eq(column, value)
       const { count: total, error } = await query
       if (error) throw new Error(`${table}: ${error.message || error.code || '조회 실패'}`)
       return total ?? 0
     }
+
+    const distinctUsersSince = async (table: string, column: string, value: string) => {
+      const { data, error } = await supabase.from(table).select('user_id').gte(column, value)
+      if (error) throw new Error(`${table}: ${error.message || error.code || '조회 실패'}`)
+      return new Set((data ?? []).map((row) => row.user_id)).size
+    }
+
+    const seoulDateParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+      .formatToParts(new Date())
+      .reduce<Record<string, string>>((parts, item) => ({ ...parts, [item.type]: item.value }), {})
+    const seoulToday = `${seoulDateParts.year}-${seoulDateParts.month}-${seoulDateParts.day}`
 
     const { value, ms } = await timed(() =>
       Promise.all([
@@ -84,13 +107,32 @@ async function checkSupabase(): Promise<ServiceStatus> {
         count('admin_users', 'status', 'pending'),
         count('community_posts'),
         count('history_items'),
+        count('space_daily_visits', undefined, undefined, 'user_id'),
+        count('space_daily_visits', 'visited_on', seoulToday, 'user_id'),
+        distinctUsersSince('space_daily_visits', 'last_seen_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()),
+        supabase.rpc('system_database_size'),
       ]),
     )
-    const [works, publishedWorks, members, users, pending, posts, history] = value
+    const [
+      works,
+      publishedWorks,
+      members,
+      users,
+      pending,
+      posts,
+      history,
+      visitRows,
+      todayVisitors,
+      recentVisitors,
+      size,
+    ] = value
+    if (size.error) throw new Error(`DB 용량: ${size.error.message || size.error.code || '조회 실패'}`)
+    const databaseBytes = Number(size.data ?? 0)
+    const databaseRatio = databaseBytes / SUPABASE_FREE_DB_BYTES
     return {
       ...base,
-      health: ms > 3000 ? 'warn' : 'ok',
-      summary: ms > 3000 ? '응답이 느려요' : '정상',
+      health: databaseRatio > 0.8 || ms > 3000 ? 'warn' : 'ok',
+      summary: databaseRatio > 0.8 ? '무료 DB 한도에 가까워요' : ms > 3000 ? '응답이 느려요' : '정상',
       latencyMs: ms,
       metrics: [
         { label: '프로젝트', value: `${works}`, hint: `공개 ${publishedWorks}` },
@@ -98,7 +140,12 @@ async function checkSupabase(): Promise<ServiceStatus> {
         { label: '멤버', value: `${users}`, hint: pending ? `승인 대기 ${pending}` : undefined },
         { label: '커뮤니티 글', value: `${posts}` },
         { label: '연혁', value: `${history}` },
+        { label: 'DB 용량', value: formatBytes(databaseBytes), hint: '무료 한도 500MB' },
+        { label: '방문 기록', value: `${visitRows}행` },
+        { label: '오늘 방문자', value: `${todayVisitors}명` },
+        { label: '최근 10분', value: `${recentVisitors}명`, hint: 'Realtime 장애 시 기준' },
       ],
+      usage: { ratio: databaseRatio, label: `${formatBytes(databaseBytes)} / 500 MB` },
     }
   } catch (error) {
     return { ...base, health: 'error', summary: `연결 실패 — ${message(error)}` }
@@ -187,11 +234,15 @@ async function checkResend(): Promise<ServiceStatus> {
     if (response.status === 401 && body.name === 'restricted_api_key') {
       return {
         ...base,
-        health: senderNote ? 'warn' : 'ok',
-        summary: senderNote ? '키 정상 · 발신 주소 확인 필요' : '키 정상',
+        health: 'ok',
+        summary: '키 정상',
         latencyMs: ms,
         metrics: [{ label: 'API 키', value: '유효', hint: '발송 전용 권한' }],
-        notes: [...(senderNote ? [senderNote] : []), '발송 전용 키라서 도메인 인증 상태는 대시보드에서 확인해 주세요.', ...base.notes],
+        notes: [
+          ...(senderNote ? [senderNote] : []),
+          '발송 전용 키라서 도메인 인증 상태는 대시보드에서 확인해 주세요.',
+          ...base.notes,
+        ],
       }
     }
     if (!response.ok) {
@@ -202,12 +253,15 @@ async function checkResend(): Promise<ServiceStatus> {
     const unverified = domains.filter((domain) => domain.status !== 'verified')
     return {
       ...base,
-      health: senderNote || unverified.length ? 'warn' : 'ok',
-      summary: senderNote ? '발신 주소 확인 필요' : unverified.length ? '인증되지 않은 도메인이 있어요' : '정상',
+      health: unverified.length ? 'warn' : 'ok',
+      summary: unverified.length ? '인증되지 않은 도메인이 있어요' : '정상',
       latencyMs: ms,
       metrics: [
         { label: 'API 키', value: '유효' },
-        ...domains.map((domain) => ({ label: domain.name, value: domain.status === 'verified' ? '인증됨' : domain.status })),
+        ...domains.map((domain) => ({
+          label: domain.name,
+          value: domain.status === 'verified' ? '인증됨' : domain.status,
+        })),
       ],
       notes: [...(senderNote ? [senderNote] : []), ...base.notes],
     }
@@ -240,7 +294,9 @@ function checkDeployment(): ServiceStatus {
     ],
     notes: [
       ...(wrongSite
-        ? [`Environment Variables에서 NEXT_PUBLIC_SITE_URL을 ${PRODUCTION_URL}로 바꾸거나 지운 뒤 다시 배포해 주세요. 검색 노출도 함께 켜져요.`]
+        ? [
+            `Environment Variables에서 NEXT_PUBLIC_SITE_URL을 ${PRODUCTION_URL}로 바꾸거나 지운 뒤 다시 배포해 주세요. 검색 노출도 함께 켜져요.`,
+          ]
         : []),
       'Hobby 플랜: 대역폭 100GB/월, 비상업적 용도만. 사용량은 대시보드 Usage 탭에서 볼 수 있어요.',
     ],
@@ -266,7 +322,12 @@ async function checkMainDomain(): Promise<DomainResult> {
     // 예: Vercel에서 www가 대표 도메인이면 hioslab.com → www.hioslab.com 으로 이동해 canonical과 어긋난다
     const location = response.headers.get('location')
     return location
-      ? { host, ok: false, value: `→ ${new URL(location, PRODUCTION_URL).hostname}`, hint: `${response.status} · canonical 주소가 다른 곳으로 이동돼요` }
+      ? {
+          host,
+          ok: false,
+          value: `→ ${new URL(location, PRODUCTION_URL).hostname}`,
+          hint: `${response.status} · canonical 주소가 다른 곳으로 이동돼요`,
+        }
       : { host, ok: false, value: `${response.status}`, hint: '정상 응답이 아니에요' }
   } catch (error) {
     return { host, ok: false, value: '접속 실패', hint: message(error) }
@@ -300,7 +361,12 @@ async function checkDomains(): Promise<ServiceStatus> {
   const [main, ...legacy] = await Promise.all([checkMainDomain(), ...LEGACY_HOSTS.map(checkLegacyDomain)])
 
   const problems: string[] = []
-  if (!main.ok) problems.push(main.value.startsWith('→') ? `${productionHost}가 ${main.value.slice(2)}로 이동돼요 — Vercel에서 대표 도메인을 ${productionHost}로 바꿔 주세요` : `${productionHost}에 접속할 수 없어요`)
+  if (!main.ok)
+    problems.push(
+      main.value.startsWith('→')
+        ? `${productionHost}가 ${main.value.slice(2)}로 이동돼요 — Vercel에서 대표 도메인을 ${productionHost}로 바꿔 주세요`
+        : `${productionHost}에 접속할 수 없어요`,
+    )
   legacy.filter((item) => !item.ok).forEach((item) => problems.push(`${item.host}가 정식 도메인으로 이동되지 않아요`))
   if (isProduction && siteHost !== productionHost) problems.push(`사이트 주소가 ${siteHost}로 설정돼 있어요`)
   if (isProduction && !ALLOW_INDEXING) problems.push('정식 배포인데 검색 노출이 막혀 있어요')
@@ -354,5 +420,9 @@ export function checkEnv(): EnvStatus[] {
 
 export async function getSystemStatus() {
   const [supabase, r2, resend, domains] = await Promise.all([checkSupabase(), checkR2(), checkResend(), checkDomains()])
-  return { services: [supabase, r2, resend, checkDeployment(), domains], env: checkEnv(), checkedAt: new Date().toISOString() }
+  return {
+    services: [supabase, r2, resend, checkDeployment(), domains],
+    env: checkEnv(),
+    checkedAt: new Date().toISOString(),
+  }
 }

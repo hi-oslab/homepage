@@ -11,6 +11,8 @@ import { ONBOARDING_MARKER } from './home/PopIn'
 import { NAV_COLLAPSED_COOKIE, SPACE_THEMES, THEME_COOKIE, type SpaceTheme } from './nav'
 import { NotificationCenter } from './NotificationCenter'
 import { getNotifications } from '@/lib/notifications'
+import { spacePresenceKey } from '@/lib/space-presence'
+import { SpacePresenceProvider } from './SpacePresenceProvider'
 
 export const metadata: Metadata = {
   title: 'Member Space',
@@ -80,21 +82,26 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* 첫 화면에서 헤더(멤버 공간 바깥)까지 바로 같은 테마로: 하이드레이션 전에 <html>에 붙인다.
           화면 이동 뒤에는 AdminShell의 useSpaceTheme가 붙이고 뗀다 */}
       <script dangerouslySetInnerHTML={{ __html: `document.documentElement.dataset.theme=${JSON.stringify(theme)}` }} />
-      <MentionProvider members={mentionMembers}>
-        {children}
-        <NotificationCenter items={notifications} userId={user.id} />
-        {/* 홈 섹션 등장 모션(PopIn)이 창이 끝날 때까지 기다리게 하는 표시 */}
-        {needsOnboarding && <span hidden {...{ [ONBOARDING_MARKER]: '' }} />}
-        {needsOnboarding && (
-          <OnboardingModal
-            member={myProfile}
-            roles={roleList.map((role) => role.name)}
-            // 분야는 다른 프로필에서 쓰인 값을 추천
-            fieldSuggestions={Array.from(new Set(profiles.flatMap((item) => item.fields)))}
-            userName={user.name}
-          />
-        )}
-      </MentionProvider>
+      <SpacePresenceProvider
+        presenceKey={spacePresenceKey(user.id)}
+        allowedKeys={accounts.filter((account) => account.status === 'approved').map((account) => spacePresenceKey(account.id))}
+      >
+        <MentionProvider members={mentionMembers}>
+          {children}
+          <NotificationCenter items={notifications} userId={user.id} />
+          {/* 홈 섹션 등장 모션(PopIn)이 창이 끝날 때까지 기다리게 하는 표시 */}
+          {needsOnboarding && <span hidden {...{ [ONBOARDING_MARKER]: '' }} />}
+          {needsOnboarding && (
+            <OnboardingModal
+              member={myProfile}
+              roles={roleList.map((role) => role.name)}
+              // 분야는 다른 프로필에서 쓰인 값을 추천
+              fieldSuggestions={Array.from(new Set(profiles.flatMap((item) => item.fields)))}
+              userName={user.name}
+            />
+          )}
+        </MentionProvider>
+      </SpacePresenceProvider>
     </AdminShell>
   )
 }

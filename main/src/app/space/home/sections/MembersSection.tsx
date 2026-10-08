@@ -5,6 +5,7 @@ import type { MemberAffiliation } from '@/types/cms'
 import { HomeSection } from '../HomeSection'
 import { getHomeAccounts, getHomeProfiles, getHomeUser } from '../data'
 import { MemberRow } from './MemberRow'
+import { spacePresenceKey } from '@/lib/space-presence'
 
 /** AccountFields의 AFFILIATION_LABELS와 같은 값 (그쪽은 클라이언트 모듈이라 서버 컴포넌트에서 가져오지 않는다) */
 const GROUP_LABELS: Record<MemberAffiliation, string> = { club: '학교 소모임', external: '외부 활동' }
@@ -39,6 +40,7 @@ export async function MembersSection({ className }: { className?: string }) {
                 <MemberRow
                   key={account.id}
                   name={account.name}
+                  presenceKey={spacePresenceKey(account.id)}
                   profile={(account.member_id && profileById.get(account.member_id)) || null}
                   isMe={account.id === user.id}
                 />

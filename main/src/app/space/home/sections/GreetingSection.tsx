@@ -5,6 +5,7 @@ import { BLOCK_PAD, buttonClass, surfaceClass } from '@/components/admin/styles'
 import { OperatorBadge } from '@/components/OperatorBadge'
 import { ProfileImage } from '@/components/ProfileImage'
 import { getHomeUser, getMyProfile } from '../data'
+import { VisitStatsBar } from './VisitStatsBar'
 /** 인사말 + 내 프로필카드: 프로필 이미지 · 오늘 날짜 · 이름 · 역할 · 공개 여부 · 프로필 설정 버튼 */
 export async function GreetingSection({ className }: { className?: string }) {
   const [user, profile] = await Promise.all([getHomeUser(), getMyProfile()])
@@ -43,6 +44,7 @@ export async function GreetingSection({ className }: { className?: string }) {
         <GoGear size={13} />
         {profile ? '프로필 설정' : '프로필카드 만들기'}
       </Link>
+      <VisitStatsBar />
     </div>
   )
 }

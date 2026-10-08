@@ -8,6 +8,7 @@ import { useToast } from '@/components/admin/ui'
 import { ProfileImage } from '@/components/ProfileImage'
 import type { Member } from '@/types/cms'
 import { IoIosMore } from 'react-icons/io'
+import { useSpacePresence } from '../../SpacePresenceProvider'
 
 /**
  * 멤버 목록 한 줄. 누르면 프로필카드 모달이 뜬다.
@@ -16,16 +17,20 @@ import { IoIosMore } from 'react-icons/io'
  */
 export function MemberRow({
   name,
+  presenceKey,
   profile,
   isMe,
 }: {
   name: string
+  presenceKey: string
   /** 프로필카드 (없으면 눌렀을 때 모달 대신 "아직 없어요" 안내) */
   profile: Member | null
   isMe: boolean
 }) {
   const [open, setOpen] = useState(false)
   const toast = useToast()
+  const { onlineKeys, ready } = useSpacePresence()
+  const online = ready && onlineKeys.has(presenceKey)
 
   // 프로필카드가 없으면 모달 대신 아래에 안내를 띄운다
   const openCard = () => {
@@ -53,6 +58,14 @@ export function MemberRow({
           <span className='flex min-w-0 items-center gap-2'>
             <ProfileImage src={profile?.cover_image_url} name={name} size='sm' className='size-8 shrink-0 text-xs' />
             <span className='truncate text-sm'>{name}</span>
+            <span
+              title={online ? '온라인' : '오프라인'}
+              aria-label={online ? '온라인' : '오프라인'}
+              className={classNames(
+                'size-2 shrink-0 rounded-full transition-all duration-300',
+                online ? 'bg-emerald-500 shadow-[0_0_7px_rgba(16,185,129,0.75)]' : 'bg-line',
+              )}
+            />
             {isMe && <span className='shrink-0 text-xs text-mute'>나</span>}
           </span>
           {profile?.role ? (
